@@ -27,11 +27,8 @@ public class Districts {
   String provinceCode;
   Integer administrativeUnitId;
   Timestamp createdAt;
-  @Nullable
   Timestamp updatedAt;
   Integer createdBy;
-  @Nullable
   Integer updatedBy;
-  @Nullable
   LocalDateTime deletedAt;
 }

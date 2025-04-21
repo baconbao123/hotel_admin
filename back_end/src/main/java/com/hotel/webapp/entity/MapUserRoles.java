@@ -26,11 +26,8 @@ public class MapUserRoles implements AuditEntity {
   Integer userId;
   Integer roleId;
   Timestamp createdAt;
-  @Nullable
   Timestamp updatedAt;
   Integer createdBy;
-  @Nullable
   Integer updatedBy;
-  @Nullable
   LocalDateTime deletedAt;
 }

@@ -1,5 +1,6 @@
 package com.hotel.webapp.dto.admin.request;
 
+import com.hotel.webapp.validation.FieldNotEmpty;
 import com.hotel.webapp.validation.Trim;
 import jakarta.annotation.Nullable;
 import lombok.AccessLevel;
@@ -11,10 +12,11 @@ import lombok.experimental.FieldDefaults;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RoleDTO {
+  @FieldNotEmpty(field = "Name")
   @Trim
   String name;
   @Nullable
   String description;
+  @FieldNotEmpty(field = "Is Active Role")
   Boolean isActive;
-
 }

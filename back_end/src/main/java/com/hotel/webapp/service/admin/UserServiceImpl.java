@@ -1,5 +1,6 @@
 package com.hotel.webapp.service.admin;
 
+import com.hotel.webapp.base.BaseMapper;
 import com.hotel.webapp.base.BaseServiceImpl;
 import com.hotel.webapp.dto.admin.request.UserDTO;
 import com.hotel.webapp.entity.MapUserRoles;
@@ -7,7 +8,7 @@ import com.hotel.webapp.entity.Permissions;
 import com.hotel.webapp.entity.User;
 import com.hotel.webapp.exception.AppException;
 import com.hotel.webapp.exception.ErrorCode;
-import com.hotel.webapp.mapper.admin.UserMapper;
+import com.hotel.webapp.repository.AddressRepository;
 import com.hotel.webapp.repository.MapUserRoleRepository;
 import com.hotel.webapp.repository.PermissionsRepository;
 import com.hotel.webapp.repository.UserRepository;
@@ -18,7 +19,6 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -27,62 +27,62 @@ import java.util.List;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, UserRepository> {
-  UserRepository userRepository;
-  UserMapper userMapper;
   MapUserRoleRepository mapUserRoleRepository;
   StorageFileService storageFileService;
   PasswordEncoder passwordEncoder;
   PermissionsRepository permissionsRepository;
+  AddressRepository addressRepository;
 
   public UserServiceImpl(
-        UserRepository userRepository,
+        UserRepository repository,
+        BaseMapper<User, UserDTO> mapper,
         AuthService authService,
-        UserMapper userMapper,
         MapUserRoleRepository mapUserRoleRepository,
         StorageFileService storageFileService,
         PasswordEncoder passwordEncoder,
-        PermissionsRepository permissionsRepository
+        PermissionsRepository permissionsRepository,
+        AddressRepository addressRepository
   ) {
-    super(userRepository, userMapper, authService);
-    this.userRepository = userRepository;
-    this.userMapper = userMapper;
+    super(repository, mapper, authService);
     this.mapUserRoleRepository = mapUserRoleRepository;
     this.storageFileService = storageFileService;
     this.passwordEncoder = passwordEncoder;
     this.permissionsRepository = permissionsRepository;
+    this.addressRepository = addressRepository;
   }
 
   @Override
   public User create(UserDTO createDto) {
-    if (userRepository.existsByEmailAndDeletedAtIsNull(createDto.getEmail()))
+    if (repository.existsByEmailAndDeletedAtIsNull(createDto.getEmail()))
       throw new AppException(ErrorCode.EMAIL_EXISTED);
 
-    var user = userMapper.toCreate(createDto);
+    if (createDto.getAddressId() != null)
+      if (!addressRepository.existsById(createDto.getAddressId()))
+        throw new AppException(ErrorCode.ADDRESS_NOTFOUND);
+
+
+    var user = mapper.toCreate(createDto);
 
     if (createDto.getAvatarUrl() != null && !createDto.getAvatarUrl().isEmpty()) {
-      try {
-        String filePath = storageFileService.uploadUserImg(createDto.getAvatarUrl());
-        user.setAvatarUrl(filePath);
-      } catch (IOException ioException) {
-        throw new RuntimeException(ioException);
-      }
+      String filePath = storageFileService.uploadUserImg(createDto.getAvatarUrl());
+      user.setAvatarUrl(filePath);
     } else {
       user.setAvatarUrl("");
     }
     user.setPassword(passwordEncoder.encode(createDto.getPassword()));
     user.setCreatedAt(new Timestamp(System.currentTimeMillis()));
     user.setCreatedBy(getAuthId());
-    return userRepository.save(user);
+    return repository.save(user);
   }
 
   @Override
   public User update(Integer id, UserDTO updateDto) {
     var user = getById(id);
 
-    if (userRepository.existsByEmailAndIdNotAndDeletedAtIsNull(updateDto.getEmail(), id))
+    if (repository.existsByEmailAndIdNotAndDeletedAtIsNull(updateDto.getEmail(), id))
       throw new AppException(ErrorCode.EMAIL_EXISTED);
 
-    userMapper.toUpdate(user, updateDto);
+    mapper.toUpdate(user, updateDto);
 
     if (updateDto.getPassword() != null && !updateDto.getPassword().isEmpty()) {
       user.setPassword(passwordEncoder.encode(updateDto.getPassword()));
@@ -91,30 +91,36 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
     }
 
     if (updateDto.getAvatarUrl() != null && !updateDto.getAvatarUrl().isEmpty()) {
-      try {
-        String fileName = storageFileService.uploadUserImg(updateDto.getAvatarUrl());
-        user.setAvatarUrl(fileName);
-      } catch (IOException ioException) {
-        throw new RuntimeException(ioException);
-      }
-
+      String fileName = storageFileService.uploadUserImg(updateDto.getAvatarUrl());
+      user.setAvatarUrl(fileName);
     }
     user.setIsActive(updateDto.getIsActive());
     user.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
     user.setUpdatedBy(getAuthId());
 
-    return userRepository.save(user);
+    return repository.save(user);
   }
 
+  @Override
+  public List<User> getAll() {
+    return repository.findAllExcludeSa();
+  }
 
   @Override
-  protected void validateCreate(UserDTO create) {}
+  protected void validateCreate(UserDTO create) {
+  }
 
   @Override
-  protected void validateUpdate(Integer id, UserDTO update) {}
+  protected void validateUpdate(Integer id, UserDTO update) {
+  }
 
   @Override
   protected void validateDelete(Integer id) {
+    User user = getById(id);
+    if (user.getEmail().equalsIgnoreCase("sa@gmail.com")) {
+      throw new AppException(ErrorCode.DONT_DELETE_SA);
+    }
+
     updateMapURIfUserDelete(id, getAuthId());
   }
 

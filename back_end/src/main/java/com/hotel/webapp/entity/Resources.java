@@ -1,8 +1,10 @@
 package com.hotel.webapp.entity;
 
 import com.hotel.webapp.base.AuditEntity;
-import jakarta.annotation.Nullable;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -22,11 +24,8 @@ public class Resources implements AuditEntity {
   Integer id;
   String name;
   Timestamp createdAt;
-  @Nullable
   Timestamp updatedAt;
   Integer createdBy;
-  @Nullable
   Integer updatedBy;
-  @Nullable
   LocalDateTime deletedAt;
 }

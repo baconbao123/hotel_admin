@@ -20,14 +20,14 @@ public class RoleController {
   RoleServiceImpl roleService;
 
   @PostMapping("/create")
-  public ApiResponse<Role> create(@Valid RoleDTO roleDTO) {
+  public ApiResponse<Role> create(@Valid @RequestBody RoleDTO roleDTO) {
     return ApiResponse.<Role>builder()
                       .result(roleService.create(roleDTO))
                       .build();
   }
 
   @PutMapping("/update/{id}")
-  public ApiResponse<Role> update(@PathVariable int id, @Valid RoleDTO roleDTO) {
+  public ApiResponse<Role> update(@PathVariable int id, @Valid @RequestBody RoleDTO roleDTO) {
     return ApiResponse.<Role>builder()
                       .result(roleService.update(id, roleDTO))
                       .build();

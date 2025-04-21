@@ -7,6 +7,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -46,11 +47,18 @@ public class GlobalExceptionHandler {
         errorCode = ErrorCode.FIELD_NOT_EMPTY;
         fieldName = extractFileName(defaultMessage, "_NOT_EMPTY");
         finalMessage = errorCode.getMessage().replace("{field}", fieldName);
-      } else if (defaultMessage != null && defaultMessage.endsWith("_INVALID_REGEX")) {
+      }
+      else if (defaultMessage != null && defaultMessage.endsWith("_INVALID_REGEX")) {
         errorCode = ErrorCode.FIELD_INVALID;
         fieldName = extractFileName(defaultMessage, "_INVALID_REGEX");
         finalMessage = errorCode.getMessage().replace("{field}", fieldName);
-      } else {
+      }
+      else if (defaultMessage != null && defaultMessage.startsWith("Maximum of")) {
+        errorCode = ErrorCode.IMG_EXCEEDS;
+        fieldName = extractFileName(defaultMessage, "Maximum of ");
+        finalMessage = errorCode.getMessage().replace("{maxSize}", fieldName);
+      }
+      else {
         errorCode = ErrorCode.KEY_INVALID;
         finalMessage = errorCode.getMessage();
       }
@@ -69,6 +77,14 @@ public class GlobalExceptionHandler {
     apiResponse.setCode(ErrorCode.ACCESS_DENIED.getCode());
     apiResponse.setMessage(ErrorCode.ACCESS_DENIED.getMessage());
     return ResponseEntity.status(ErrorCode.ACCESS_DENIED.getStatusCode()).body(apiResponse);
+  }
+
+  @ExceptionHandler(value = MaxUploadSizeExceededException.class)
+  ResponseEntity<ApiResponse> handleMaxSizeExceeds(MaxUploadSizeExceededException e) {
+    ApiResponse apiResponse = new ApiResponse();
+    apiResponse.setCode(ErrorCode.IMG_SIZE_EXCEEDS.getCode());
+    apiResponse.setMessage(ErrorCode.IMG_SIZE_EXCEEDS.getMessage());
+    return ResponseEntity.status(ErrorCode.IMG_SIZE_EXCEEDS.getStatusCode()).body(apiResponse);
   }
 
   private String extractFileName(String defaultMess, String suffix) {

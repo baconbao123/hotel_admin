@@ -14,7 +14,7 @@ export default [
     route("setting", "./routes/settings/page.setting.tsx"),
   ]),
   layout("./layouts/authLayout.tsx", [
-    route("login", "./routes/login/page.login.tsx"),
+    route("login", "./pages/login/Login.tsx"),
     route("register", "./routes/register/page.register.tsx"),
   ]),
 ] satisfies RouteConfig;

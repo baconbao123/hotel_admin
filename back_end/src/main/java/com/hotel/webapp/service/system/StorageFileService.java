@@ -28,6 +28,8 @@ public class StorageFileService {
   @PostConstruct
   public void init() {
     createDir(storageProperties.getUserUploadPath());
+    createDir(storageProperties.getHotelPath());
+    createDir(storageProperties.getDocumentPath());
   }
 
   private void createDir(String path) {
@@ -39,17 +41,27 @@ public class StorageFileService {
     }
   }
 
-  public String uploadUserImg(MultipartFile file) throws IOException {
+  public String uploadUserImg(MultipartFile file) {
     return saveImage(file, storageProperties.getUserUploadPath());
   }
 
-  private String saveImage(MultipartFile file, String folderPath) throws IOException {
+  public String uploadHotelImg(MultipartFile file) {
+    return saveImage(file, storageProperties.getHotelPath());
+  }
+
+  public String uploadDocument(MultipartFile file) {
+    return saveImage(file, storageProperties.getDocumentPath());
+  }
+
+  private String saveImage(MultipartFile file, String folderPath) {
     createDir(folderPath);
-
-    String fileName = fileHelperUtil.generateFileName(file.getOriginalFilename());
-    Path path = Paths.get(folderPath, fileName);
-
-    Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-    return fileName;
+    try {
+      String fileName = fileHelperUtil.generateFileName(file.getOriginalFilename());
+      Path path = Paths.get(folderPath, fileName);
+      Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+      return fileName;
+    } catch (IOException e) {
+      throw new RuntimeException("Failed to upload file", e);
+    }
   }
 }

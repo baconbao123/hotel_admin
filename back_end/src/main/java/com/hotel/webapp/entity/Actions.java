@@ -23,12 +23,8 @@ public class Actions implements AuditEntity {
   Integer id;
   String name;
   Timestamp createdAt;
-  @Nullable
   Timestamp updatedAt;
   Integer createdBy;
-  @Nullable
   Integer updatedBy;
-  @Nullable
   LocalDateTime deletedAt;
-
 }

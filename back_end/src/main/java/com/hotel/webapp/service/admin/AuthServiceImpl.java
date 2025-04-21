@@ -57,7 +57,7 @@ public class AuthServiceImpl implements AuthService {
 
     String refreshToken = "";
 
-    if (authReq.isRemember()) refreshToken = generateToken(user, 7 * 24);
+    if (authReq.getRemember()) refreshToken = generateToken(user, 7 * 24);
 
     if (refreshToken != null && !refreshToken.isEmpty()) {
       user.setRefreshToken(refreshToken);
@@ -69,10 +69,10 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public int getAuthLogin() {
+  public Integer getAuthLogin() {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     var username = auth.getName();
-    User user = userRepository.findByEmail(username).orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
+    User user = userRepository.findByEmail(username).orElseThrow(() -> new AppException(ErrorCode.AUTH_LOGIN_NOTFOUND));
     return user.getId();
   }
 
