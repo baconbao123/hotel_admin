@@ -1,13 +1,13 @@
 package com.hotel.webapp.service.admin;
 
+import com.hotel.webapp.base.BaseMapper;
 import com.hotel.webapp.base.BaseServiceImpl;
-import com.hotel.webapp.dto.admin.request.ActionResourceDTO;
+import com.hotel.webapp.dto.admin.request.NameDTO;
 import com.hotel.webapp.entity.MapResourcesAction;
 import com.hotel.webapp.entity.Permissions;
 import com.hotel.webapp.entity.Resources;
 import com.hotel.webapp.exception.AppException;
 import com.hotel.webapp.exception.ErrorCode;
-import com.hotel.webapp.mapper.admin.ResourceMapper;
 import com.hotel.webapp.repository.MapResourceActionRepository;
 import com.hotel.webapp.repository.PermissionsRepository;
 import com.hotel.webapp.repository.ResourcesRepository;
@@ -25,40 +25,37 @@ import java.util.List;
 @Service
 @Transactional
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class ResourceServiceImpl extends BaseServiceImpl<Resources, Integer, ActionResourceDTO, ResourcesRepository> {
-  AuthService authService;
+public class ResourceServiceImpl extends BaseServiceImpl<Resources, Integer, NameDTO, ResourcesRepository> {
   ValidateDataInput validateDataInput;
-  ResourceMapper resourceMapper;
   ResourcesRepository resourcesRepository;
   MapResourceActionRepository mapResourceActionRepository;
   PermissionsRepository permissionsRepository;
 
   public ResourceServiceImpl(
-        ResourceMapper resourceMapper,
+        ResourcesRepository repository,
+        BaseMapper<Resources, NameDTO> mapper,
         AuthService authService,
         ValidateDataInput validateDataInput,
         ResourcesRepository resourcesRepository,
         MapResourceActionRepository mapResourceActionRepository,
         PermissionsRepository permissionsRepository
   ) {
-    super(resourcesRepository, resourceMapper, authService);
-    this.authService = authService;
+    super(repository, mapper, authService);
     this.validateDataInput = validateDataInput;
-    this.resourceMapper = resourceMapper;
     this.resourcesRepository = resourcesRepository;
     this.mapResourceActionRepository = mapResourceActionRepository;
     this.permissionsRepository = permissionsRepository;
   }
 
   @Override
-  protected void validateCreate(ActionResourceDTO create) {
+  protected void validateCreate(NameDTO create) {
     if (resourcesRepository.existsByNameAndDeletedAtIsNull(create.getName()))
       throw new AppException(ErrorCode.RESOURCE_EXISTED);
     create.setName(validateDataInput.capitalizeFirstLetter(create.getName()));
   }
 
   @Override
-  protected void validateUpdate(Integer id, ActionResourceDTO update) {
+  protected void validateUpdate(Integer id, NameDTO update) {
     if (resourcesRepository.existsByNameAndIdNotAndDeletedAtIsNull(update.getName(), id))
       throw new AppException(ErrorCode.RESOURCE_EXISTED);
     update.setName(validateDataInput.capitalizeFirstLetter(update.getName()));

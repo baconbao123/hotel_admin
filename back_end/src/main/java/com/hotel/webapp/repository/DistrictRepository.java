@@ -15,4 +15,7 @@ public interface DistrictRepository extends JpaRepository<Districts, String> {
   @Query("select new com.hotel.webapp.dto.admin.response.LocalResponse(d.code, d.name) from Districts d " +
         "where d.provinceCode = :provinceCode")
   List<LocalResponse> findDistrictsByProvinceCode(String provinceCode);
+
+  boolean existsByCode(String code);
+
 }

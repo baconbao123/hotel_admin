@@ -26,13 +26,12 @@ import java.util.stream.Collectors;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class MapResourceActionServiceImpl extends BaseServiceImpl<MapResourcesAction, Integer, MapRADTO,
-      MapResourceActionRepository> {
-  MapResourceActionRepository mapRARepository;
+public class MapResourceActionServiceImpl extends BaseServiceImpl<
+      MapResourcesAction, Integer, MapRADTO, MapResourceActionRepository>
+{
   ResourcesRepository resourcesRepository;
   ActionRepository actionRepository;
   PermissionsRepository permissionsRepository;
-  AuthService authService;
 
   public MapResourceActionServiceImpl(
         MapResourceActionRepository mapRARepository,
@@ -42,11 +41,9 @@ public class MapResourceActionServiceImpl extends BaseServiceImpl<MapResourcesAc
         AuthService authService
   ) {
     super(mapRARepository, authService);
-    this.mapRARepository = mapRARepository;
     this.resourcesRepository = resourcesRepository;
     this.actionRepository = actionRepository;
     this.permissionsRepository = permissionsRepository;
-    this.authService = authService;
   }
 
   @Override
@@ -77,7 +74,7 @@ public class MapResourceActionServiceImpl extends BaseServiceImpl<MapResourcesAc
       }
     }
 
-    var saveMappings = mapRARepository.saveAll(listRAs);
+    var saveMappings = repository.saveAll(listRAs);
     if (saveMappings.isEmpty()) {
       throw new AppException(ErrorCode.CREATION_FAILED);
     }
@@ -111,7 +108,7 @@ public class MapResourceActionServiceImpl extends BaseServiceImpl<MapResourcesAc
     }
 
     // find all old mapping
-    List<MapResourcesAction> oldMappings = mapRARepository.findAllByResourceIdInAndDeletedAtIsNull(resourceIds);
+    List<MapResourcesAction> oldMappings = repository.findAllByResourceIdInAndDeletedAtIsNull(resourceIds);
 
     // Delete at existing old mappings
     for (MapResourcesAction oldMapping : oldMappings) {
@@ -119,7 +116,7 @@ public class MapResourceActionServiceImpl extends BaseServiceImpl<MapResourcesAc
       updatePermissionIfMapRAUpdate(oldMapping.getId());
     }
 
-    mapRARepository.saveAll(oldMappings);
+    repository.saveAll(oldMappings);
 
     // Create new mapping
     List<MapResourcesAction> newMapping = new ArrayList<>();
@@ -135,7 +132,7 @@ public class MapResourceActionServiceImpl extends BaseServiceImpl<MapResourcesAc
       }
     }
 
-    List<MapResourcesAction> savedMappings = mapRARepository.saveAll(newMapping);
+    List<MapResourcesAction> savedMappings = repository.saveAll(newMapping);
 
     if (savedMappings.isEmpty()) {
       throw new AppException(ErrorCode.UPDATED_FAILED);

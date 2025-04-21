@@ -1,6 +1,5 @@
 package com.hotel.webapp.entity;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.*;
@@ -27,11 +26,8 @@ public class Provinces {
   Integer administrativeUnitId;
   Integer administrativeRegionId;
   Timestamp createdAt;
-  @Nullable
   Timestamp updatedAt;
   Integer createdBy;
-  @Nullable
   Integer updatedBy;
-  @Nullable
   LocalDateTime deletedAt;
 }
