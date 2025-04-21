@@ -14,4 +14,6 @@ public interface WardRepository extends JpaRepository<Wards, String> {
   @Query("select new com.hotel.webapp.dto.admin.response.LocalResponse(w.code, w.name) from Wards w " +
         "where w.districtCode = :districtCode")
   List<LocalResponse> findWardsByDistrict(String districtCode);
+
+  boolean existsByCode(String code);
 }

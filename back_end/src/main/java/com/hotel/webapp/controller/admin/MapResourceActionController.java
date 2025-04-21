@@ -26,7 +26,7 @@ public class MapResourceActionController {
   }
 
   @PutMapping(value = "/update/{id}")
-  public ApiResponse<List<MapResourcesAction>> update(@PathVariable Integer id,@RequestBody MapRADTO updateReq) {
+  public ApiResponse<List<MapResourcesAction>> update(@PathVariable Integer id, @RequestBody MapRADTO updateReq) {
     return ApiResponse.<List<MapResourcesAction>>builder()
                       .result(mapResourceActionService.updateCollectionBulk(id, updateReq))
                       .build();

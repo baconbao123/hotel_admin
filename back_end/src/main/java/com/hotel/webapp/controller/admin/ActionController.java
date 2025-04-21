@@ -1,6 +1,6 @@
 package com.hotel.webapp.controller.admin;
 
-import com.hotel.webapp.dto.admin.request.ActionResourceDTO;
+import com.hotel.webapp.dto.admin.request.NameDTO;
 import com.hotel.webapp.dto.admin.response.ApiResponse;
 import com.hotel.webapp.entity.Actions;
 import com.hotel.webapp.service.admin.ActionServiceImpl;
@@ -21,14 +21,14 @@ public class ActionController {
   ActionServiceImpl actionServiceImpl;
 
   @PostMapping("/create")
-  public ApiResponse<Actions> create(@Valid ActionResourceDTO actionResourceDTO) {
+  public ApiResponse<Actions> create(@Valid @RequestBody NameDTO nameDTO) {
     return ApiResponse.<Actions>builder()
-                      .result(actionServiceImpl.create(actionResourceDTO))
+                      .result(actionServiceImpl.create(nameDTO))
                       .build();
   }
 
   @PutMapping("/update/{id}")
-  public ApiResponse<Actions> update(@PathVariable int id, @Valid ActionResourceDTO updateReq) {
+  public ApiResponse<Actions> update(@PathVariable int id, @Valid @RequestBody NameDTO updateReq) {
     return ApiResponse.<Actions>builder()
                       .result(actionServiceImpl.update(id, updateReq))
                       .build();

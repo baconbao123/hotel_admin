@@ -22,14 +22,14 @@ public class PermissionController {
   AuthService authService;
 
   @PostMapping("/create")
-  public ApiResponse<List<Permissions>> create(@RequestBody @Valid PermissionDTO permissionDTO) {
+  public ApiResponse<List<Permissions>> create(@Valid @RequestBody PermissionDTO permissionDTO) {
     return ApiResponse.<List<Permissions>>builder()
                       .result(permissionService.createCollectionBulk(permissionDTO))
                       .build();
   }
 
   @PutMapping("/update/{id}")
-  public ApiResponse<List<Permissions>> update(@PathVariable int id, @RequestBody @Valid PermissionDTO permissionUpdate) {
+  public ApiResponse<List<Permissions>> update(@PathVariable int id, @Valid @RequestBody PermissionDTO permissionUpdate) {
     return ApiResponse.<List<Permissions>>builder()
                       .result(permissionService.updateCollectionBulk(id, permissionUpdate))
                       .build();

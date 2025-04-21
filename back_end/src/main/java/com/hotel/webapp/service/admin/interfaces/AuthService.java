@@ -6,5 +6,5 @@ import com.hotel.webapp.dto.admin.response.AuthResponse;
 public interface AuthService {
   AuthResponse authenticate(AuthReq authReq);
 
-  int getAuthLogin();
+  Integer getAuthLogin();
 }

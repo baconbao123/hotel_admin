@@ -13,4 +13,6 @@ import java.util.Objects;
 public interface ProvincesRepository extends JpaRepository<Provinces, String> {
   @Query("select new com.hotel.webapp.dto.admin.response.LocalResponse(p.code, p.name) from Provinces p ")
   List<LocalResponse> findProvinces();
+
+  boolean existsByCode(String code);
 }
