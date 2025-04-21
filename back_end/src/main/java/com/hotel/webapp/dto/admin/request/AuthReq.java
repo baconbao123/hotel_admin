@@ -1,6 +1,8 @@
 package com.hotel.webapp.dto.admin.request;
 
 import com.hotel.webapp.validation.Trim;
+
+import io.micrometer.common.lang.Nullable;
 import jakarta.validation.constraints.Email;
 import lombok.AccessLevel;
 import lombok.Builder;

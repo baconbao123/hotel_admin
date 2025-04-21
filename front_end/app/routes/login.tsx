@@ -1,5 +1,6 @@
+import Login from "~/pages/login/Login";
 import type { Route } from "./+types/home";
-import { Welcome } from "../welcome/welcome";
+import Dashboard from "~/pages/admin/dashboard/Dashboard";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -8,6 +9,6 @@ export function meta({}: Route.MetaArgs) {
   ];
 }
 
-export default function Home() {
-  return <Welcome />;
+export default function Route() {
+  return <Login />;
 }
