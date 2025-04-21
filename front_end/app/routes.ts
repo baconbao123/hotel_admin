@@ -1,24 +1,20 @@
 import {
-    type RouteConfig,
-    index,
-    layout,
-    prefix,
-    route,
+  type RouteConfig,
+  route,
+  index,
+  layout,
+  prefix,
 } from "@react-router/dev/routes";
 
 export default [
-    route("", "src/pages/user/User.tsx",),
-    route("login", "src/pages/login/Login.tsx"),
-    // ...prefix("concerts", [
-        // index("src/pages/user/User.tsx"),
-    //     layout("src/layout/Main.tsx", [
-    //         index("src/pages/user/User.tsx",),
-    //         route("/login", "src/pages/login/Login.tsx"),
-    //       ]),
-    //   ]),
-    // layout("src/layout/Main.tsx", [
-    //     route("hello", "src/pages/user/User.tsx",),
-    // ]),
-    
-
+  layout("./layouts/rootLayout.tsx", [
+    index("./routes/dashboard/page.dashboard.tsx"),
+   
+    route("profile", "./routes/profile/page.profile.tsx"),
+    route("setting", "./routes/settings/page.setting.tsx"),
+  ]),
+  layout("./layouts/authLayout.tsx", [
+    route("login", "./routes/login/page.login.tsx"),
+    route("register", "./routes/register/page.register.tsx"),
+  ]),
 ] satisfies RouteConfig;

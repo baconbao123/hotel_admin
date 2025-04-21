@@ -5,7 +5,7 @@ import {
     Scripts,
     ScrollRestoration,
 } from "react-router";
-import './app.scss'
+import './app.css'
 export function Layout({ children }: { children: React.ReactNode }) {
     return (
         <html lang="en">
