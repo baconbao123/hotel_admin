@@ -49,8 +49,8 @@ export const navigation: MenuItem[] = [
     icon: ClipboardDocumentListIcon 
   },
   { 
-    name: 'Settings', 
-    href: '/settings', 
+    name: 'Setting', 
+    href: '/setting', 
     icon: CogIcon 
   },
 ];

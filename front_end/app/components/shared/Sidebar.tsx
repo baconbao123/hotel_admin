@@ -4,6 +4,7 @@ import { ChevronDownIcon, ChevronLeftIcon, ChevronRightIcon } from '@heroicons/r
 import { ArrowRightOnRectangleIcon } from '@heroicons/react/24/outline';
 import { Link, Navigate, redirect, useLocation, useNavigate } from 'react-router';
 import { navigation } from '../../config/menu.config';
+import logo from '../../asset/images/logo.png';
 
 export default function Sidebar() {
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
@@ -24,9 +25,7 @@ export default function Sidebar() {
   const isActive = (href: string) => location.pathname === href;
 
   const navigate = useNavigate();
-  // ... existing code ...
   const handleLogout = () => {
-    // TODO: Add your logout logic here (clear tokens, etc.) if needed
     navigate('/login');
   };
 
@@ -36,11 +35,11 @@ export default function Sidebar() {
       <div className="flex items-center justify-between h-16 px-4">
         <div className="flex items-center">
           <img
-            src="/logo.svg"
+            src={logo}
             alt="Novotel"
-            className={`transition-all duration-200 ${collapsed ? 'w-8' : 'w-8 mr-2'}`}
+            className={`w-6 transition-all duration-200${!collapsed ? ' mr-2' : ''}`}
           />
-          {!collapsed && <span className="text-xl font-bold text-blue-700 tracking-wide">Novotel</span>}
+          {!collapsed && <span className="text-xl font-bold text-black tracking-wide">Portal Hotel</span>}
         </div>
         <button
           onClick={handleCollapse}
@@ -59,21 +58,34 @@ export default function Sidebar() {
             return (
               <li key={item.name}>
                 <div>
-                  <div
-                    className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition
-                      ${active ? 'bg-blue-50 text-blue-500 font-semibold' : 'text-gray-700 hover:bg-gray-100'}
-                      ${collapsed ? 'justify-center px-2' : ''}
-                    `}
-                    onClick={() => item.children && toggleMenu(item.name)}
-                  >
-                    {item.icon && <item.icon className={`w-5 h-5 ${active ? 'text-blue-400' : 'text-gray-400'}`} />}
-                    {!collapsed && <span>{item.name}</span>}
-                    {!collapsed && item.children && (
-                      <ChevronDownIcon
-                        className={`w-4 h-4 ml-auto transition-transform duration-200 ${expandedMenus.includes(item.name) ? 'rotate-180' : ''}`}
-                      />
-                    )}
-                  </div>
+                  {item.children ? (
+                    <div
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition
+                        ${active ? 'bg-blue-50 text-blue-500 font-semibold' : 'text-gray-700 hover:bg-gray-100'}
+                        ${collapsed ? 'justify-center px-2' : ''}
+                      `}
+                      onClick={() => toggleMenu(item.name)}
+                    >
+                      {item.icon && <item.icon className={`w-5 h-5 ${active ? 'text-blue-400' : 'text-gray-400'}`} />}
+                      {!collapsed && <span>{item.name}</span>}
+                      {!collapsed && (
+                        <ChevronDownIcon
+                          className={`w-4 h-4 ml-auto transition-transform duration-200 ${expandedMenus.includes(item.name) ? 'rotate-180' : ''}`}
+                        />
+                      )}
+                    </div>
+                  ) : (
+                    <Link
+                      to={item.href}
+                      className={`flex items-center gap-3 px-3 py-2 rounded-lg transition
+                        ${active ? 'bg-blue-50 text-blue-500 font-semibold' : 'text-gray-700 hover:bg-gray-100'}
+                        ${collapsed ? 'justify-center px-2' : ''}
+                      `}
+                    >
+                      {item.icon && <item.icon className={`w-5 h-5 ${active ? 'text-blue-400' : 'text-gray-400'}`} />}
+                      {!collapsed && <span>{item.name}</span>}
+                    </Link>
+                  )}
                   {/* Submenu */}
                   {!collapsed && item.children && expandedMenus.includes(item.name) && (
                     <ul className="mt-1 ml-6 space-y-1">
