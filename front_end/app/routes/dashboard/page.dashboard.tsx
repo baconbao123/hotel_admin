@@ -7,7 +7,7 @@ export function meta({}: Route.MetaArgs) {
     { name: "description", content: "Hotel Admin Dashboard" },
   ];
 }
-
+ 
 export default function Dashboard() {
   return (
     <div>
