@@ -2,9 +2,6 @@ package com.hotel.webapp.controller.admin;
 
 import com.hotel.webapp.dto.admin.response.ApiResponse;
 import com.hotel.webapp.dto.admin.response.LocalResponse;
-import com.hotel.webapp.entity.Districts;
-import com.hotel.webapp.entity.Provinces;
-import com.hotel.webapp.entity.Wards;
 import com.hotel.webapp.service.admin.LocalServiceImpl;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;

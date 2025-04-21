@@ -25,11 +25,8 @@ public class Role implements AuditEntity {
   String description;
   Boolean isActive;
   Timestamp createdAt;
-  @Nullable
   Timestamp updatedAt;
   Integer createdBy;
-  @Nullable
   Integer updatedBy;
-  @Nullable
   LocalDateTime deletedAt;
 }

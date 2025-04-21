@@ -27,20 +27,18 @@ import java.util.stream.Collectors;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class MapUserRoleServiceImp extends BaseServiceImpl<MapUserRoles, Integer, MapURDTO, MapUserRoleRepository> {
-  MapUserRoleRepository mapUserRoleRepository;
   RoleRepository roleRepository;
   UserRepository userRepository;
   PermissionsRepository permissionsRepository;
 
   public MapUserRoleServiceImp(
         AuthService authService,
-        MapUserRoleRepository mapUserRoleRepository,
+        MapUserRoleRepository repository,
         RoleRepository roleRepository,
         UserRepository userRepository,
         PermissionsRepository permissionsRepository
   ) {
-    super(mapUserRoleRepository, authService);
-    this.mapUserRoleRepository = mapUserRoleRepository;
+    super(repository, authService);
     this.roleRepository = roleRepository;
     this.userRepository = userRepository;
     this.permissionsRepository = permissionsRepository;
@@ -78,7 +76,7 @@ public class MapUserRoleServiceImp extends BaseServiceImpl<MapUserRoles, Integer
       }
     }
 
-    List<MapUserRoles> savedMappings = mapUserRoleRepository.saveAll(listURs);
+    List<MapUserRoles> savedMappings = repository.saveAll(listURs);
     if (savedMappings.isEmpty()) {
       throw new AppException(ErrorCode.CREATION_FAILED);
     }
@@ -114,14 +112,14 @@ public class MapUserRoleServiceImp extends BaseServiceImpl<MapUserRoles, Integer
     }
 
     // 4. Find all old Map User Role
-    List<MapUserRoles> oldMappings = mapUserRoleRepository.findAllByUserIdInAndDeletedAtIsNull(userIds);
+    List<MapUserRoles> oldMappings = repository.findAllByUserIdInAndDeletedAtIsNull(userIds);
 
     // 5. Delete at old user role + permission contain old map user role
     for (MapUserRoles old : oldMappings) {
       old.setDeletedAt(LocalDateTime.now());
       updatePermissionsIfMapURUpdate(old.getId());
     }
-    mapUserRoleRepository.saveAll(oldMappings);
+    repository.saveAll(oldMappings);
 
     // 6. Tạo bản ghi mới
     List<MapUserRoles> newMappings = new ArrayList<>();
@@ -136,7 +134,7 @@ public class MapUserRoleServiceImp extends BaseServiceImpl<MapUserRoles, Integer
         newMappings.add(newMap);
       }
     }
-    List<MapUserRoles> savedMappings = mapUserRoleRepository.saveAll(newMappings);
+    List<MapUserRoles> savedMappings = repository.saveAll(newMappings);
 
     if (savedMappings.isEmpty()) {
       throw new AppException(ErrorCode.UPDATED_FAILED);

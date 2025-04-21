@@ -1,11 +1,11 @@
 package com.hotel.webapp.config;
 
+import com.hotel.webapp.entity.MapUserRoles;
 import com.hotel.webapp.entity.Role;
 import com.hotel.webapp.entity.User;
-import com.hotel.webapp.entity.MapUserRoles;
+import com.hotel.webapp.repository.MapUserRoleRepository;
 import com.hotel.webapp.repository.RoleRepository;
 import com.hotel.webapp.repository.UserRepository;
-import com.hotel.webapp.repository.MapUserRoleRepository;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

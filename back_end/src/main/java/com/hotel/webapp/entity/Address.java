@@ -1,7 +1,10 @@
 package com.hotel.webapp.entity;
 
-import jakarta.annotation.Nullable;
-import jakarta.persistence.*;
+import com.hotel.webapp.base.AuditEntity;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,7 +18,7 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Address {
+public class Address implements AuditEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer id;
@@ -23,14 +26,11 @@ public class Address {
   String districtCode;
   String wardCode;
   Integer streetId;
-  Integer streetNumber;
+  String streetNumber;
   String note;
   Timestamp createdAt;
-  @Nullable
   Timestamp updatedAt;
   Integer createdBy;
-  @Nullable
   Integer updatedBy;
-  @Nullable
   LocalDateTime deletedAt;
 }

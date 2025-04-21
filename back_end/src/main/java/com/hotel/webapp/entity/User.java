@@ -35,11 +35,8 @@ public class User implements AuditEntity {
   String refreshToken;
   Boolean isActive;
   Timestamp createdAt;
-  @Nullable
   Timestamp updatedAt;
   Integer createdBy;
-  @Nullable
   Integer updatedBy;
-  @Nullable
   LocalDateTime deletedAt;
 }

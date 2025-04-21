@@ -1,5 +1,7 @@
 package com.hotel.webapp.base;
 
+import com.hotel.webapp.exception.AppException;
+import com.hotel.webapp.exception.ErrorCode;
 import com.hotel.webapp.service.admin.interfaces.AuthService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -30,26 +32,33 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
 
   @Override
   public E create(DTO create) {
+    validateDTOCommon(create);
     validateCreate(create);
     E entity = mapper.toCreate(create);
 
     if (entity instanceof AuditEntity audit) {
       audit.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
-      audit.setCreatedBy(authService.getAuthLogin());
+      audit.setCreatedBy(getAuthId());
     }
 
-    return repository.save(entity);
+    entity = repository.save(entity);
+
+    afterCreate(entity, create);
+    return entity;
   }
 
   @Override
   public E update(ID id, DTO update) {
+
+    validateDTOCommon(update);
+
     E entity = getById(id);
     validateUpdate((Integer) id, update);
     mapper.toUpdate(entity, update);
 
     if (entity instanceof AuditEntity audit) {
       audit.setUpdatedAt(Timestamp.valueOf(LocalDateTime.now()));
-      audit.setUpdatedBy(authService.getAuthLogin());
+      audit.setUpdatedBy(getAuthId());
     }
 
     return repository.save(entity);
@@ -83,7 +92,11 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
 
 
   protected Integer getAuthId() {
-    return authService.getAuthLogin();
+    Integer authId = authService.getAuthLogin();
+    if (authId == null) {
+      throw new AppException(ErrorCode.ACCESS_DENIED);
+    }
+    return authId;
   }
 
   public Collection<E> createCollectionBulk(DTO dto) {
@@ -101,4 +114,10 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
   protected abstract void validateDelete(ID id);
 
   protected abstract RuntimeException createNotFoundException(ID id);
+
+  protected void validateDTOCommon(DTO dto) {
+  }
+
+  protected void afterCreate(E entity, DTO dto) {
+  }
 }

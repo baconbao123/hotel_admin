@@ -1,5 +1,6 @@
 package com.hotel.webapp.service.admin;
 
+import com.hotel.webapp.base.BaseMapper;
 import com.hotel.webapp.base.BaseServiceImpl;
 import com.hotel.webapp.dto.admin.request.RoleDTO;
 import com.hotel.webapp.entity.MapUserRoles;
@@ -7,7 +8,6 @@ import com.hotel.webapp.entity.Permissions;
 import com.hotel.webapp.entity.Role;
 import com.hotel.webapp.exception.AppException;
 import com.hotel.webapp.exception.ErrorCode;
-import com.hotel.webapp.mapper.admin.RoleMapper;
 import com.hotel.webapp.repository.MapUserRoleRepository;
 import com.hotel.webapp.repository.PermissionsRepository;
 import com.hotel.webapp.repository.RoleRepository;
@@ -25,30 +25,26 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RoleServiceImpl extends BaseServiceImpl<Role, Integer, RoleDTO, RoleRepository> {
   ValidateDataInput validateDataInput;
-  RoleRepository roleRepository;
-  RoleMapper roleMapper;
   MapUserRoleRepository mapUserRoleRepository;
   PermissionsRepository permissionsRepository;
 
   public RoleServiceImpl(
-        RoleRepository roleRepository,
+        RoleRepository repository,
+        BaseMapper<Role, RoleDTO> mapper,
         AuthService authService,
         ValidateDataInput validateDataInput,
-        RoleMapper roleMapper,
         MapUserRoleRepository mapUserRoleRepository,
         PermissionsRepository permissionsRepository
   ) {
-    super(roleRepository, roleMapper, authService);
+    super(repository, mapper, authService);
     this.validateDataInput = validateDataInput;
-    this.roleRepository = roleRepository;
-    this.roleMapper = roleMapper;
     this.mapUserRoleRepository = mapUserRoleRepository;
     this.permissionsRepository = permissionsRepository;
   }
 
   @Override
   protected void validateCreate(RoleDTO create) {
-    if (roleRepository.existsByNameAndDeletedAtIsNull(create.getName()))
+    if (repository.existsByNameAndDeletedAtIsNull(create.getName()))
       throw new AppException(ErrorCode.ROLE_EXISTED);
 
     create.setName(validateDataInput.capitalizeFirstLetter(create.getName()));
@@ -56,7 +52,7 @@ public class RoleServiceImpl extends BaseServiceImpl<Role, Integer, RoleDTO, Rol
 
   @Override
   protected void validateUpdate(Integer id, RoleDTO update) {
-    if (roleRepository.existsByNameAndIdNotAndDeletedAtIsNull(update.getName(), id))
+    if (repository.existsByNameAndIdNotAndDeletedAtIsNull(update.getName(), id))
       throw new AppException(ErrorCode.ROLE_EXISTED);
 
     update.setName(validateDataInput.capitalizeFirstLetter(update.getName()));

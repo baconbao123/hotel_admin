@@ -26,18 +26,16 @@ import java.util.stream.Collectors;
 @Transactional
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer, PermissionDTO, PermissionsRepository> {
-  PermissionsRepository permissionsRepository;
   MapResourceActionRepository mapResourceActionRepository;
   MapUserRoleRepository mapUserRoleRepository;
 
   public PermissionServiceImpl(
         AuthService authService,
-        PermissionsRepository permissionsRepository,
+        PermissionsRepository repository,
         MapResourceActionRepository mapResourceActionRepository,
         MapUserRoleRepository mapUserRoleRepository
   ) {
-    super(permissionsRepository, authService);
-    this.permissionsRepository = permissionsRepository;
+    super(repository, authService);
     this.mapResourceActionRepository = mapResourceActionRepository;
     this.mapUserRoleRepository = mapUserRoleRepository;
   }
@@ -68,7 +66,7 @@ public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer,
       }
     }
 
-    List<Permissions> savedPermissions = permissionsRepository.saveAll(listPermissions);
+    List<Permissions> savedPermissions = repository.saveAll(listPermissions);
     if (savedPermissions.isEmpty())
       throw new AppException(ErrorCode.CREATION_FAILED);
 
@@ -101,11 +99,11 @@ public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer,
     }
 
     //    Delete At old permission
-    List<Permissions> oldMappings = permissionsRepository.findAllByMapURId(mapURs);
+    List<Permissions> oldMappings = repository.findAllByMapURId(mapURs);
 
     for (Permissions permissions : oldMappings) {
       permissions.setDeletedAt(LocalDateTime.now());
-      permissionsRepository.save(permissions);
+      repository.save(permissions);
     }
 
     //    Create new permission
@@ -122,7 +120,7 @@ public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer,
       }
     }
 
-    List<Permissions> savedMappings = permissionsRepository.saveAll(newPermissions);
+    List<Permissions> savedMappings = repository.saveAll(newPermissions);
     if (savedMappings.isEmpty()) {
       throw new AppException(ErrorCode.CREATION_FAILED);
     }

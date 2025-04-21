@@ -8,9 +8,4 @@ import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface RoleMapper extends BaseMapper<Role, RoleDTO> {
-  @Override
-  Role toCreate(RoleDTO roleDTO);
-
-  @Override
-  void toUpdate(@MappingTarget Role role, RoleDTO roleUpdate);
 }
