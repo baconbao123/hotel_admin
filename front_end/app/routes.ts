@@ -8,13 +8,15 @@ import {
 
 export default [
   layout("./layouts/rootLayout.tsx", [
-    index("./pages/dashboard/page.dashboard.tsx"),
+    index("./pages/dashboard/DashboardPage.tsx"),
    
-    route("profile", "./pages/profile/page.profile.tsx"),
-    route("setting", "./pages/settings/page.setting.tsx"),
+    route("profile", "./pages/profile/ProfilePage.tsx"),
+    route("setting", "./pages/settings/SettingPage.tsx"),
   ]),
   layout("./layouts/authLayout.tsx", [
-    route("login", "./pages/login/page.login.tsx"),
-    route("register", "./pages/register/page.register.tsx"),
+    route("login", "./pages/login/LoginPage.tsx"),
+    route("register", "./pages/register/RegisterPage.tsx"),
   ]),
+  route("*", "./pages/error/NotFound.tsx"),
+  route("500", "./pages/error/Error500.tsx")
 ] satisfies RouteConfig;
