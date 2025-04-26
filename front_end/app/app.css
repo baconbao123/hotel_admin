@@ -7,9 +7,27 @@
 
 html,
 body {
-  @apply bg-blue-400;
+  @apply bg-blue-400 text-base;
+  font-size: 14px;
+}
 
-  @media (prefers-color-scheme: dark) {
+.text-base {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.text-lg {
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.text-xl {
+  font-size: 18px;
+  line-height: 1.5;
+}
+
+@media (prefers-color-scheme: dark) {
+  html {
     color-scheme: dark;
   }
 }
