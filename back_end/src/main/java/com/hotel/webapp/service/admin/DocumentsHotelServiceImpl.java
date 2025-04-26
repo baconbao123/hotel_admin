@@ -15,7 +15,7 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -48,7 +48,7 @@ public class DocumentsHotelServiceImpl extends BaseServiceImpl<DocumentsHotel, I
       documentsHotel.setDocumentUrl(filePath);
     }
 
-    documentsHotel.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+    documentsHotel.setCreatedAt(LocalDateTime.now());
     documentsHotel.setCreatedBy(authService.getAuthLogin());
 
     return repository.save(documentsHotel);
@@ -66,7 +66,7 @@ public class DocumentsHotelServiceImpl extends BaseServiceImpl<DocumentsHotel, I
       documentsHotel.setDocumentUrl(filePath);
     }
 
-    documentsHotel.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+    documentsHotel.setUpdatedAt(LocalDateTime.now());
     documentsHotel.setUpdatedBy(authService.getAuthLogin());
 
     return repository.save(documentsHotel);

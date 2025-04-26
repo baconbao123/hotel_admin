@@ -8,7 +8,6 @@ import jakarta.persistence.Id;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Entity
@@ -24,8 +23,8 @@ public class MapResourcesAction implements AuditEntity {
   Integer id;
   Integer resourceId;
   Integer actionId;
-  Timestamp createdAt;
-  Timestamp updatedAt;
+  LocalDateTime createdAt;
+  LocalDateTime updatedAt;
   Integer createdBy;
   Integer updatedBy;
   LocalDateTime deletedAt;

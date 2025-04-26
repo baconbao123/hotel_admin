@@ -51,14 +51,14 @@ public class ResourceServiceImpl extends BaseServiceImpl<Resources, Integer, Nam
   protected void validateCreate(NameDTO create) {
     if (resourcesRepository.existsByNameAndDeletedAtIsNull(create.getName()))
       throw new AppException(ErrorCode.RESOURCE_EXISTED);
-    create.setName(validateDataInput.capitalizeFirstLetter(create.getName()));
+    create.setName(validateDataInput.lowercaseFirstLetter(create.getName()));
   }
 
   @Override
   protected void validateUpdate(Integer id, NameDTO update) {
     if (resourcesRepository.existsByNameAndIdNotAndDeletedAtIsNull(update.getName(), id))
       throw new AppException(ErrorCode.RESOURCE_EXISTED);
-    update.setName(validateDataInput.capitalizeFirstLetter(update.getName()));
+    update.setName(validateDataInput.lowercaseFirstLetter(update.getName()));
   }
 
   @Override

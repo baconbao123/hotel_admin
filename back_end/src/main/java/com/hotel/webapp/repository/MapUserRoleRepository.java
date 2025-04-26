@@ -16,15 +16,20 @@ public interface MapUserRoleRepository extends BaseRepository<MapUserRoles, Inte
   @Query("select mur.id from MapUserRoles mur where mur.roleId = :roleId and mur.userId = :userId")
   int findIdByRoleIdAndUserId(int roleId, int userId);
 
+  //  find all
   List<MapUserRoles> findAllByUserId(int userId);
 
   List<MapUserRoles> findAllByRoleId(int roleId);
 
-  void deleteByUserIdIn(Collection<Integer> userId);
-
-  boolean existsByIdAndDeletedAtIsNull(Integer id);
-
   List<MapUserRoles> findAllByUserIdInAndDeletedAtIsNull(Collection<Integer> userId);
+
+  List<Integer> findAllByUserIdAndDeletedAtIsNull(int userId);
+
+  // find role ids
+  List<Integer> findRoleIdsByUserIdAndDeletedAtIsNull(Integer userId);
+
+  //  exist
+  boolean existsByIdAndDeletedAtIsNull(Integer id);
 
 
 }

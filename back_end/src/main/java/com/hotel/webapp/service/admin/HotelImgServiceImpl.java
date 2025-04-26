@@ -17,7 +17,6 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Service
@@ -36,7 +35,7 @@ public class HotelImgServiceImpl {
       HotelImages hotelImg = HotelImages.builder()
                                         .name(filePath)
                                         .type("avatar")
-                                        .createdAt(new Timestamp(System.currentTimeMillis()))
+                                        .createdAt(LocalDateTime.now())
                                         .createdBy(authService.getAuthLogin())
                                         .build();
 
@@ -54,7 +53,7 @@ public class HotelImgServiceImpl {
     }
 
     var hotelImg = getById(id);
-    hotelImg.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+    hotelImg.setUpdatedAt(LocalDateTime.now());
     hotelImg.setUpdatedBy(authService.getAuthLogin());
     hotelImg.setDeletedAt(LocalDateTime.now());
     hotelImagesRepository.save(hotelImg);
@@ -64,7 +63,7 @@ public class HotelImgServiceImpl {
       HotelImages hotelAvatarNew = HotelImages.builder()
                                               .name(filePath)
                                               .type("avatar")
-                                              .createdAt(new Timestamp(System.currentTimeMillis()))
+                                              .createdAt(LocalDateTime.now())
                                               .createdBy(authService.getAuthLogin())
                                               .build();
       hotelImagesRepository.save(hotelAvatarNew);
@@ -87,7 +86,7 @@ public class HotelImgServiceImpl {
         String filePath = storageFileService.uploadHotelImg(file);
         hotelImg.setName(filePath);
         hotelImg.setType(images.getType());
-        hotelImg.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        hotelImg.setCreatedAt(LocalDateTime.now());
         hotelImg.setCreatedBy(authService.getAuthLogin());
         hotelImagesRepository.save(hotelImg);
       }
@@ -114,7 +113,7 @@ public class HotelImgServiceImpl {
       var mapHotelImages = new MapHotelImages();
       mapHotelImages.setHotelId(dto.getHotelId());
       mapHotelImages.setImageId(imgId);
-      mapHotelImages.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+      mapHotelImages.setCreatedAt(LocalDateTime.now());
       mapHotelImages.setCreatedBy(authService.getAuthLogin());
       mapHotelImagesRepository.save(mapHotelImages);
     }
@@ -124,7 +123,7 @@ public class HotelImgServiceImpl {
     if (!hotelRepository.existsByIdAndDeletedAtIsNull(dto.getHotelId()))
       throw new AppException(ErrorCode.HOTEL_NOTFOUND);
 
-    if(!mapHotelImagesRepository.existsByHotelIdAndDeletedAtIsNull(dto.getHotelId()))
+    if (!mapHotelImagesRepository.existsByHotelIdAndDeletedAtIsNull(dto.getHotelId()))
       throw new AppException(ErrorCode.MAPPING_IMG_NOTFOUND);
 
     for (Integer imgId : dto.getHotelImgs()) {
@@ -135,7 +134,7 @@ public class HotelImgServiceImpl {
     var oldMaps = mapHotelImagesRepository.findByHotelIdAndDeletedAtIsNull(dto.getHotelId());
     for (MapHotelImages mapHotelImages : oldMaps) {
       mapHotelImages.setDeletedAt(LocalDateTime.now());
-      mapHotelImages.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+      mapHotelImages.setUpdatedAt(LocalDateTime.now());
       mapHotelImages.setUpdatedBy(authService.getAuthLogin());
       mapHotelImagesRepository.save(mapHotelImages);
     }
@@ -144,7 +143,7 @@ public class HotelImgServiceImpl {
       var mapHotelImages = new MapHotelImages();
       mapHotelImages.setHotelId(dto.getHotelId());
       mapHotelImages.setImageId(imgId);
-      mapHotelImages.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+      mapHotelImages.setCreatedAt(LocalDateTime.now());
       mapHotelImages.setCreatedBy(authService.getAuthLogin());
       mapHotelImagesRepository.save(mapHotelImages);
     }

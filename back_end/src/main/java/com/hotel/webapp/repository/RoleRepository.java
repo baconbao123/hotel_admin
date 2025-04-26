@@ -4,6 +4,7 @@ import com.hotel.webapp.base.BaseRepository;
 import com.hotel.webapp.entity.Role;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository

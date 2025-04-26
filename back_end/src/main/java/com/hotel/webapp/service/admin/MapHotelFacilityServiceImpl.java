@@ -13,7 +13,6 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +44,7 @@ public class MapHotelFacilityServiceImpl extends BaseServiceImpl<
       var mapHotelFacility = new MapHotelFacility();
       mapHotelFacility.setFacilityId(facilityId);
       mapHotelFacility.setHotelId(mapHotelFacilityDTO.getHotelId());
-      mapHotelFacility.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+      mapHotelFacility.setCreatedAt(LocalDateTime.now());
       mapHotelFacility.setCreatedBy(authService.getAuthLogin());
       mapHotelFacility = repository.save(mapHotelFacility);
       listDto.add(mapHotelFacility);
@@ -61,7 +60,7 @@ public class MapHotelFacilityServiceImpl extends BaseServiceImpl<
     var oldMapping = repository.findByHotelIdAndDeletedAtIsNull(mapHotelFacilityDTO.getHotelId());
     for (MapHotelFacility mapHotelFacility : oldMapping) {
       mapHotelFacility.setDeletedAt(LocalDateTime.now());
-      mapHotelFacility.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+      mapHotelFacility.setUpdatedAt(LocalDateTime.now());
       mapHotelFacility.setUpdatedBy(authService.getAuthLogin());
       repository.save(mapHotelFacility);
     }
@@ -71,7 +70,7 @@ public class MapHotelFacilityServiceImpl extends BaseServiceImpl<
       var mapHotelFacility = new MapHotelFacility();
       mapHotelFacility.setFacilityId(facilityId);
       mapHotelFacility.setHotelId(mapHotelFacilityDTO.getHotelId());
-      mapHotelFacility.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+      mapHotelFacility.setCreatedAt(LocalDateTime.now());
       mapHotelFacility.setCreatedBy(authService.getAuthLogin());
       mapHotelFacility = repository.save(mapHotelFacility);
       listDto.add(mapHotelFacility);

@@ -17,7 +17,6 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,21 +46,15 @@ public class MapUserRoleServiceImp extends BaseServiceImpl<MapUserRoles, Integer
   @Override
   @Transactional
   public List<MapUserRoles> createCollectionBulk(MapURDTO createDto) {
-    // Validate role IDs exist and are active
-    for (MapURProperties prop : createDto.getProperties()) {
-      for (Integer roleId : prop.getRoleId()) {
-        if (!roleRepository.existsByIdAndIsActiveIsTrueAndDeletedAtIsNull(roleId)) {
-          throw new AppException(ErrorCode.ROLE_NOT_ACTIVE);
-        }
-      }
-    }
+    Set<Integer> userIds = createDto.getProperties().stream()
+                                    .map(MapURProperties::getUserId)
+                                    .collect(Collectors.toSet());
 
-    // Validate user IDs exist and are active
-    for (MapURProperties prop : createDto.getProperties()) {
-      if (!userRepository.existsByIdAndIsActiveIsTrueAndDeletedAtIsNull(prop.getUserId())) {
-        throw new AppException(ErrorCode.USER_NOT_ACTIVE);
-      }
-    }
+    Set<Integer> roleIds = createDto.getProperties().stream()
+                                    .flatMap(prop -> prop.getRoleId().stream())
+                                    .collect(Collectors.toSet());
+
+    commonValidate(userIds, roleIds);
 
     // Create user-role mappings
     List<MapUserRoles> listURs = new ArrayList<>();
@@ -70,7 +63,7 @@ public class MapUserRoleServiceImp extends BaseServiceImpl<MapUserRoles, Integer
         var mapUserRoles = new MapUserRoles();
         mapUserRoles.setUserId(prop.getUserId());
         mapUserRoles.setRoleId(roleId);
-        mapUserRoles.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        mapUserRoles.setCreatedAt(LocalDateTime.now());
         mapUserRoles.setCreatedBy(getAuthId());
         listURs.add(mapUserRoles);
       }
@@ -88,6 +81,7 @@ public class MapUserRoleServiceImp extends BaseServiceImpl<MapUserRoles, Integer
   @Transactional
   public List<MapUserRoles> updateCollectionBulk(Integer id, MapURDTO updateDto) {
     getById(id);
+
     // 1. Collect userIds and roleIds
     Set<Integer> userIds = updateDto.getProperties().stream()
                                     .map(MapURProperties::getUserId)
@@ -97,38 +91,27 @@ public class MapUserRoleServiceImp extends BaseServiceImpl<MapUserRoles, Integer
                                     .flatMap(prop -> prop.getRoleId().stream())
                                     .collect(Collectors.toSet());
 
-    // 2. Validate user
-    for (Integer userId : userIds) {
-      if (!userRepository.existsByIdAndIsActiveIsTrueAndDeletedAtIsNull(userId)) {
-        throw new AppException(ErrorCode.USER_NOT_ACTIVE);
-      }
-    }
 
-    // 3. Validate role
-    for (Integer roleId : roleIds) {
-      if (!roleRepository.existsByIdAndIsActiveIsTrueAndDeletedAtIsNull(roleId)) {
-        throw new AppException(ErrorCode.ROLE_NOT_ACTIVE);
-      }
-    }
+    commonValidate(userIds, roleIds);
 
-    // 4. Find all old Map User Role
+    // 2. Find all old Map User Role
     List<MapUserRoles> oldMappings = repository.findAllByUserIdInAndDeletedAtIsNull(userIds);
 
-    // 5. Delete at old user role + permission contain old map user role
+    // 3. Delete at old user role + permission contain old map user role
     for (MapUserRoles old : oldMappings) {
       old.setDeletedAt(LocalDateTime.now());
       updatePermissionsIfMapURUpdate(old.getId());
     }
     repository.saveAll(oldMappings);
 
-    // 6. Tạo bản ghi mới
+    // 4. Create new record
     List<MapUserRoles> newMappings = new ArrayList<>();
     for (MapURProperties prop : updateDto.getProperties()) {
       for (Integer roleId : prop.getRoleId()) {
         MapUserRoles newMap = MapUserRoles.builder()
                                           .userId(prop.getUserId())
                                           .roleId(roleId)
-                                          .createdAt(new Timestamp(System.currentTimeMillis()))
+                                          .createdAt(LocalDateTime.now())
                                           .createdBy(getAuthId())
                                           .build();
         newMappings.add(newMap);
@@ -150,6 +133,22 @@ public class MapUserRoleServiceImp extends BaseServiceImpl<MapUserRoles, Integer
     for (Permissions permission : permissions) {
       permission.setDeletedAt(LocalDateTime.now());
       permissionsRepository.save(permission);
+    }
+  }
+
+  private void commonValidate(Set<Integer> userIds, Set<Integer> roleIds) {
+    // 2. Validate user
+    for (Integer userId : userIds) {
+      if (!userRepository.existsByIdAndIsActiveIsTrueAndDeletedAtIsNull(userId)) {
+        throw new AppException(ErrorCode.USER_NOT_ACTIVE);
+      }
+    }
+
+    // 3. Validate role
+    for (Integer roleId : roleIds) {
+      if (!roleRepository.existsByIdAndIsActiveIsTrueAndDeletedAtIsNull(roleId)) {
+        throw new AppException(ErrorCode.ROLE_NOT_ACTIVE);
+      }
     }
   }
 

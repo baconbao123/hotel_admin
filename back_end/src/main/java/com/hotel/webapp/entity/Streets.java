@@ -1,7 +1,6 @@
 package com.hotel.webapp.entity;
 
 import com.hotel.webapp.base.AuditEntity;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,7 +9,6 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Entity
@@ -28,8 +26,8 @@ public class Streets implements AuditEntity {
   String districtCode;
   BigDecimal width;
   BigDecimal curbWith;
-  Timestamp createdAt;
-  Timestamp updatedAt;
+  LocalDateTime createdAt;
+  LocalDateTime updatedAt;
   Integer createdBy;
   Integer updatedBy;
   LocalDateTime deletedAt;

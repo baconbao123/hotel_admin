@@ -1,12 +1,10 @@
 package com.hotel.webapp.entity;
 
 import com.hotel.webapp.base.AuditEntity;
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Entity
@@ -21,9 +19,10 @@ public class Actions implements AuditEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer id;
+  @Column(nullable = false)
   String name;
-  Timestamp createdAt;
-  Timestamp updatedAt;
+  LocalDateTime createdAt;
+  LocalDateTime updatedAt;
   Integer createdBy;
   Integer updatedBy;
   LocalDateTime deletedAt;

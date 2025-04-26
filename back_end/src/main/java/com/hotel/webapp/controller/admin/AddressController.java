@@ -4,6 +4,8 @@ import com.hotel.webapp.dto.admin.request.AddressDTO;
 import com.hotel.webapp.dto.admin.response.ApiResponse;
 import com.hotel.webapp.entity.Address;
 import com.hotel.webapp.service.admin.AddressServiceImpl;
+import com.hotel.webapp.validation.Permission;
+import com.hotel.webapp.validation.Resource;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -15,11 +17,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/address")
 @RequiredArgsConstructor
+@Resource(name = "address")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AddressController {
   AddressServiceImpl addressService;
 
   @PostMapping("/create")
+  @Permission(name = "create")
   public ApiResponse<Address> create(@Valid @RequestBody AddressDTO addressDTO) {
     return ApiResponse.<Address>builder()
                       .result(addressService.create(addressDTO))
@@ -27,6 +31,7 @@ public class AddressController {
   }
 
   @PutMapping("/update/{id}")
+  @Permission(name = "update")
   public ApiResponse<Address> update(@PathVariable int id, @Valid @RequestBody AddressDTO updateReq) {
     return ApiResponse.<Address>builder()
                       .result(addressService.update(id, updateReq))
@@ -34,6 +39,7 @@ public class AddressController {
   }
 
   @GetMapping("/get-all")
+  @Permission(name = "view")
   public ApiResponse<List<Address>> getAll() {
     return ApiResponse.<List<Address>>builder()
                       .result(addressService.getAll())
@@ -41,6 +47,7 @@ public class AddressController {
   }
 
   @GetMapping("/find-by-id/{id}")
+  @Permission(name = "view")
   public ApiResponse<Address> findById(@PathVariable int id) {
     return ApiResponse.<Address>builder()
                       .result(addressService.getById(id))
@@ -48,6 +55,7 @@ public class AddressController {
   }
 
   @DeleteMapping("/delete/{id}")
+  @Permission(name = "delete")
   public ApiResponse<Void> deleteById(@PathVariable int id) {
     addressService.delete(id);
     return ApiResponse.<Void>builder()

@@ -4,6 +4,8 @@ import com.hotel.webapp.dto.admin.request.UserDTO;
 import com.hotel.webapp.dto.admin.response.ApiResponse;
 import com.hotel.webapp.entity.User;
 import com.hotel.webapp.service.admin.UserServiceImpl;
+import com.hotel.webapp.validation.Permission;
+import com.hotel.webapp.validation.Resource;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -17,10 +19,12 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
+@Resource(name = "user")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
   UserServiceImpl userService;
 
+  @Permission(name = "create")
   @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ApiResponse<User> create(@Valid @ModelAttribute UserDTO userDTO) throws IOException {
     return ApiResponse.<User>builder()
@@ -28,6 +32,7 @@ public class UserController {
                       .build();
   }
 
+  @Permission(name = "update")
   @PutMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ApiResponse<User> update(@PathVariable int id, @Valid @ModelAttribute UserDTO userDTO) throws IOException {
     return ApiResponse.<User>builder()
@@ -36,6 +41,7 @@ public class UserController {
   }
 
   @GetMapping("/get-all")
+  @Permission(name = "view")
   public ApiResponse<List<User>> getAll() {
     return ApiResponse.<List<User>>builder()
                       .result(userService.getAll())
@@ -43,6 +49,7 @@ public class UserController {
   }
 
   @GetMapping("/find-by-id/{id}")
+  @Permission(name = "view")
   public ApiResponse<User> findById(@PathVariable int id) {
     return ApiResponse.<User>builder()
                       .result(userService.getById(id))
@@ -50,6 +57,7 @@ public class UserController {
   }
 
   @DeleteMapping("/delete/{id}")
+  @Permission(name = "delete")
   public ApiResponse<Void> deleteById(@PathVariable int id) {
     userService.delete(id);
     return ApiResponse.<Void>builder()

@@ -17,7 +17,6 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,8 +26,7 @@ import java.util.stream.Collectors;
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class MapResourceActionServiceImpl extends BaseServiceImpl<
-      MapResourcesAction, Integer, MapRADTO, MapResourceActionRepository>
-{
+      MapResourcesAction, Integer, MapRADTO, MapResourceActionRepository> {
   ResourcesRepository resourcesRepository;
   ActionRepository actionRepository;
   PermissionsRepository permissionsRepository;
@@ -68,7 +66,7 @@ public class MapResourceActionServiceImpl extends BaseServiceImpl<
         var mapRA = new MapResourcesAction();
         mapRA.setResourceId(prop.getResourceId());
         mapRA.setActionId(actionIds);
-        mapRA.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        mapRA.setCreatedAt(LocalDateTime.now());
         mapRA.setCreatedBy(getAuthId());
         listRAs.add(mapRA);
       }
@@ -125,7 +123,7 @@ public class MapResourceActionServiceImpl extends BaseServiceImpl<
         MapResourcesAction mapRA = MapResourcesAction.builder()
                                                      .resourceId(prop.getResourceId())
                                                      .actionId(actionId)
-                                                     .updatedAt(new Timestamp(System.currentTimeMillis()))
+                                                     .updatedAt(LocalDateTime.now())
                                                      .updatedBy(getAuthId())
                                                      .build();
         newMapping.add(mapRA);

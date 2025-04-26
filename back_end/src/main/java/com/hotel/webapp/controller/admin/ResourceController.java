@@ -4,7 +4,8 @@ import com.hotel.webapp.dto.admin.request.NameDTO;
 import com.hotel.webapp.dto.admin.response.ApiResponse;
 import com.hotel.webapp.entity.Resources;
 import com.hotel.webapp.service.admin.ResourceServiceImpl;
-import com.hotel.webapp.service.admin.interfaces.AuthService;
+import com.hotel.webapp.validation.Permission;
+import com.hotel.webapp.validation.Resource;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -16,12 +17,13 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/resource")
 @RequiredArgsConstructor
+@Resource(name = "resource")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ResourceController {
-  AuthService authService;
   ResourceServiceImpl resourceService;
 
   @PostMapping("/create")
+  @Permission(name = "create")
   public ApiResponse<Resources> create(@Valid @RequestBody NameDTO actionResourceReq) {
     return ApiResponse.<Resources>builder()
                       .result(resourceService.create(actionResourceReq))
@@ -29,6 +31,7 @@ public class ResourceController {
   }
 
   @PutMapping("/update/{id}")
+  @Permission(name = "update")
   public ApiResponse<Resources> update(@PathVariable int id, @Valid @RequestBody NameDTO updateReq) {
     return ApiResponse.<Resources>builder()
                       .result(resourceService.update(id, updateReq))
@@ -36,6 +39,7 @@ public class ResourceController {
   }
 
   @GetMapping("/get-all")
+  @Permission(name = "view")
   public ApiResponse<List<Resources>> getAll() {
     return ApiResponse.<List<Resources>>builder()
                       .result(resourceService.getAll())
@@ -43,6 +47,7 @@ public class ResourceController {
   }
 
   @GetMapping("/find-by-id/{id}")
+  @Permission(name = "view")
   public ApiResponse<Resources> findById(@PathVariable int id) {
     return ApiResponse.<Resources>builder()
                       .result(resourceService.getById(id))
@@ -50,6 +55,7 @@ public class ResourceController {
   }
 
   @DeleteMapping("/delete/{id}")
+  @Permission(name = "delete")
   public ApiResponse<Void> deleteById(@PathVariable int id) {
     resourceService.delete(id);
     return ApiResponse.<Void>builder()

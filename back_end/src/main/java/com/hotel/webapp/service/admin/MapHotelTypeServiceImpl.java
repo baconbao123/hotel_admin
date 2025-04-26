@@ -1,5 +1,6 @@
 package com.hotel.webapp.service.admin;
 
+import com.hotel.webapp.base.BaseServiceImpl;
 import com.hotel.webapp.dto.admin.request.MapHotelTypeDTO;
 import com.hotel.webapp.entity.MapHotelType;
 import com.hotel.webapp.exception.AppException;
@@ -9,79 +10,104 @@ import com.hotel.webapp.repository.MapHotelTypeRepository;
 import com.hotel.webapp.repository.TypeHotelRepository;
 import com.hotel.webapp.service.admin.interfaces.AuthService;
 import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class MapHotelTypeServiceImpl {
-  MapHotelTypeRepository mapHotelTypeRepository;
+public class MapHotelTypeServiceImpl extends BaseServiceImpl<MapHotelType, Integer, MapHotelTypeDTO, MapHotelTypeRepository> {
   HotelRepository hotelRepository;
   TypeHotelRepository typeHotelRepository;
-  AuthService authService;
 
-  public List<MapHotelType> mapHotelType(MapHotelTypeDTO dto) {
-    if (!hotelRepository.existsByIdAndDeletedAtIsNull(dto.getHotelId()))
-      throw new AppException(ErrorCode.HOTEL_NOTFOUND);
+  public MapHotelTypeServiceImpl(
+        MapHotelTypeRepository repository,
+        AuthService authService,
+        HotelRepository hotelRepository,
+        TypeHotelRepository typeHotelRepository
+  ) {
+    super(repository, authService);
+    this.hotelRepository = hotelRepository;
+    this.typeHotelRepository = typeHotelRepository;
+  }
 
-    for (Integer typeId : dto.getTypeId()) {
-      if (!typeHotelRepository.existsByIdAndDeletedAtIsNull(typeId))
-        throw new AppException(ErrorCode.TYPE_NOTFOUND);
-    }
+  @Override
+  public List<MapHotelType> createCollectionBulk(MapHotelTypeDTO mapHotelTypeDTO) {
+    validateDTOCommon(mapHotelTypeDTO);
 
     List<MapHotelType> mapList = new ArrayList<>();
-    for (Integer typeId : dto.getTypeId()) {
+    for (Integer typeId : mapHotelTypeDTO.getTypeId()) {
       var map = new MapHotelType();
-      map.setHotelId(dto.getHotelId());
+      map.setHotelId(mapHotelTypeDTO.getHotelId());
       map.setTypeId(typeId);
-      map.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
+      map.setCreatedAt(LocalDateTime.now());
       map.setCreatedBy(authService.getAuthLogin());
-      map = mapHotelTypeRepository.save(map);
+      map = repository.save(map);
       mapList.add(map);
     }
 
     return mapList;
   }
 
-  public List<MapHotelType> updateMapHotelType(MapHotelTypeDTO dto) {
-    if (!hotelRepository.existsByIdAndDeletedAtIsNull(dto.getHotelId()))
-      throw new AppException(ErrorCode.HOTEL_NOTFOUND);
+  @Override
+  public List<MapHotelType> updateCollectionBulk(Integer id, MapHotelTypeDTO mapHotelTypeDTO) {
+    validateDTOCommon(mapHotelTypeDTO);
 
-    for (Integer typeId : dto.getTypeId()) {
-      if (!typeHotelRepository.existsByIdAndDeletedAtIsNull(typeId))
-        throw new AppException(ErrorCode.TYPE_NOTFOUND);
-    }
+    validateUpdate(id, mapHotelTypeDTO);
 
-    if (!mapHotelTypeRepository.existsByHotelIdAndDeletedAtIsNull(dto.getHotelId())) {
-      throw new AppException(ErrorCode.MAPPING_HOTEL_NOTFOUND);
-    }
-
-    var oldMap = mapHotelTypeRepository.findByHotelIdAndDeletedAtIsNull(dto.getHotelId());
+    var oldMap = repository.findByHotelIdAndDeletedAtIsNull(mapHotelTypeDTO.getHotelId());
     for (MapHotelType mapHotelType : oldMap) {
       mapHotelType.setDeletedAt(LocalDateTime.now());
-      mapHotelType.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+      mapHotelType.setUpdatedAt(LocalDateTime.now());
       mapHotelType.setUpdatedBy(authService.getAuthLogin());
-      mapHotelTypeRepository.save(mapHotelType);
+      repository.save(mapHotelType);
     }
 
     List<MapHotelType> newMapList = new ArrayList<>();
-    for (Integer typeId : dto.getTypeId()) {
+    for (Integer typeId : mapHotelTypeDTO.getTypeId()) {
       var map = new MapHotelType();
-      map.setHotelId(dto.getHotelId());
+      map.setHotelId(mapHotelTypeDTO.getHotelId());
       map.setTypeId(typeId);
-      map.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
+      map.setCreatedAt(LocalDateTime.now());
       map.setCreatedBy(authService.getAuthLogin());
-      map = mapHotelTypeRepository.save(map);
+      map = repository.save(map);
       newMapList.add(map);
     }
 
     return newMapList;
+  }
+
+  @Override
+  protected void validateDTOCommon(MapHotelTypeDTO mapHotelTypeDTO) {
+    if (!hotelRepository.existsByIdAndDeletedAtIsNull(mapHotelTypeDTO.getHotelId()))
+      throw new AppException(ErrorCode.HOTEL_NOTFOUND);
+
+    for (Integer typeId : mapHotelTypeDTO.getTypeId()) {
+      if (!typeHotelRepository.existsByIdAndDeletedAtIsNull(typeId))
+        throw new AppException(ErrorCode.TYPE_NOTFOUND);
+    }
+  }
+
+  @Override
+  protected void validateCreate(MapHotelTypeDTO create) {
+  }
+
+  @Override
+  protected void validateUpdate(Integer id, MapHotelTypeDTO update) {
+    if (!repository.existsByHotelIdAndDeletedAtIsNull(update.getHotelId())) {
+      throw new AppException(ErrorCode.MAPPING_HOTEL_NOTFOUND);
+    }
+  }
+
+  @Override
+  protected void validateDelete(Integer integer) {
+  }
+
+  @Override
+  protected RuntimeException createNotFoundException(Integer integer) {
+    return new AppException(ErrorCode.MAPPING_HOTEL_NOTFOUND);
   }
 }

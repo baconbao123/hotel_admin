@@ -5,6 +5,8 @@ import com.hotel.webapp.dto.admin.response.ApiResponse;
 import com.hotel.webapp.entity.MapUserRoles;
 import com.hotel.webapp.service.admin.MapUserRoleServiceImp;
 import com.hotel.webapp.service.admin.interfaces.AuthService;
+import com.hotel.webapp.validation.Permission;
+import com.hotel.webapp.validation.Resource;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -15,12 +17,14 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/map-user-role")
 @RequiredArgsConstructor
+@Resource(name = "map-user-role")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class MapUserRoleController {
   AuthService authService;
   MapUserRoleServiceImp mapUserRoleService;
 
   @PostMapping(value = "/create")
+  @Permission(name = "create")
   public ApiResponse<List<MapUserRoles>> create(@RequestBody MapURDTO mapURDTO) {
     return ApiResponse.<List<MapUserRoles>>builder()
                       .result(mapUserRoleService.createCollectionBulk(mapURDTO))
@@ -28,6 +32,7 @@ public class MapUserRoleController {
   }
 
   @PutMapping(value = "/update/{id}")
+  @Permission(name = "update")
   public ApiResponse<List<MapUserRoles>> update(@PathVariable Integer id, @RequestBody MapURDTO updateReq) {
     return ApiResponse.<List<MapUserRoles>>builder()
                       .result(mapUserRoleService.updateCollectionBulk(id, updateReq))

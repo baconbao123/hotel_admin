@@ -20,7 +20,7 @@ public class PermissionSeederRunner implements CommandLineRunner {
   @Override
   public void run(String... args) throws Exception {
     if(args.length > 0 && "seeder-permission".equals(args[0])) {
-      permissionSystemSeeder.seeder(1, 1);
+      permissionSystemSeeder.seeder();
       log.info("Permission system seeding completed");
 
     }

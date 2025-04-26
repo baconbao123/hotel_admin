@@ -19,7 +19,6 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
@@ -70,7 +69,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
       user.setAvatarUrl("");
     }
     user.setPassword(passwordEncoder.encode(createDto.getPassword()));
-    user.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+    user.setCreatedAt(LocalDateTime.now());
     user.setCreatedBy(getAuthId());
     return repository.save(user);
   }
@@ -95,7 +94,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
       user.setAvatarUrl(fileName);
     }
     user.setIsActive(updateDto.getIsActive());
-    user.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+    user.setUpdatedAt(LocalDateTime.now());
     user.setUpdatedBy(getAuthId());
 
     return repository.save(user);

@@ -15,7 +15,6 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,19 +39,20 @@ public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer,
     this.mapUserRoleRepository = mapUserRoleRepository;
   }
 
+
   @Override
   public List<Permissions> createCollectionBulk(PermissionDTO createDto) {
-    for (PermissionProperties properties : createDto.getProperties()) {
-      for (Integer mapResourcesActionId : properties.getMapResourcesActionId()) {
-        if (!mapResourceActionRepository.existsByIdAndDeletedAtIsNull(mapResourcesActionId))
-          throw new AppException(ErrorCode.MAPPING_RA_NOT_ACTIVE);
-      }
-    }
+    Set<Integer> mapURs = createDto.getProperties()
+                                   .stream()
+                                   .map(PermissionProperties::getMapUserRolesId)
+                                   .collect(Collectors.toSet());
 
-    for (PermissionProperties properties : createDto.getProperties()) {
-      if (!mapUserRoleRepository.existsByIdAndDeletedAtIsNull(properties.getMapUserRolesId()))
-        throw new AppException(ErrorCode.MAPPING_UR_NOT_ACTIVE);
-    }
+    // Valid map resource action
+    Set<Integer> mapRAIds = createDto.getProperties()
+                                     .stream()
+                                     .flatMap(prop -> prop.getMapResourcesActionId().stream())
+                                     .collect(Collectors.toSet());
+    commmonValidation(mapURs, mapRAIds);
 
     List<Permissions> listPermissions = new ArrayList<>();
     for (PermissionProperties properties : createDto.getProperties()) {
@@ -60,7 +60,7 @@ public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer,
         var permission = new Permissions();
         permission.setMapResourcesActionId(mapResourcesActionId);
         permission.setMapUserRolesId(properties.getMapUserRolesId());
-        permission.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        permission.setCreatedAt(LocalDateTime.now());
         permission.setCreatedBy(getAuthId());
         listPermissions.add(permission);
       }
@@ -82,21 +82,13 @@ public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer,
                                    .map(PermissionProperties::getMapUserRolesId)
                                    .collect(Collectors.toSet());
 
-    for (Integer mapURIds : mapURs) {
-      if (!mapUserRoleRepository.existsByIdAndDeletedAtIsNull(mapURIds))
-        throw new AppException(ErrorCode.MAPPING_UR_NOT_ACTIVE);
-    }
-
     // Valid map resource action
     Set<Integer> mapRAIds = updateDto.getProperties()
                                      .stream()
                                      .flatMap(prop -> prop.getMapResourcesActionId().stream())
                                      .collect(Collectors.toSet());
 
-    for (Integer mapRAId : mapRAIds) {
-      if (!mapResourceActionRepository.existsByIdAndDeletedAtIsNull(mapRAId))
-        throw new AppException(ErrorCode.MAPPING_RA_NOT_ACTIVE);
-    }
+    commmonValidation(mapURs, mapRAIds);
 
     //    Delete At old permission
     List<Permissions> oldMappings = repository.findAllByMapURId(mapURs);
@@ -113,7 +105,7 @@ public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer,
         Permissions permission = Permissions.builder()
                                             .mapResourcesActionId(mapResourcesActionId)
                                             .mapUserRolesId(prop.getMapUserRolesId())
-                                            .updatedAt(new Timestamp(System.currentTimeMillis()))
+                                            .updatedAt(LocalDateTime.now())
                                             .updatedBy(getAuthId())
                                             .build();
         newPermissions.add(permission);
@@ -128,6 +120,22 @@ public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer,
     return savedMappings;
   }
 
+  private void commmonValidation(Set<Integer> mapURs, Set<Integer> mapRAIds) {
+    for (Integer mapURIds : mapURs) {
+      if (!mapUserRoleRepository.existsByIdAndDeletedAtIsNull(mapURIds))
+        throw new AppException(ErrorCode.MAPPING_UR_NOT_ACTIVE);
+    }
+
+
+    for (Integer mapRAId : mapRAIds) {
+      if (!mapResourceActionRepository.existsByIdAndDeletedAtIsNull(mapRAId))
+        throw new AppException(ErrorCode.MAPPING_RA_NOT_ACTIVE);
+    }
+  }
+
+  public boolean checkPermission(Integer userId, String resource, String action) {
+    return repository.checkPermission(userId, resource, action);
+  }
 
   @Override
   protected void validateCreate(PermissionDTO create) {

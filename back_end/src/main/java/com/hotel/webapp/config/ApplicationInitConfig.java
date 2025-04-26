@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Configuration
 @RequiredArgsConstructor
@@ -31,7 +31,7 @@ public class ApplicationInitConfig {
                                   User newUser = User.builder()
                                                      .email("sa@gmail.com")
                                                      .password(passwordEncoder.encode("123"))
-                                                     .createdAt(new Timestamp(System.currentTimeMillis()))
+                                                     .createdAt(LocalDateTime.now())
                                                      .build();
                                   return userRepository.save(newUser);
                                 });
@@ -40,7 +40,7 @@ public class ApplicationInitConfig {
                                 .orElseGet(() -> {
                                   Role newRole = Role.builder().name("Admin")
                                                      .isActive(true)
-                                                     .createdAt(new Timestamp(System.currentTimeMillis()))
+                                                     .createdAt(LocalDateTime.now())
                                                      .build();
                                   return roleRepository.save(newRole);
                                 });

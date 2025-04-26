@@ -16,7 +16,6 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -67,7 +66,7 @@ public class FacilitiesServiceImpl extends BaseServiceImpl<Facilities, Integer, 
       var mapold = mapHotelFacilityRepository.findByFacilityIdAndDeletedAtIsNull(facility.getId());
       for (MapHotelFacility mapHotelFacility : mapold) {
         mapHotelFacility.setDeletedAt(LocalDateTime.now());
-        mapHotelFacility.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+        mapHotelFacility.setUpdatedAt(LocalDateTime.now());
         mapHotelFacility.setUpdatedBy(authService.getAuthLogin());
         mapHotelFacilityRepository.save(mapHotelFacility);
       }

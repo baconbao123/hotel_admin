@@ -18,26 +18,22 @@ import java.util.Map;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PermissionSystemSeeder {
   ResourcesRepository resourcesRepository;
-  PermissionsRepository permissionsRepository;
   ActionRepository actionRepository;
   MapResourceActionRepository mapResourceActionRepository;
-  MapUserRoleRepository mapUserRoleRepository;
 
   List<String> DEFAULT_RESOURCE = List.of("Hotel", "User", "Booking", "Permissions", "Resources", "Actions");
 
   List<String> DEFAULT_ACTION = List.of("view", "create", "update", "delete");
 
   @Transactional
-  public void seeder(int adminId, int roleId) {
+  public void seeder() {
     Map<String, Integer> resourceIds = seederResources();
 
     Map<String, Integer> actionIds = seederActions();
 
     // create resource-actions mapping
-    Map<Pair<Integer, Integer>, Integer> resourceActionMappings = seederResourceActionMapping(resourceIds, actionIds);
+    seederResourceActionMapping(resourceIds, actionIds);
 
-    // create permission for sa
-    seederAdminPermission(adminId, roleId, resourceActionMappings);
   }
 
   //  seederResources
@@ -107,20 +103,4 @@ public class PermissionSystemSeeder {
     }
     return mappings;
   }
-
-  //  seederAdminPermission
-  private void seederAdminPermission(int adminId, int roleId,
-        Map<Pair<Integer, Integer>, Integer> resourceActionMappings) {
-    int mapUserRoleId = mapUserRoleRepository.findIdByRoleIdAndUserId(roleId, adminId);
-
-    Timestamp now = new Timestamp(System.currentTimeMillis());
-
-    for (int resourceActionId : resourceActionMappings.values()) {
-      if (permissionsRepository.countPermissionsByMapResourcesActionIdAndMapUserRolesId(roleId,
-            resourceActionId) == 0) {
-        permissionsRepository.insertPermissions(resourceActionId, mapUserRoleId, now, 0);
-      }
-    }
-  }
-
 }
