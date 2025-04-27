@@ -1,6 +1,7 @@
 import { Outlet } from "react-router";
 import { useEffect } from "react";
 import Sidebar from "../components/shared//Sidebar";
+import Navbar from "../components/shared/Navbar";
 
 
 export default function RootLayout() {
@@ -11,14 +12,16 @@ export default function RootLayout() {
 
   return (
     <div className="flex h-screen bg-gray-100">
+      {/* Navbar */}
       {/* Sidebar */}
       <Sidebar />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden text-black">
+       <Navbar />
         {/* Main Content Area */}
         <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-100">
-          <div className="container mx-auto px-6 py-8">
+          <div className="container px-4 py-8">
             <Outlet />
           </div>
         </main>

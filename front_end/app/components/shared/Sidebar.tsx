@@ -43,10 +43,19 @@ export default function Sidebar() {
         </div>
         <button
           onClick={handleCollapse}
-          className="text-gray-400 hover:text-blue-300 p-1 rounded transition"
+          className="text-gray-500 hover:text-blue-400 p-1 rounded transition"
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {collapsed ? <ChevronRightIcon className="w-5 h-5" /> : <ChevronLeftIcon className="w-5 h-5" />}
+          {collapsed ? <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+  <path strokeLinecap="round" strokeLinejoin="round" d="m12.75 15 3-3m0 0-3-3m3 3h-7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+</svg>
+
+ :<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+ <path strokeLinecap="round" strokeLinejoin="round" d="m11.25 9-3 3m0 0 3 3m-3-3h7.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+</svg>
+
+
+}
         </button>
       </div>
 
@@ -109,32 +118,6 @@ export default function Sidebar() {
           })}
         </ul>
       </nav>
-
-      {/* User Profile */}
-      <div className={`flex items-center px-4 py-4 border-t border-gray-100 transition-all duration-200 ${collapsed ? 'justify-center' : ''}`}>
-        <img
-          className="w-9 h-9 rounded-full object-cover"
-          src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-          alt="User avatar"
-        />
-        {!collapsed && (
-          <div className="ml-3">
-            <p className="text-base font-medium text-gray-900">Admin User</p>
-            <p className="text-xs text-gray-400">admin@hotel.com</p>
-          </div>
-        )}
-      </div>
-
-      {/* Logout Button */}
-      <button
-        onClick={handleLogout}
-        className={`flex items-center w-full px-4 py-3 border-t border-gray-100 text-red-500 hover:bg-red-50 transition-all duration-200
-          ${collapsed ? 'justify-center' : ''}
-        `}
-      >
-        <ArrowRightOnRectangleIcon className="w-6 h-6" />
-        {!collapsed && <span className="ml-3 font-medium cursor-pointer">Logout</span>}
-      </button>
     </div>
   );
 }
