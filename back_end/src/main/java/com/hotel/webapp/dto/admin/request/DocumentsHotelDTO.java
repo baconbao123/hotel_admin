@@ -9,6 +9,6 @@ import org.springframework.web.multipart.MultipartFile;
 public class DocumentsHotelDTO {
   String name;
   Integer hotelId;
-  Integer typeId;
+  String colName;
   MultipartFile documentUrl;
 }

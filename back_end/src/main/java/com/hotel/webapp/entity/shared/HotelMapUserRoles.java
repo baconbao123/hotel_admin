@@ -4,35 +4,27 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 
-@Getter
-@Setter
 @Entity
-@Table(name = "hotel_users")
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
+@Setter
+@Builder
+@Table(name = "hotel_map_user_role")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class HotelUser {
+public class HotelMapUserRoles {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer id;
-  String fullName;
-  String email;
-  String phoneNumber;
-  @Lob
-  String password;
-  String avatarUrl;
-  Integer addressId;
-  @Lob
-  String refreshToken;
-  Boolean isActive;
+  @Column(nullable = false)
+  Integer userId;
+  @Column(nullable = false)
+  Integer roleId;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;
   Integer createdBy;
   Integer updatedBy;
   LocalDateTime deletedAt;
-
 }

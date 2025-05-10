@@ -21,7 +21,7 @@ public class Facilities implements AuditEntity {
   @Column(nullable = false)
   String name;
   @Column(nullable = false)
-  Integer typeId;
+  String colName;
   @Column(nullable = false)
   Integer number;
   LocalDateTime createdAt;

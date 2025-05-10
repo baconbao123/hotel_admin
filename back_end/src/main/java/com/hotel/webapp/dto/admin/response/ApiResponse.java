@@ -1,9 +1,11 @@
 package com.hotel.webapp.dto.admin.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.annotation.Nullable;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import lombok.Builder;
+import org.springframework.http.HttpStatus;
 
 @Builder
 @Getter

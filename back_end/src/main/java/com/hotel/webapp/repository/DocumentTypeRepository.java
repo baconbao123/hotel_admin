@@ -11,4 +11,8 @@ public interface DocumentTypeRepository extends BaseRepository<DocumentType, Int
   boolean existsByNameAndDeletedAtIsNull(String name);
 
   boolean existsByNameAndIdNotAndDeletedAtIsNull(String name, Integer id);
+
+  boolean existsByColNameAndDeletedAtIsNull(String colName);
+
+  String findColNameByIdAndDeletedAtIsNull(Integer id);
 }

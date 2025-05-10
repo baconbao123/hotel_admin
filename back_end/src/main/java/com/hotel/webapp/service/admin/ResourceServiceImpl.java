@@ -50,25 +50,25 @@ public class ResourceServiceImpl extends BaseServiceImpl<Resources, Integer, Nam
   @Override
   protected void validateCreate(NameDTO create) {
     if (resourcesRepository.existsByNameAndDeletedAtIsNull(create.getName()))
-      throw new AppException(ErrorCode.RESOURCE_EXISTED);
-    create.setName(validateDataInput.lowercaseFirstLetter(create.getName()));
+      throw new AppException(ErrorCode.FIELD_EXISTED, "Resource");
+    create.setName(validateDataInput.lowercaseStr(create.getName()));
   }
 
   @Override
   protected void validateUpdate(Integer id, NameDTO update) {
     if (resourcesRepository.existsByNameAndIdNotAndDeletedAtIsNull(update.getName(), id))
-      throw new AppException(ErrorCode.RESOURCE_EXISTED);
-    update.setName(validateDataInput.lowercaseFirstLetter(update.getName()));
+      throw new AppException(ErrorCode.FIELD_EXISTED, "Resource");
+    update.setName(validateDataInput.lowercaseStr(update.getName()));
   }
 
   @Override
-  protected void validateDelete(Integer id) {
+  protected void beforeDelete(Integer id) {
     updateMapRAIfResourceDelete(id, getAuthId());
   }
 
   @Override
   protected RuntimeException createNotFoundException(Integer integer) {
-    return new AppException(ErrorCode.RESOURCE_NOTFOUND);
+    return new AppException(ErrorCode.NOT_FOUND, "Resource");
   }
 
   private void updateMapRAIfResourceDelete(int resourceId, int authId) {

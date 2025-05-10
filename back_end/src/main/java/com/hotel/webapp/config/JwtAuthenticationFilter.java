@@ -46,7 +46,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     String finalPath = path;
     boolean isPublic = Arrays.stream(SecurityConfig.PUBLIC_URLS)
-                             .anyMatch(pattern -> pathMatcher.match(pattern, finalPath));
+                             .anyMatch(url -> pathMatcher.match(url, finalPath));
 
     if (isPublic) {
       filterChain.doFilter(request, response);
@@ -60,7 +60,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     Jwt jwt = (Jwt) auth.getPrincipal();
-    log.info("JWT claims: {}", jwt.getClaims());
     String userId = jwt.getClaimAsString("userId");
     String email = jwt.getClaimAsString("sub");
 
@@ -94,8 +93,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     if (!(handler instanceof HandlerExecutionChain)) {
-      log.warn("No HandlerExecutionChain found for request: {} {}", request.getMethod(), path);
-      // Consider allowing the request to continue if you want to handle 404s later
       response.sendError(HttpServletResponse.SC_NOT_FOUND, "Endpoint not found");
       return;
     }

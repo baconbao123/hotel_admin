@@ -4,6 +4,9 @@ import com.hotel.webapp.base.BaseMapper;
 import com.hotel.webapp.base.BaseServiceImpl;
 import com.hotel.webapp.dto.admin.request.AddressDTO;
 import com.hotel.webapp.entity.Address;
+import com.hotel.webapp.entity.Districts;
+import com.hotel.webapp.entity.Streets;
+import com.hotel.webapp.entity.Wards;
 import com.hotel.webapp.exception.AppException;
 import com.hotel.webapp.exception.ErrorCode;
 import com.hotel.webapp.repository.*;
@@ -12,6 +15,8 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
+
+import java.util.Objects;
 
 @Service
 @Transactional
@@ -39,41 +44,32 @@ public class AddressServiceImpl extends BaseServiceImpl<Address, Integer, Addres
   }
 
   @Override
-  protected void validateCreate(AddressDTO create) {
-    if (!provincesRepository.existsByCode(create.getProvinceCode()))
-      throw new AppException(ErrorCode.PROVINCE_NOTFOUND);
+  protected void validateDTOCommon(AddressDTO addressDTO) {
+    if (!provincesRepository.existsByCode(addressDTO.getProvinceCode()))
+      throw new AppException(ErrorCode.NOT_FOUND, "Province");
 
-    if (!districtRepository.existsByCode(create.getDistrictCode()))
-      throw new AppException(ErrorCode.DISTRICT_NOTFOUND);
+    Districts districts = districtRepository.findById(addressDTO.getDistrictCode())
+                                            .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "District"));
 
-    if (!wardRepository.existsByCode(create.getWardCode()))
-      throw new AppException(ErrorCode.WARD_NOTFOUND);
+    if (!Objects.equals(districts.getProvinceCode(), addressDTO.getProvinceCode()))
+      throw new AppException(ErrorCode.COMMON_400, "District not include in province");
 
-    if (!streetRepository.existsById(create.getStreetId()))
-      throw new AppException(ErrorCode.STREET_NOTFOUND);
+    Wards wards = wardRepository.findById(addressDTO.getWardCode())
+                                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Ward"));
+
+    if (!Objects.equals(wards.getDistrictCode(), addressDTO.getDistrictCode()))
+      throw new AppException(ErrorCode.COMMON_400, "Ward not include in district");
+
+    Streets streets = streetRepository.findById(addressDTO.getStreetId())
+                                      .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Street"));
+
+    if (!Objects.equals(streets.getDistrictCode(), addressDTO.getDistrictCode()))
+      throw new AppException(ErrorCode.COMMON_400, "Street not include in district");
   }
 
-  @Override
-  protected void validateUpdate(Integer id, AddressDTO update) {
-    if (!provincesRepository.existsByCode(update.getProvinceCode()))
-      throw new AppException(ErrorCode.PROVINCE_NOTFOUND);
-
-    if (!districtRepository.existsByCode(update.getDistrictCode()))
-      throw new AppException(ErrorCode.DISTRICT_NOTFOUND);
-
-    if (!wardRepository.existsByCode(update.getWardCode()))
-      throw new AppException(ErrorCode.WARD_NOTFOUND);
-
-    if (!streetRepository.existsById(update.getStreetId()))
-      throw new AppException(ErrorCode.STREET_NOTFOUND);
-  }
-
-  @Override
-  protected void validateDelete(Integer integer) {
-  }
 
   @Override
   protected RuntimeException createNotFoundException(Integer integer) {
-    return null;
+    throw new AppException(ErrorCode.NOT_FOUND, "Address");
   }
 }

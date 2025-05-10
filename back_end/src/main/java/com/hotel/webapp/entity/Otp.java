@@ -1,6 +1,5 @@
 package com.hotel.webapp.entity;
 
-import com.hotel.webapp.base.AuditEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,15 +16,11 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class MapHotelType implements AuditEntity {
+public class Otp {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer id;
-  String colName;
-  Integer hotelId;
-  LocalDateTime createdAt;
-  LocalDateTime updatedAt;
-  Integer createdBy;
-  Integer updatedBy;
-  LocalDateTime deletedAt;
+  String email;
+  String code;
+  LocalDateTime expTime;
 }

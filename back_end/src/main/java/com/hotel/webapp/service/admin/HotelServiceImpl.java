@@ -40,50 +40,41 @@ public class HotelServiceImpl extends BaseServiceImpl<Hotels, Integer, HotelDTO,
   @Override
   protected void validateCreate(HotelDTO create) {
     HotelPolicy hotelPolicy = policyRepository.findById(create.getPolicyId())
-                                              .orElseThrow(() -> new AppException(ErrorCode.POLICY_NOTFOUND));
+                                              .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Policy"));
     if (hotelPolicy.getHotelId() != null)
-      throw new AppException(ErrorCode.POLICY_USED);
+      throw new AppException(ErrorCode.FIELD_USED, "The policy");
   }
 
   @Override
   protected void afterCreate(Hotels hotel, HotelDTO create) {
     HotelPolicy hotelPolicy = policyRepository.findById(create.getPolicyId())
-                                              .orElseThrow(() -> new AppException(ErrorCode.POLICY_NOTFOUND));
+                                              .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Policy"));
     hotelPolicy.setHotelId(hotel.getId());
-  }
-
-  @Override
-  protected void validateUpdate(Integer id, HotelDTO update) {
   }
 
   @Override
   protected void validateDTOCommon(HotelDTO hotelDTO) {
     if (hotelDTO.getAvatarId() != null &&
           !hotelImagesRepository.existsByIdAndDeletedAtIsNull(hotelDTO.getAvatarId()))
-      throw new AppException(ErrorCode.IMAGE_NOTFOUND);
+      throw new AppException(ErrorCode.NOT_FOUND, "Image");
 
 
     if (hotelDTO.getOwnerId() != null &&
           !userRepository.existsByIdAndIsActiveIsTrueAndDeletedAtIsNull(hotelDTO.getOwnerId()))
-      throw new AppException(ErrorCode.USER_NOTFOUND);
+      throw new AppException(ErrorCode.NOT_FOUND, "User");
 
 
     if (hotelDTO.getAddressId() != null &&
           !addressRepository.existsByIdAndDeletedAtIsNull(hotelDTO.getAddressId()))
-      throw new AppException(ErrorCode.ADDRESS_NOTFOUND);
+      throw new AppException(ErrorCode.NOT_FOUND, "Address");
 
     if (hotelDTO.getPolicyId() != null && !policyRepository.existsByIdAndDeletedAtIsNull(hotelDTO.getPolicyId())) {
-      throw new AppException(ErrorCode.POLICY_NOTFOUND);
+      throw new AppException(ErrorCode.NOT_FOUND, "Policy");
     }
-  }
-
-
-  @Override
-  protected void validateDelete(Integer integer) {
   }
 
   @Override
   protected RuntimeException createNotFoundException(Integer integer) {
-    return new AppException(ErrorCode.HOTEL_NOTFOUND);
+    return new AppException(ErrorCode.NOT_FOUND, "Hotel");
   }
 }

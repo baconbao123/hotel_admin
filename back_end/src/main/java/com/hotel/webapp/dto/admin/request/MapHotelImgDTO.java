@@ -11,6 +11,6 @@ import java.util.List;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MapHotelImgDTO {
-  int hotelId;
+  Integer hotelId;
   List<Integer> hotelImgs;
 }

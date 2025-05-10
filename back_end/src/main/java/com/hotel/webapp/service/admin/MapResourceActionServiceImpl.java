@@ -47,25 +47,26 @@ public class MapResourceActionServiceImpl extends BaseServiceImpl<
   @Override
   @Transactional
   public List<MapResourcesAction> createCollectionBulk(MapRADTO createDto) {
-    for (MapRAPropertiesDTO prop : createDto.getProperties()) {
-      for (Integer actionId : prop.getActionId()) {
-        if (!actionRepository.existsByIdAndDeletedAtIsNull(actionId))
-          throw new AppException(ErrorCode.ACTION_NOT_ACTIVE);
-      }
-    }
+    // Collect resourceIds and actionIds
+    Set<Integer> resourceIds = createDto.getProperties()
+                                        .stream()
+                                        .map(MapRAPropertiesDTO::getResourceId)
+                                        .collect(Collectors.toSet());
 
-    for (MapRAPropertiesDTO prop : createDto.getProperties()) {
-      if (!resourcesRepository.existsByIdAndDeletedAtIsNull(prop.getResourceId()))
-        throw new AppException(ErrorCode.RESOURCE_NOT_ACTIVE);
-    }
+    Set<Integer> actionIds = createDto.getProperties().stream()
+                                      .flatMap(prop -> prop.getActionId().stream())
+                                      .collect(Collectors.toSet());
+
+    //  Valid resource
+    validCommon(resourceIds, actionIds);
 
     // create new resource-action mapping
     List<MapResourcesAction> listRAs = new ArrayList<>();
     for (MapRAPropertiesDTO prop : createDto.getProperties()) {
-      for (Integer actionIds : prop.getActionId()) {
+      for (Integer actionId : prop.getActionId()) {
         var mapRA = new MapResourcesAction();
         mapRA.setResourceId(prop.getResourceId());
-        mapRA.setActionId(actionIds);
+        mapRA.setActionId(actionId);
         mapRA.setCreatedAt(LocalDateTime.now());
         mapRA.setCreatedBy(getAuthId());
         listRAs.add(mapRA);
@@ -94,16 +95,7 @@ public class MapResourceActionServiceImpl extends BaseServiceImpl<
                                       .collect(Collectors.toSet());
 
     //  Valid resource
-    for (Integer resourceId : resourceIds) {
-      if (!resourcesRepository.existsByIdAndDeletedAtIsNull(resourceId))
-        throw new AppException(ErrorCode.RESOURCE_NOT_ACTIVE);
-    }
-
-    for (Integer actionId : actionIds) {
-      if (!actionRepository.existsByIdAndDeletedAtIsNull(actionId)) {
-        throw new AppException(ErrorCode.ACTION_NOT_ACTIVE);
-      }
-    }
+    validCommon(resourceIds, actionIds);
 
     // find all old mapping
     List<MapResourcesAction> oldMappings = repository.findAllByResourceIdInAndDeletedAtIsNull(resourceIds);
@@ -139,24 +131,22 @@ public class MapResourceActionServiceImpl extends BaseServiceImpl<
     return savedMappings;
   }
 
-  @Override
-  protected void validateCreate(MapRADTO create) {
+  private void validCommon(Set<Integer> resourceIds, Set<Integer> actionIds) {
+    for (Integer resourceId : resourceIds) {
+      if (!resourcesRepository.existsByIdAndDeletedAtIsNull(resourceId))
+        throw new AppException(ErrorCode.NOT_ACTIVE, "Resource");
+    }
 
-  }
-
-  @Override
-  protected void validateUpdate(Integer id, MapRADTO update) {
-
-  }
-
-  @Override
-  protected void validateDelete(Integer integer) {
-
+    for (Integer actionId : actionIds) {
+      if (!actionRepository.existsByIdAndDeletedAtIsNull(actionId)) {
+        throw new AppException(ErrorCode.NOT_ACTIVE, "Action");
+      }
+    }
   }
 
   @Override
   protected RuntimeException createNotFoundException(Integer integer) {
-    return new AppException(ErrorCode.MAPPING_RA_NOTFOUND);
+    return new AppException(ErrorCode.NOT_FOUND, "Map Resource Action");
   }
 
   private void updatePermissionIfMapRAUpdate(int oldMapRAId) {

@@ -1,69 +1,71 @@
 package com.hotel.webapp.config;
 
-import lombok.AccessLevel;
-import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.web.authentication.BearerTokenAuthenticationFilter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import javax.crypto.spec.SecretKeySpec;
+import java.util.Arrays;
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@FieldDefaults(level = AccessLevel.PRIVATE)
 public class SecurityConfig {
 
   public static final String[] PUBLIC_URLS = {
         "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api/auth/**", "/public/**", "/upload/**"
   };
 
-  JwtAuthenticationFilter jwtAuthenticationFilter;
+  private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-  @NonFinal
-  @Value("${jwt.signerKey}")
-  private String signerKey;
+  private final CustomJwtDecoder jwtDecoder;
 
-  public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
+  public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter, CustomJwtDecoder jwtDecoder) {
     this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    this.jwtDecoder = jwtDecoder;
   }
 
   @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http.authorizeHttpRequests(req -> req
-          .requestMatchers(PUBLIC_URLS)
-          .permitAll()
-          .anyRequest()
-          .authenticated());
+  @Order(1)
+  public SecurityFilterChain publicFilterChain(HttpSecurity http) throws Exception {
+    RequestMatcher[] matchers = Arrays.stream(PUBLIC_URLS)
+                                      .map(AntPathRequestMatcher::new)
+                                      .toArray(RequestMatcher[]::new);
 
-    http.oauth2ResourceServer(oauth ->
-          oauth.jwt(jwtConfigurer -> jwtConfigurer.decoder(jwtDecoder())
-                                                  .jwtAuthenticationConverter(
-                                                        jwtAuthenticationConverter())));
-
-    http.addFilterAfter(jwtAuthenticationFilter, BearerTokenAuthenticationFilter.class);
-
-    http.csrf(AbstractHttpConfigurer::disable)
+    http.securityMatcher(new OrRequestMatcher(matchers))
+        .authorizeHttpRequests(req -> req.anyRequest().permitAll())
+        .csrf(AbstractHttpConfigurer::disable)
         .formLogin(AbstractHttpConfigurer::disable)
         .cors(cors -> cors.configurationSource(corsConfigurationSource()));
+    return http.build();
+  }
 
-
+  @Bean
+  @Order(2)
+  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http.authorizeHttpRequests(req -> req.anyRequest().authenticated())
+        .oauth2ResourceServer(oauth ->
+              oauth.jwt(jwtConfigurer -> jwtConfigurer
+                    .decoder(jwtDecoder)
+                    .jwtAuthenticationConverter(jwtAuthenticationConverter())))
+        .addFilterAfter(jwtAuthenticationFilter, BearerTokenAuthenticationFilter.class)
+        .csrf(AbstractHttpConfigurer::disable)
+        .formLogin(AbstractHttpConfigurer::disable)
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()));
     return http.build();
   }
 
@@ -78,12 +80,6 @@ public class SecurityConfig {
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);
     return source;
-  }
-
-  @Bean
-  JwtDecoder jwtDecoder() {
-    SecretKeySpec secretKeySpec = new SecretKeySpec(signerKey.getBytes(), "HS512");
-    return NimbusJwtDecoder.withSecretKey(secretKeySpec).macAlgorithm(MacAlgorithm.HS512).build();
   }
 
   @Bean

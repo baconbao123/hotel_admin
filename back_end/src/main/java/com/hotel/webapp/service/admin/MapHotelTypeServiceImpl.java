@@ -39,10 +39,10 @@ public class MapHotelTypeServiceImpl extends BaseServiceImpl<MapHotelType, Integ
     validateDTOCommon(mapHotelTypeDTO);
 
     List<MapHotelType> mapList = new ArrayList<>();
-    for (Integer typeId : mapHotelTypeDTO.getTypeId()) {
+    for (String typeId : mapHotelTypeDTO.getColNames()) {
       var map = new MapHotelType();
       map.setHotelId(mapHotelTypeDTO.getHotelId());
-      map.setTypeId(typeId);
+      map.setColName(typeId);
       map.setCreatedAt(LocalDateTime.now());
       map.setCreatedBy(authService.getAuthLogin());
       map = repository.save(map);
@@ -67,10 +67,10 @@ public class MapHotelTypeServiceImpl extends BaseServiceImpl<MapHotelType, Integ
     }
 
     List<MapHotelType> newMapList = new ArrayList<>();
-    for (Integer typeId : mapHotelTypeDTO.getTypeId()) {
+    for (String typeId : mapHotelTypeDTO.getColNames()) {
       var map = new MapHotelType();
       map.setHotelId(mapHotelTypeDTO.getHotelId());
-      map.setTypeId(typeId);
+      map.setColName(typeId);
       map.setCreatedAt(LocalDateTime.now());
       map.setCreatedBy(authService.getAuthLogin());
       map = repository.save(map);
@@ -83,31 +83,23 @@ public class MapHotelTypeServiceImpl extends BaseServiceImpl<MapHotelType, Integ
   @Override
   protected void validateDTOCommon(MapHotelTypeDTO mapHotelTypeDTO) {
     if (!hotelRepository.existsByIdAndDeletedAtIsNull(mapHotelTypeDTO.getHotelId()))
-      throw new AppException(ErrorCode.HOTEL_NOTFOUND);
+      throw new AppException(ErrorCode.NOT_FOUND, "Hotel");
 
-    for (Integer typeId : mapHotelTypeDTO.getTypeId()) {
-      if (!typeHotelRepository.existsByIdAndDeletedAtIsNull(typeId))
-        throw new AppException(ErrorCode.TYPE_NOTFOUND);
+    for (String type : mapHotelTypeDTO.getColNames()) {
+      if (!typeHotelRepository.existsByColNameAndDeletedAtIsNull(type))
+        throw new AppException(ErrorCode.NOT_FOUND, "Type Hotel");
     }
-  }
-
-  @Override
-  protected void validateCreate(MapHotelTypeDTO create) {
   }
 
   @Override
   protected void validateUpdate(Integer id, MapHotelTypeDTO update) {
     if (!repository.existsByHotelIdAndDeletedAtIsNull(update.getHotelId())) {
-      throw new AppException(ErrorCode.MAPPING_HOTEL_NOTFOUND);
+      throw new AppException(ErrorCode.NOT_FOUND, "Map Hotel Type");
     }
   }
 
   @Override
-  protected void validateDelete(Integer integer) {
-  }
-
-  @Override
   protected RuntimeException createNotFoundException(Integer integer) {
-    return new AppException(ErrorCode.MAPPING_HOTEL_NOTFOUND);
+    return new AppException(ErrorCode.NOT_FOUND, "Map Hotel Type");
   }
 }

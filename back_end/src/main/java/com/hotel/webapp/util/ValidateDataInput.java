@@ -8,7 +8,15 @@ public class ValidateDataInput {
     return str != null && !str.isEmpty() ? (str.substring(0, 1).toUpperCase() + str.substring(1).toLowerCase()) : null;
   }
 
-  public String lowercaseFirstLetter(String str) {
-    return str != null && !str.isEmpty() ? str.substring(0, 1).toLowerCase() + str.substring(1).toLowerCase() : null;
+  public String lowercaseStr(String str) {
+    return str != null && !str.isEmpty() ? str.toLowerCase() : null;
+  }
+
+  public String generateColName(String str) {
+    return str.toLowerCase()
+              .replaceAll("[^a-zA-Z\\s]", "")
+              .trim()
+              .replaceAll("\\s+", "_");
+
   }
 }

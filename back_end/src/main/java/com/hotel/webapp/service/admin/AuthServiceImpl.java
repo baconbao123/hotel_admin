@@ -1,7 +1,10 @@
 package com.hotel.webapp.service.admin;
 
 import com.hotel.webapp.dto.admin.request.AuthReq;
+import com.hotel.webapp.dto.admin.request.IntrospectRequest;
+import com.hotel.webapp.dto.admin.request.TokenRefreshReq;
 import com.hotel.webapp.dto.admin.response.AuthResponse;
+import com.hotel.webapp.dto.admin.response.IntrospectRes;
 import com.hotel.webapp.entity.User;
 import com.hotel.webapp.exception.AppException;
 import com.hotel.webapp.exception.ErrorCode;
@@ -11,29 +14,33 @@ import com.hotel.webapp.repository.UserRepository;
 import com.hotel.webapp.service.admin.interfaces.AuthService;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
+import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
+import com.nimbusds.jwt.SignedJWT;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class AuthServiceImpl implements AuthService {
-  private static final Logger log = LoggerFactory.getLogger(AuthServiceImpl.class);
   UserRepository userRepository;
   MapUserRoleRepository userRoleRepository;
   RoleRepository roleRepository;
@@ -43,24 +50,31 @@ public class AuthServiceImpl implements AuthService {
   @Value("${jwt.signerKey}")
   protected String SIGNER_KEY;
 
+  @NonFinal
+  @Value("${jwt.valid-duration}")
+  protected int VALIDATION_DURATION;
+
+  @NonFinal
+  @Value("${jwt.refreshable-duration}")
+  protected int REFRESHABLE_DURATION;
+
   @Override
   public AuthResponse authenticate(AuthReq authReq) {
     var user = userRepository.findByEmail(authReq.getEmail())
-                             .orElseThrow(() -> new AppException(ErrorCode.USER_NOTFOUND));
+                             .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
     boolean authenticated = passwordEncoder.matches(authReq.getPassword(), user.getPassword());
 
     if (!authenticated) {
       throw new AppException(ErrorCode.AUTHENTICATION_FAILED);
     }
 
-    var token = generateToken(user, 24);
+    var token = generateToken(user);
 
-    String refreshToken = "";
-
-    if (authReq.getRemember()) refreshToken = generateToken(user, 7 * 24);
+    String refreshToken = authReq.getRemember() ? UUID.randomUUID().toString() : "";
 
     if (refreshToken != null && !refreshToken.isEmpty()) {
       user.setRefreshToken(refreshToken);
+      user.setExpired(LocalDateTime.now().plusSeconds(REFRESHABLE_DURATION));
     }
 
     userRepository.save(user);
@@ -69,20 +83,72 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
+  public AuthResponse refreshToken(TokenRefreshReq tokenRefreshReq) {
+    var refreshToken = tokenRefreshReq.getRefreshToken();
+
+    var user = userRepository.findByRefreshToken(refreshToken)
+                             .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
+
+    if (user.getExpired() != null && user.getExpired().isBefore(LocalDateTime.now())) {
+      throw new AppException(ErrorCode.EXPIRED_TOKEN);
+    }
+
+    String newToken = generateToken(user);
+    String newRefreshToken = UUID.randomUUID().toString();
+
+    user.setRefreshToken(newRefreshToken);
+    user.setExpired(LocalDateTime.now().plusSeconds(REFRESHABLE_DURATION));
+    userRepository.save(user);
+    return AuthResponse.builder().token(newToken).refreshToken(newRefreshToken).build();
+  }
+
+  @Override
+  public IntrospectRes introspect(IntrospectRequest request) {
+    var token = request.getToken();
+    boolean isValid = true;
+
+    try {
+      verifyToken(token);
+    } catch (ParseException | JOSEException e) {
+      isValid = false;
+    }
+
+    return IntrospectRes.builder().isValid(isValid).build();
+  }
+
+  private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
+    JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+
+    SignedJWT signedJWT = SignedJWT.parse(token);
+
+    Date expTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+    boolean verified = signedJWT.verify(verifier);
+
+    if (expTime == null || !verified || expTime.before(new Date())) {
+      throw new AppException(ErrorCode.UNAUTHENTICATED);
+    }
+
+    return signedJWT;
+  }
+
+  @Override
   public Integer getAuthLogin() {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     var username = auth.getName();
-    User user = userRepository.findByEmail(username).orElseThrow(() -> new AppException(ErrorCode.AUTH_LOGIN_NOTFOUND));
+    User user = userRepository.findByEmail(username)
+                              .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Auth login"));
     return user.getId();
   }
 
-  private String generateToken(User user, int expiration) {
+  private String generateToken(User user) {
     var userRoles = userRoleRepository.findAllByUserId(user.getId());
 
-    List<String> roles =
-          userRoles.stream().map(ur -> roleRepository.findById(ur.getRoleId())
-                                                     .orElseThrow(() -> new AppException(ErrorCode.ROLE_NOTFOUND))
-                                                     .getName()).toList();
+    List<String> roles = userRoles.stream()
+                                  .map(ur -> roleRepository.findById(ur.getRoleId())
+                                                           .orElseThrow(
+                                                                 () -> new AppException(ErrorCode.NOT_FOUND, "Role"))
+                                                           .getName()).toList();
 
     String roleString = String.join(",", roles);
     JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
@@ -91,7 +157,7 @@ public class AuthServiceImpl implements AuthService {
           .subject(user.getEmail())
           .issuer("Phoebe dev")
           .issueTime(new Date())
-          .expirationTime(new Date(Instant.now().plus(expiration, ChronoUnit.HOURS).toEpochMilli()))
+          .expirationTime(new Date(Instant.now().plus(VALIDATION_DURATION, ChronoUnit.SECONDS).toEpochMilli()))
           .claim("userId", user.getId())
           .claim("scope", roleString)
           .build();
@@ -108,6 +174,4 @@ public class AuthServiceImpl implements AuthService {
       throw new RuntimeException(e);
     }
   }
-
-
 }

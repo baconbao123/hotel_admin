@@ -45,7 +45,7 @@ public class RoleServiceImpl extends BaseServiceImpl<Role, Integer, RoleDTO, Rol
   @Override
   protected void validateCreate(RoleDTO create) {
     if (repository.existsByNameAndDeletedAtIsNull(create.getName()))
-      throw new AppException(ErrorCode.ROLE_EXISTED);
+      throw new AppException(ErrorCode.FIELD_EXISTED, "Role");
 
     create.setName(validateDataInput.capitalizeFirstLetter(create.getName()));
   }
@@ -53,18 +53,18 @@ public class RoleServiceImpl extends BaseServiceImpl<Role, Integer, RoleDTO, Rol
   @Override
   protected void validateUpdate(Integer id, RoleDTO update) {
     if (repository.existsByNameAndIdNotAndDeletedAtIsNull(update.getName(), id))
-      throw new AppException(ErrorCode.ROLE_EXISTED);
+      throw new AppException(ErrorCode.FIELD_EXISTED, "Role");
 
     update.setName(validateDataInput.capitalizeFirstLetter(update.getName()));
   }
 
   @Override
   protected RuntimeException createNotFoundException(Integer integer) {
-    return new AppException(ErrorCode.ROLE_NOTFOUND);
+    return new AppException(ErrorCode.NOT_FOUND, "Role");
   }
 
   @Override
-  protected void validateDelete(Integer id) {
+  protected void beforeDelete(Integer id) {
     updateMapURIfRoleDelete(id, getAuthId());
   }
 

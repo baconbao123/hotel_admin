@@ -20,6 +20,7 @@ public class FacilityType implements AuditEntity {
   Integer id;
   @Column(nullable = false)
   String name;
+  @Column(unique = true)
   String colName;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;

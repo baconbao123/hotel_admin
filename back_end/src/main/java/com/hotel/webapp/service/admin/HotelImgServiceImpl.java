@@ -96,17 +96,17 @@ public class HotelImgServiceImpl {
   public HotelImages getById(Integer id) {
     return hotelImagesRepository.findById(id)
                                 .filter(h -> h.getDeletedAt() == null)
-                                .orElseThrow(() -> new AppException(ErrorCode.IMAGE_NOTFOUND));
+                                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Hotel image"));
   }
 
   // map images with hotel
   public void mapHotelImages(MapHotelImgDTO dto) {
     if (!hotelRepository.existsByIdAndDeletedAtIsNull(dto.getHotelId()))
-      throw new AppException(ErrorCode.HOTEL_NOTFOUND);
+      throw new AppException(ErrorCode.NOT_FOUND, "Hotel");
 
     for (Integer imgId : dto.getHotelImgs()) {
       if (!hotelImagesRepository.existsByIdAndDeletedAtIsNull(imgId))
-        throw new AppException(ErrorCode.IMAGE_NOTFOUND);
+        throw new AppException(ErrorCode.NOT_FOUND, "Hotel image");
     }
 
     for (Integer imgId : dto.getHotelImgs()) {
@@ -121,14 +121,14 @@ public class HotelImgServiceImpl {
 
   public void updateMapHotelImages(MapHotelImgDTO dto) {
     if (!hotelRepository.existsByIdAndDeletedAtIsNull(dto.getHotelId()))
-      throw new AppException(ErrorCode.HOTEL_NOTFOUND);
+      throw new AppException(ErrorCode.NOT_FOUND, "Hotel");
 
     if (!mapHotelImagesRepository.existsByHotelIdAndDeletedAtIsNull(dto.getHotelId()))
-      throw new AppException(ErrorCode.MAPPING_IMG_NOTFOUND);
+      throw new AppException(ErrorCode.NOT_FOUND, "Mapping Img Hotel");
 
     for (Integer imgId : dto.getHotelImgs()) {
       if (!hotelImagesRepository.existsByIdAndDeletedAtIsNull(imgId))
-        throw new AppException(ErrorCode.IMAGE_NOTFOUND);
+        throw new AppException(ErrorCode.NOT_FOUND, "Hotel image");
     }
 
     var oldMaps = mapHotelImagesRepository.findByHotelIdAndDeletedAtIsNull(dto.getHotelId());

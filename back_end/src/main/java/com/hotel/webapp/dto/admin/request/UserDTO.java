@@ -20,7 +20,7 @@ public class UserDTO {
   String fullName;
   @Email(message = "EMAIL_INVALID", regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
   @Trim
-  @FieldNotEmpty(field = "Email")
+  @FieldNotEmpty(field = "Otp")
   String email;
   @Pattern(regexp = "^\\d{10}$")
   @Trim

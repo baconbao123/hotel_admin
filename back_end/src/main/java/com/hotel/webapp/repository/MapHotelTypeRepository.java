@@ -2,7 +2,6 @@ package com.hotel.webapp.repository;
 
 import com.hotel.webapp.base.BaseRepository;
 import com.hotel.webapp.entity.MapHotelType;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -12,4 +11,6 @@ public interface MapHotelTypeRepository extends BaseRepository<MapHotelType, Int
   boolean existsByHotelIdAndDeletedAtIsNull(int hotelId);
 
   List<MapHotelType> findByHotelIdAndDeletedAtIsNull(int hotelId);
+
+  List<MapHotelType> findByColNameAndDeletedAtIsNull(String colName);
 }

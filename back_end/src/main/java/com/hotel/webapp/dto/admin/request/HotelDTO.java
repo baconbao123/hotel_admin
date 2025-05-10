@@ -17,7 +17,6 @@ public class HotelDTO {
   String name;
   @Nullable
   String description;
-  @FieldNotEmpty(field = "Avatar")
   Integer avatarId;
   @FieldNotEmpty(field = "Address")
   Integer addressId;

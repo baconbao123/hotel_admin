@@ -11,6 +11,6 @@ import java.util.List;
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class MapHotelTypeDTO {
-  List<Integer> typeId;
+  List<String> colNames;
   Integer hotelId;
 }

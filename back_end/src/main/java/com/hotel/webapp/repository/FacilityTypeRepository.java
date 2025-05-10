@@ -11,4 +11,8 @@ public interface FacilityTypeRepository extends BaseRepository<FacilityType, Int
   boolean existsByNameAndIdNotAndDeletedAtIsNull(String name, Integer id);
 
   boolean existsByIdAndDeletedAtIsNull(Integer id);
+
+  boolean existsByColNameAndDeletedAtIsNull(String colName);
+
+  String findColNameById(Integer id);
 }

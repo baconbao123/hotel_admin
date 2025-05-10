@@ -11,4 +11,8 @@ public interface TypeHotelRepository extends BaseRepository<TypeHotel, Integer> 
   boolean existsByNameAndIdNotAndDeletedAtIsNull(String name, Integer id);
 
   boolean existsByIdAndDeletedAtIsNull(Integer id);
+
+  boolean existsByColNameAndDeletedAtIsNull(String colName);
+
+  String findColNameById(Integer id);
 }

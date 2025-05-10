@@ -82,31 +82,16 @@ public class MapHotelFacilityServiceImpl extends BaseServiceImpl<
   @Override
   protected void validateDTOCommon(MapHotelFacilityDTO mapHotelFacilityDTO) {
     if (!hotelRepository.existsByIdAndDeletedAtIsNull(mapHotelFacilityDTO.getHotelId()))
-      throw new AppException(ErrorCode.HOTEL_NOTFOUND);
+      throw new AppException(ErrorCode.NOT_FOUND, "Hotel");
 
     for (Integer facilityId : mapHotelFacilityDTO.getFacilityId()) {
       if (!facilitiesRepository.existsByIdAndDeletedAtIsNull(facilityId))
-        throw new AppException(ErrorCode.FACILITY_NOTFOUND);
+        throw new AppException(ErrorCode.NOT_FOUND, "Facility");
     }
   }
 
   @Override
-  protected void validateCreate(MapHotelFacilityDTO create) {
-
-  }
-
-  @Override
-  protected void validateUpdate(Integer id, MapHotelFacilityDTO update) {
-
-  }
-
-  @Override
-  protected void validateDelete(Integer integer) {
-
-  }
-
-  @Override
   protected RuntimeException createNotFoundException(Integer integer) {
-    return new AppException(ErrorCode.MAPPING_HOTEL_NOTFOUND);
+    return new AppException(ErrorCode.NOT_FOUND, "Map Hotel Facility");
   }
 }

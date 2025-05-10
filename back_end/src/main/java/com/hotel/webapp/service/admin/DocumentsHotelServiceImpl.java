@@ -75,26 +75,14 @@ public class DocumentsHotelServiceImpl extends BaseServiceImpl<DocumentsHotel, I
   @Override
   protected void validateDTOCommon(DocumentsHotelDTO documentsHotelDTO) {
     if (!hotelRepository.existsByIdAndDeletedAtIsNull(documentsHotelDTO.getHotelId()))
-      throw new AppException(ErrorCode.HOTEL_NOTFOUND);
+      throw new AppException(ErrorCode.NOT_FOUND, "Hotel");
 
-    if (!documentTypeRepository.existsByIdAndDeletedAtIsNull(documentsHotelDTO.getTypeId()))
-      throw new AppException(ErrorCode.DOCUMENTS_TYPE_NOTFOUND);
-  }
-
-  @Override
-  protected void validateCreate(DocumentsHotelDTO create) {
-  }
-
-  @Override
-  protected void validateUpdate(Integer id, DocumentsHotelDTO update) {
-  }
-
-  @Override
-  protected void validateDelete(Integer integer) {
+    if (!documentTypeRepository.existsByColNameAndDeletedAtIsNull(documentsHotelDTO.getColName()))
+      throw new AppException(ErrorCode.NOT_FOUND, "Document Type");
   }
 
   @Override
   protected RuntimeException createNotFoundException(Integer integer) {
-    return new AppException(ErrorCode.DOCUMENTS_NOTFOUND);
+    return new AppException(ErrorCode.NOT_FOUND, "Documents");
   }
 }

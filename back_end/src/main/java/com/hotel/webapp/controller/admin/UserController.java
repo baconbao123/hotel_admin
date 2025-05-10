@@ -40,11 +40,11 @@ public class UserController {
                       .build();
   }
 
-  @GetMapping("/get-all")
+  @GetMapping(value = "/get-all")
   @Permission(name = "view")
-  public ApiResponse<List<User>> getAll() {
+  public ApiResponse<List<User>> getAll(@RequestParam String email) {
     return ApiResponse.<List<User>>builder()
-                      .result(userService.getAll())
+                      .result(userService.getAll(email))
                       .build();
   }
 

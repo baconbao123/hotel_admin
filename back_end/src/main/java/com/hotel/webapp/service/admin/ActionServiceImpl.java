@@ -47,27 +47,27 @@ public class ActionServiceImpl extends BaseServiceImpl<Actions, Integer, NameDTO
   @Override
   protected void validateCreate(NameDTO create) {
     if (repository.existsByNameAndDeletedAtIsNull(create.getName())) {
-      throw new AppException(ErrorCode.ACTION_EXISTED);
+      throw new AppException(ErrorCode.FIELD_EXISTED, "Action");
     }
-    create.setName(validateDataInput.lowercaseFirstLetter(create.getName()));
+    create.setName(validateDataInput.lowercaseStr(create.getName()));
   }
 
   @Override
   protected void validateUpdate(Integer id, NameDTO update) {
     if (repository.existsByNameAndIdNotAndDeletedAtIsNull(update.getName(), id)) {
-      throw new AppException(ErrorCode.ACTION_EXISTED);
+      throw new AppException(ErrorCode.FIELD_EXISTED, "Action");
     }
-    update.setName(validateDataInput.lowercaseFirstLetter(update.getName()));
+    update.setName(validateDataInput.lowercaseStr(update.getName()));
   }
 
   @Override
-  protected void validateDelete(Integer id) {
+  protected void beforeDelete(Integer id) {
     updateMapRAIfActionDelete(id, getAuthId());
   }
 
   @Override
   protected RuntimeException createNotFoundException(Integer integer) {
-    return new AppException(ErrorCode.ACTION_NOTFOUND);
+    return new AppException(ErrorCode.NOT_FOUND, "Action");
   }
 
 

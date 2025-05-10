@@ -15,7 +15,7 @@ public class FacilitiesDTO {
   @FieldNotEmpty(field = "name")
   String name;
   @FieldNotEmpty(field = "type")
-  Integer typeId;
+  String colName;
   @FieldNotEmpty(field = "number")
   Integer number;
 }

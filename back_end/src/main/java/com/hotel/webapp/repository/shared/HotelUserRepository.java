@@ -1,4 +1,4 @@
-package com.hotel.webapp.repository;
+package com.hotel.webapp.repository.shared;
 
 import com.hotel.webapp.entity.shared.HotelUser;
 import org.springframework.data.jpa.repository.JpaRepository;

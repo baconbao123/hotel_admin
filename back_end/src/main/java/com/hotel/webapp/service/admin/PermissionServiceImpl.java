@@ -52,7 +52,8 @@ public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer,
                                      .stream()
                                      .flatMap(prop -> prop.getMapResourcesActionId().stream())
                                      .collect(Collectors.toSet());
-    commmonValidation(mapURs, mapRAIds);
+
+    commonValidation(mapURs, mapRAIds);
 
     List<Permissions> listPermissions = new ArrayList<>();
     for (PermissionProperties properties : createDto.getProperties()) {
@@ -88,7 +89,7 @@ public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer,
                                      .flatMap(prop -> prop.getMapResourcesActionId().stream())
                                      .collect(Collectors.toSet());
 
-    commmonValidation(mapURs, mapRAIds);
+    commonValidation(mapURs, mapRAIds);
 
     //    Delete At old permission
     List<Permissions> oldMappings = repository.findAllByMapURId(mapURs);
@@ -120,16 +121,16 @@ public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer,
     return savedMappings;
   }
 
-  private void commmonValidation(Set<Integer> mapURs, Set<Integer> mapRAIds) {
+  private void commonValidation(Set<Integer> mapURs, Set<Integer> mapRAIds) {
     for (Integer mapURIds : mapURs) {
       if (!mapUserRoleRepository.existsByIdAndDeletedAtIsNull(mapURIds))
-        throw new AppException(ErrorCode.MAPPING_UR_NOT_ACTIVE);
+        throw new AppException(ErrorCode.NOT_ACTIVE, "Mapping User Role");
     }
 
 
     for (Integer mapRAId : mapRAIds) {
       if (!mapResourceActionRepository.existsByIdAndDeletedAtIsNull(mapRAId))
-        throw new AppException(ErrorCode.MAPPING_RA_NOT_ACTIVE);
+        throw new AppException(ErrorCode.NOT_ACTIVE, "Mapping Resource Action");
     }
   }
 
@@ -138,22 +139,7 @@ public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer,
   }
 
   @Override
-  protected void validateCreate(PermissionDTO create) {
-
-  }
-
-  @Override
-  protected void validateUpdate(Integer id, PermissionDTO update) {
-
-  }
-
-  @Override
-  protected void validateDelete(Integer integer) {
-
-  }
-
-  @Override
   protected RuntimeException createNotFoundException(Integer integer) {
-    return new AppException(ErrorCode.PERMISSION_NOTFOUND);
+    return new AppException(ErrorCode.NOT_FOUND, "Permission");
   }
 }

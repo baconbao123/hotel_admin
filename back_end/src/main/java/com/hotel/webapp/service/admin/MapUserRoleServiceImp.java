@@ -140,35 +140,21 @@ public class MapUserRoleServiceImp extends BaseServiceImpl<MapUserRoles, Integer
     // 2. Validate user
     for (Integer userId : userIds) {
       if (!userRepository.existsByIdAndIsActiveIsTrueAndDeletedAtIsNull(userId)) {
-        throw new AppException(ErrorCode.USER_NOT_ACTIVE);
+        throw new AppException(ErrorCode.NOT_ACTIVE, "User");
       }
     }
 
     // 3. Validate role
     for (Integer roleId : roleIds) {
       if (!roleRepository.existsByIdAndIsActiveIsTrueAndDeletedAtIsNull(roleId)) {
-        throw new AppException(ErrorCode.ROLE_NOT_ACTIVE);
+        throw new AppException(ErrorCode.NOT_ACTIVE, "Role");
       }
     }
   }
 
-  @Override
-  protected void validateCreate(MapURDTO create) {
-
-  }
-
-  @Override
-  protected void validateUpdate(Integer id, MapURDTO update) {
-
-  }
-
-  @Override
-  protected void validateDelete(Integer integer) {
-
-  }
 
   @Override
   protected RuntimeException createNotFoundException(Integer integer) {
-    return new AppException(ErrorCode.MAPPING_UR_NOTFOUND);
+    return new AppException(ErrorCode.NOT_FOUND, "Map User Role");
   }
 }

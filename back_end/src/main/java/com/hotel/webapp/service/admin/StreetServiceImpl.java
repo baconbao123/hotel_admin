@@ -33,31 +33,27 @@ public class StreetServiceImpl extends BaseServiceImpl<Streets, Integer, StreetD
   @Override
   protected void validateCreate(StreetDTO create) {
     if (repository.existsByNameAndDeletedAtIsNull(create.getName())) {
-      throw new AppException(ErrorCode.STREET_EXIST);
+      throw new AppException(ErrorCode.FIELD_EXISTED, "Street");
     }
 
     if (!districtRepository.existsByCode(create.getDistrictCode())) {
-      throw new AppException(ErrorCode.DISTRICT_NOTFOUND);
+      throw new AppException(ErrorCode.NOT_FOUND, "District");
     }
   }
 
   @Override
   protected void validateUpdate(Integer id, StreetDTO update) {
     if (repository.existsByNameAndIdNotAndDeletedAtIsNull(update.getName(), id)) {
-      throw new AppException(ErrorCode.STREET_EXIST);
+      throw new AppException(ErrorCode.FIELD_EXISTED, "Street");
     }
 
     if (!districtRepository.existsByCode(update.getDistrictCode())) {
-      throw new AppException(ErrorCode.DISTRICT_NOTFOUND);
+      throw new AppException(ErrorCode.NOT_FOUND, "District");
     }
-  }
-
-  @Override
-  protected void validateDelete(Integer integer) {
   }
 
   @Override
   protected RuntimeException createNotFoundException(Integer integer) {
-    return new AppException(ErrorCode.STREET_NOTFOUND);
+    return new AppException(ErrorCode.NOT_FOUND, "Street");
   }
 }

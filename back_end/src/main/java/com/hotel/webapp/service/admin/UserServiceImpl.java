@@ -14,6 +14,7 @@ import com.hotel.webapp.repository.PermissionsRepository;
 import com.hotel.webapp.repository.UserRepository;
 import com.hotel.webapp.service.admin.interfaces.AuthService;
 import com.hotel.webapp.service.system.StorageFileService;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -53,11 +54,11 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
   @Override
   public User create(UserDTO createDto) {
     if (repository.existsByEmailAndDeletedAtIsNull(createDto.getEmail()))
-      throw new AppException(ErrorCode.EMAIL_EXISTED);
+      throw new AppException(ErrorCode.FIELD_EXISTED, "Email");
 
     if (createDto.getAddressId() != null)
       if (!addressRepository.existsById(createDto.getAddressId()))
-        throw new AppException(ErrorCode.ADDRESS_NOTFOUND);
+        throw new AppException(ErrorCode.NOT_FOUND, "Address");
 
 
     var user = mapper.toCreate(createDto);
@@ -79,7 +80,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
     var user = getById(id);
 
     if (repository.existsByEmailAndIdNotAndDeletedAtIsNull(updateDto.getEmail(), id))
-      throw new AppException(ErrorCode.EMAIL_EXISTED);
+      throw new AppException(ErrorCode.FIELD_EXISTED, "Email");
 
     mapper.toUpdate(user, updateDto);
 
@@ -100,17 +101,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
     return repository.save(user);
   }
 
-  @Override
-  public List<User> getAll() {
-    return repository.findAllExcludeSa();
-  }
-
-  @Override
-  protected void validateCreate(UserDTO create) {
-  }
-
-  @Override
-  protected void validateUpdate(Integer id, UserDTO update) {
+  public List<User> getAll(String email) {
+    return repository.findAllByEmail(email);
   }
 
   @Override
@@ -119,13 +111,16 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
     if (user.getEmail().equalsIgnoreCase("sa@gmail.com")) {
       throw new AppException(ErrorCode.DONT_DELETE_SA);
     }
+  }
 
+  @Override
+  protected void beforeDelete(Integer id) {
     updateMapURIfUserDelete(id, getAuthId());
   }
 
   @Override
   protected RuntimeException createNotFoundException(Integer integer) {
-    return new AppException(ErrorCode.USER_NOTFOUND);
+    return new AppException(ErrorCode.NOT_FOUND, "User");
   }
 
 
@@ -153,5 +148,17 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
       permission.setUpdatedBy(authId);
       permissionsRepository.save(permission);
     }
+  }
+
+  @Transactional
+  public boolean existsByEmail(String email) {
+    return repository.existsByEmailAndDeletedAtIsNull(email);
+  }
+
+  @Transactional
+  public void changePassword(String email, String newPassword) {
+    var user = repository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
+    user.setPassword(passwordEncoder.encode(newPassword));
+    repository.save(user);
   }
 }

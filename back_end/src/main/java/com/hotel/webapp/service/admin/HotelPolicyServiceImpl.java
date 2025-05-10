@@ -24,25 +24,17 @@ public class HotelPolicyServiceImpl extends BaseServiceImpl<HotelPolicy, Integer
   }
 
   @Override
-  protected void validateCreate(HotelPolicyDTO create) {
-  }
-
-  @Override
   protected void validateUpdate(Integer id, HotelPolicyDTO update) {
     var hotelPolicy = getById(id);
 
     if (hotelPolicy.getHotelId() != null &&
           (update.getHotelId() == null || update.getHotelId() == 0)) {
-      throw new AppException(ErrorCode.HOTEL_NOT_NULL);
+      throw new AppException(ErrorCode.NOT_NULL, "Hotel");
     }
   }
 
   @Override
-  protected void validateDelete(Integer integer) {
-  }
-
-  @Override
   protected RuntimeException createNotFoundException(Integer integer) {
-    return new AppException(ErrorCode.POLICY_NOTFOUND);
+    return new AppException(ErrorCode.NOT_FOUND, "Policy");
   }
 }

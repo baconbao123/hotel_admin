@@ -42,21 +42,14 @@ public class FacilitiesServiceImpl extends BaseServiceImpl<Facilities, Integer, 
 
   @Override
   protected void validateDTOCommon(FacilitiesDTO facilitiesDTO) {
-    if (!facilityTypeRepository.existsByIdAndDeletedAtIsNull(facilitiesDTO.getTypeId()))
-      throw new AppException(ErrorCode.FACILITY_NOTFOUND);
+    if (!facilityTypeRepository.existsByColNameAndDeletedAtIsNull(facilitiesDTO.getColName()))
+      throw new AppException(ErrorCode.NOT_FOUND, "Facilities");
     validateDataInput.capitalizeFirstLetter(facilitiesDTO.getName());
   }
 
-  @Override
-  protected void validateCreate(FacilitiesDTO create) {
-  }
 
   @Override
-  protected void validateUpdate(Integer id, FacilitiesDTO update) {
-  }
-
-  @Override
-  protected void validateDelete(Integer id) {
+  protected void beforeDelete(Integer id) {
     var facilities = repository.findByIdAndDeletedAtIsNull(id);
     deleteMapHotelFacilities(facilities);
   }
@@ -75,6 +68,6 @@ public class FacilitiesServiceImpl extends BaseServiceImpl<Facilities, Integer, 
 
   @Override
   protected RuntimeException createNotFoundException(Integer integer) {
-    return new AppException(ErrorCode.FACILITY_NOTFOUND);
+    return new AppException(ErrorCode.NOT_FOUND, "Facilities");
   }
 }

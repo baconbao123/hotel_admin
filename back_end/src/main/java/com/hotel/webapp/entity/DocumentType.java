@@ -20,7 +20,8 @@ public class DocumentType implements AuditEntity {
   Integer id;
   @Column(nullable = false)
   String name;
-  Integer colName;
+  @Column(unique = true)
+  String colName;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;
   Integer createdBy;
