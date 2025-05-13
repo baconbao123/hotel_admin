@@ -3,20 +3,21 @@ import {
   route,
   index,
   layout,
-  prefix,
 } from "@react-router/dev/routes";
 
 export default [
   layout("./layouts/rootLayout.tsx", [
-    index("./pages/dashboard/DashboardPage.tsx"),
-   
-    route("profile", "./pages/profile/ProfilePage.tsx"),
-    route("setting", "./pages/settings/SettingPage.tsx"),
+    route("", "./routes/protectedRoute.tsx", [
+      index("./pages/dashboard/DashboardPage.tsx"),
+      route("profile", "./pages/profile/ProfilePage.tsx"),
+      route("setting", "./pages/settings/SettingPage.tsx"),
+    ]),
   ]),
   layout("./layouts/authLayout.tsx", [
     route("login", "./pages/login/LoginPage.tsx"),
     route("register", "./pages/register/RegisterPage.tsx"),
   ]),
-  route("*", "./pages/error/NotFound.tsx"),
-  route("500", "./pages/error/Error500.tsx")
+  route("404", "./pages/error/NotFound.tsx"),
+  route("500", "./pages/error/Error500.tsx"),
+  route("*", "./pages/error/NotFound.tsx", { id: "catch-all" }),
 ] satisfies RouteConfig;

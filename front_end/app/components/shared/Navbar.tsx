@@ -12,6 +12,7 @@ import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { Modal } from './Modal';
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
+import Cookies from "js-cookie";
 
 export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -24,6 +25,8 @@ export default function Navbar() {
   const handleLogoutClick = () => {
     setIsProfileOpen(false);
     setShowLogoutConfirm(true);
+    Cookies.remove("token");
+    Cookies.remove("refreshToken");
   };
 
   const confirmLogout = () => {
