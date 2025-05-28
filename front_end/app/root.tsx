@@ -6,6 +6,7 @@ import {
     ScrollRestoration,
     useRouteError,
 } from "react-router";
+import { Tooltip } from 'primereact/tooltip';
 import './app.css'
 
 import { LoadingProvider } from './contexts/LoadingContext';

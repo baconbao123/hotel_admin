@@ -4,7 +4,8 @@ import {
   CalendarIcon, 
   CogIcon,
   BuildingOfficeIcon,
-  ClipboardDocumentListIcon
+  ClipboardDocumentListIcon,
+  UserIcon
 } from '@heroicons/react/24/outline';
 import type { MenuItem } from '../types/menu.types';
 
@@ -13,6 +14,11 @@ export const navigation: MenuItem[] = [
     name: 'Dashboard', 
     href: '/', 
     icon: HomeIcon 
+  },
+  { 
+    name:  'Users management', 
+    href: '/user', 
+    icon: UserIcon 
   },
   { 
     name: 'Bookings', 
