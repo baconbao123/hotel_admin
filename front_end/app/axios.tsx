@@ -5,7 +5,7 @@ import { useLoading } from './contexts/LoadingContext';
 
 // Create axios instance with default config
 const $axios = axios.create({
-    baseURL: import.meta.env.VITE_API_BACKEND,
+    baseURL: import.meta.env.VITE_REACT_APP_BACK_END_LINK,
     headers: {
         'Content-Type': 'application/json',
     }
