@@ -14,19 +14,18 @@ public interface UserRepository extends BaseRepository<User, Integer> {
   //  Startup - for sa
   Optional<User> findByEmail(String email);
 
-  boolean existsByEmailAndDeletedAtIsNull(String email);
+  boolean existsByEmail(String email);
 
   boolean existsByEmailAndIdNotAndDeletedAtIsNull(String email, int id);
 
-  boolean existsByIdAndIsActiveIsTrueAndDeletedAtIsNull(Integer id);
-
+  boolean existsByIdAndStatusIsTrueAndDeletedAtIsNull(Integer id);
 
   // ----------------------
   boolean existsByIdAndDeletedAtIsNull(Integer id);
 
-  @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL AND lower(u.email) like lower(concat('%', :email, '%')) " +
-        "AND u.email <> 'sa@gmail.com'")
-  List<User> findAllByEmail(@Param("email") String email);
+//  @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL AND lower(u.email) like lower(concat('%', :email, '%')) " +
+//        "AND u.email <> 'sa@gmail.com'")
+//  List<User> findAllByEmail(@Param("email") String email);
 
   Optional<User> findByRefreshToken(String refreshToken);
 }

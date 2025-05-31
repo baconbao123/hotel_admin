@@ -1,8 +1,8 @@
 package com.hotel.webapp.service.admin;
 
 import com.hotel.webapp.base.BaseServiceImpl;
-import com.hotel.webapp.dto.admin.request.MapURDTO;
-import com.hotel.webapp.dto.admin.request.properties.MapURProperties;
+import com.hotel.webapp.dto.request.MapURDTO;
+import com.hotel.webapp.dto.request.properties.MapURProperties;
 import com.hotel.webapp.entity.MapUserRoles;
 import com.hotel.webapp.entity.Permissions;
 import com.hotel.webapp.exception.AppException;
@@ -139,7 +139,7 @@ public class MapUserRoleServiceImp extends BaseServiceImpl<MapUserRoles, Integer
   private void commonValidate(Set<Integer> userIds, Set<Integer> roleIds) {
     // 2. Validate user
     for (Integer userId : userIds) {
-      if (!userRepository.existsByIdAndIsActiveIsTrueAndDeletedAtIsNull(userId)) {
+      if (!userRepository.existsByIdAndStatusIsTrueAndDeletedAtIsNull(userId)) {
         throw new AppException(ErrorCode.NOT_ACTIVE, "User");
       }
     }

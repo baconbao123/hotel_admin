@@ -1,0 +1,77 @@
+package com.hotel.webapp.controller;
+
+import com.hotel.webapp.dto.request.UserDTO;
+import com.hotel.webapp.dto.response.ApiResponse;
+import com.hotel.webapp.entity.User;
+import com.hotel.webapp.service.admin.UserServiceImpl;
+import com.hotel.webapp.validation.Permission;
+import com.hotel.webapp.validation.Resource;
+import jakarta.validation.Valid;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api/user")
+@RequiredArgsConstructor
+@Resource(name = "user")
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+public class UserController {
+  UserServiceImpl userService;
+
+  @Permission(name = "create")
+  @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ApiResponse<User> create(@Valid @ModelAttribute UserDTO userDTO) throws IOException {
+    return ApiResponse.<User>builder()
+                      .result(userService.create(userDTO))
+                      .build();
+  }
+
+  @Permission(name = "update")
+  @PutMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ApiResponse<User> update(@PathVariable int id, @Valid @ModelAttribute UserDTO userDTO) throws IOException {
+    return ApiResponse.<User>builder()
+                      .result(userService.update(id, userDTO))
+                      .build();
+  }
+
+  @GetMapping("/get-all")
+  @Permission(name = "view")
+  public ApiResponse<Page<User>> getAll(
+        @RequestParam(required = false) Map<String, String> filters,
+        @RequestParam(required = false) String sort) {
+    Map<String, Object> filterMap = filters != null ? new HashMap<>(filters) : new HashMap<>();
+    if (filters != null) {
+      filterMap.putAll(filters);
+      filterMap.remove("sort");
+    }
+    return ApiResponse.<Page<User>>builder()
+                      .result(userService.getAll(filterMap, sort))
+                      .build();
+  }
+
+  @GetMapping("/find-by-id/{id}")
+  @Permission(name = "view")
+  public ApiResponse<User> findById(@PathVariable int id) {
+    return ApiResponse.<User>builder()
+                      .result(userService.getById(id))
+                      .build();
+  }
+
+  @DeleteMapping("/delete/{id}")
+  @Permission(name = "delete")
+  public ApiResponse<Void> deleteById(@PathVariable int id) {
+    userService.delete(id);
+    return ApiResponse.<Void>builder()
+                      .message("Deleted user with id " + id + " successfully")
+                      .build();
+  }
+
+}

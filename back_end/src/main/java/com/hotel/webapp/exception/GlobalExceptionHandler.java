@@ -1,6 +1,6 @@
 package com.hotel.webapp.exception;
 
-import com.hotel.webapp.dto.admin.response.ApiResponse;
+import com.hotel.webapp.dto.response.ApiResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.validation.FieldError;
@@ -47,18 +47,15 @@ public class GlobalExceptionHandler {
         errorCode = ErrorCode.FIELD_NOT_EMPTY;
         fieldName = extractFileName(defaultMessage, "_NOT_EMPTY");
         finalMessage = errorCode.getMessage().replace("{field}", fieldName);
-      }
-      else if (defaultMessage != null && defaultMessage.endsWith("_INVALID_REGEX")) {
+      } else if (defaultMessage != null && defaultMessage.endsWith("_INVALID_REGEX")) {
         errorCode = ErrorCode.FIELD_INVALID;
         fieldName = extractFileName(defaultMessage, "_INVALID_REGEX");
         finalMessage = errorCode.getMessage().replace("{field}", fieldName);
-      }
-      else if (defaultMessage != null && defaultMessage.startsWith("Maximum of")) {
+      } else if (defaultMessage != null && defaultMessage.startsWith("Maximum of")) {
         errorCode = ErrorCode.IMG_EXCEEDS;
         fieldName = extractFileName(defaultMessage, "Maximum of ");
         finalMessage = errorCode.getMessage().replace("{maxSize}", fieldName);
-      }
-      else {
+      } else {
         errorCode = ErrorCode.KEY_INVALID;
         finalMessage = errorCode.getMessage();
       }

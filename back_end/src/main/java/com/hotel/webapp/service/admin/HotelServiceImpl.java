@@ -2,7 +2,7 @@ package com.hotel.webapp.service.admin;
 
 import com.hotel.webapp.base.BaseMapper;
 import com.hotel.webapp.base.BaseServiceImpl;
-import com.hotel.webapp.dto.admin.request.HotelDTO;
+import com.hotel.webapp.dto.request.HotelDTO;
 import com.hotel.webapp.entity.HotelPolicy;
 import com.hotel.webapp.entity.Hotels;
 import com.hotel.webapp.exception.AppException;
@@ -60,7 +60,7 @@ public class HotelServiceImpl extends BaseServiceImpl<Hotels, Integer, HotelDTO,
 
 
     if (hotelDTO.getOwnerId() != null &&
-          !userRepository.existsByIdAndIsActiveIsTrueAndDeletedAtIsNull(hotelDTO.getOwnerId()))
+          !userRepository.existsByIdAndStatusIsTrueAndDeletedAtIsNull(hotelDTO.getOwnerId()))
       throw new AppException(ErrorCode.NOT_FOUND, "User");
 
 

@@ -1,6 +1,6 @@
 package com.hotel.webapp.service.admin;
 
-import com.hotel.webapp.dto.admin.response.LocalResponse;
+import com.hotel.webapp.dto.response.LocalResponse;
 import com.hotel.webapp.repository.DistrictRepository;
 import com.hotel.webapp.repository.ProvincesRepository;
 import com.hotel.webapp.repository.WardRepository;

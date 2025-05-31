@@ -20,7 +20,7 @@ public class User implements AuditEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer id;
   String fullName;
-  @Column(nullable = false)
+  @Column(nullable = false, unique = true)
   String email;
   String phoneNumber;
   @Lob
@@ -30,7 +30,7 @@ public class User implements AuditEntity {
   @Lob
   String refreshToken;
   LocalDateTime expired;
-  Boolean isActive;
+  Boolean status;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;
   Integer createdBy;

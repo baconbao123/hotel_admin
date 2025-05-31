@@ -2,7 +2,7 @@ package com.hotel.webapp.service.admin;
 
 import com.hotel.webapp.base.BaseMapper;
 import com.hotel.webapp.base.BaseServiceImpl;
-import com.hotel.webapp.dto.admin.request.UserDTO;
+import com.hotel.webapp.dto.request.UserDTO;
 import com.hotel.webapp.entity.MapUserRoles;
 import com.hotel.webapp.entity.Permissions;
 import com.hotel.webapp.entity.User;
@@ -53,7 +53,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
 
   @Override
   public User create(UserDTO createDto) {
-    if (repository.existsByEmailAndDeletedAtIsNull(createDto.getEmail()))
+    if (repository.existsByEmail(createDto.getEmail()))
       throw new AppException(ErrorCode.FIELD_EXISTED, "Email");
 
     if (createDto.getAddressId() != null)
@@ -94,16 +94,16 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
       String fileName = storageFileService.uploadUserImg(updateDto.getAvatarUrl());
       user.setAvatarUrl(fileName);
     }
-    user.setIsActive(updateDto.getIsActive());
+    user.setStatus(updateDto.getStatus());
     user.setUpdatedAt(LocalDateTime.now());
     user.setUpdatedBy(getAuthId());
 
     return repository.save(user);
   }
 
-  public List<User> getAll(String email) {
-    return repository.findAllByEmail(email);
-  }
+//  public List<User> getAll(String email) {
+//    return repository.findAllByEmail(email);
+//  }
 
   @Override
   protected void validateDelete(Integer id) {
@@ -152,7 +152,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
 
   @Transactional
   public boolean existsByEmail(String email) {
-    return repository.existsByEmailAndDeletedAtIsNull(email);
+    return repository.existsByEmail(email);
   }
 
   @Transactional

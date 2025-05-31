@@ -2,7 +2,7 @@ package com.hotel.webapp.service.admin;
 
 import com.hotel.webapp.base.BaseMapper;
 import com.hotel.webapp.base.BaseServiceImpl;
-import com.hotel.webapp.dto.admin.request.ApproveHotelDTO;
+import com.hotel.webapp.dto.request.ApproveHotelDTO;
 import com.hotel.webapp.entity.ApproveHotel;
 import com.hotel.webapp.entity.Hotels;
 import com.hotel.webapp.entity.shared.HotelMapUserRoles;

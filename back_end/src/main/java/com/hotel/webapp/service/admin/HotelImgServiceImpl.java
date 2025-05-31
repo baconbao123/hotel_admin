@@ -1,7 +1,7 @@
 package com.hotel.webapp.service.admin;
 
-import com.hotel.webapp.dto.admin.request.HotelImgsDto;
-import com.hotel.webapp.dto.admin.request.MapHotelImgDTO;
+import com.hotel.webapp.dto.request.HotelImgsDto;
+import com.hotel.webapp.dto.request.MapHotelImgDTO;
 import com.hotel.webapp.entity.HotelImages;
 import com.hotel.webapp.entity.MapHotelImages;
 import com.hotel.webapp.exception.AppException;

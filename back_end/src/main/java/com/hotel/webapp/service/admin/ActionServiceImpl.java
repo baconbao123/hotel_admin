@@ -2,7 +2,7 @@ package com.hotel.webapp.service.admin;
 
 import com.hotel.webapp.base.BaseMapper;
 import com.hotel.webapp.base.BaseServiceImpl;
-import com.hotel.webapp.dto.admin.request.NameDTO;
+import com.hotel.webapp.dto.request.NameDTO;
 import com.hotel.webapp.entity.Actions;
 import com.hotel.webapp.entity.MapResourcesAction;
 import com.hotel.webapp.entity.Permissions;

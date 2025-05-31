@@ -1,6 +1,6 @@
 package com.hotel.webapp.config;
 
-import com.hotel.webapp.dto.admin.request.IntrospectRequest;
+import com.hotel.webapp.dto.request.IntrospectRequest;
 import com.hotel.webapp.service.admin.interfaces.AuthService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;

@@ -1,7 +1,7 @@
 package com.hotel.webapp.service.admin;
 
 import com.hotel.webapp.base.BaseServiceImpl;
-import com.hotel.webapp.dto.admin.request.MapHotelFacilityDTO;
+import com.hotel.webapp.dto.request.MapHotelFacilityDTO;
 import com.hotel.webapp.entity.MapHotelFacility;
 import com.hotel.webapp.exception.AppException;
 import com.hotel.webapp.exception.ErrorCode;
