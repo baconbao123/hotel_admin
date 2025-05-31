@@ -12,6 +12,7 @@ import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { Modal } from './Modal';
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
+import Cookies from "js-cookie";
 
 export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -24,6 +25,8 @@ export default function Navbar() {
   const handleLogoutClick = () => {
     setIsProfileOpen(false);
     setShowLogoutConfirm(true);
+    Cookies.remove("token");
+    Cookies.remove("refreshToken");
   };
 
   const confirmLogout = () => {
@@ -32,7 +35,7 @@ export default function Navbar() {
   };
   return (
     <nav className="bg-white border-b border-gray-200">
-      <div className="max-w-screen-2xl mx-auto px-4 py-3">
+      <div className="w-full mx-auto px-4 py-3">
         <div className="flex justify-between items-center">
           {/* Left side */}
           <h1 className="text-xl font-semibold text-gray-800"></h1>
@@ -59,7 +62,7 @@ export default function Navbar() {
               <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
             </button>
             {/* Desktop Profile */}
-            <div className="hidden md:flex items-center space-x-2 relative">
+            <div className="hidden md:flex items-center relative z-5">
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 className="flex items-center space-x-2 focus:outline-none"

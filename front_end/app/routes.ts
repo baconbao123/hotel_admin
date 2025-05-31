@@ -3,7 +3,6 @@ import {
   route,
   index,
   layout,
-  prefix,
 } from "@react-router/dev/routes";
 
 export default [
@@ -12,11 +11,14 @@ export default [
    
     route("profile", "./pages/profile/ProfilePage.tsx"),
     route("setting", "./pages/settings/SettingPage.tsx"),
+  // User page
+    route("user", "./pages/user/UserList.tsx"),
   ]),
   layout("./layouts/authLayout.tsx", [
     route("login", "./pages/login/LoginPage.tsx"),
     route("register", "./pages/register/RegisterPage.tsx"),
   ]),
-  route("*", "./pages/error/NotFound.tsx"),
-  route("500", "./pages/error/Error500.tsx")
+  route("404", "./pages/error/NotFound.tsx"),
+  route("500", "./pages/error/Error500.tsx"),
+  route("*", "./pages/error/NotFound.tsx", { id: "catch-all" }),
 ] satisfies RouteConfig;

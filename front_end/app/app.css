@@ -15,21 +15,21 @@
 html,
 body {
   @apply bg-blue-400 text-base;
-  font-size: 14px;
+  font-size: 12px;
 }
 
 .text-base {
-  font-size: 14px;
+  font-size: 12px;
   line-height: 1.5;
 }
 
 .text-lg {
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1.5;
 }
 
 .text-xl {
-  font-size: 18px;
+  font-size: 16px;
   line-height: 1.5;
 }
 

@@ -1,61 +1,110 @@
 import axios from "axios"
-//  @ts-ignore
 import Cookies from "js-cookie"
+import { useNavigate } from 'react-router'
+import { useLoading } from './contexts/LoadingContext';
+
+// Create axios instance with default config
 const $axios = axios.create({
-    baseURL: import.meta.env.VITE_REACT_APP_BACK_END_LINK,
+    baseURL: import.meta.env.VITE_API_BACKEND,
     headers: {
-        Authorization: "Bearer "+ ( Cookies.get("token") ? Cookies.get("token") : ""),
+        'Content-Type': 'application/json',
     }
 })
-const authorization = (token: any) => {
-    return {Authorization: "Bearer " + token}
-}
-export {
-    authorization
-}
-$axios.interceptors.response.use(
-    (response) => {
-        return response;
+
+let requestCount = 0;
+
+// Request interceptor to add auth token
+$axios.interceptors.request.use(
+    (config) => {
+        requestCount++;
+        window.dispatchEvent(new CustomEvent('loading', { detail: true }));
+        
+        const token = Cookies.get("token")
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`
+        }
+        return config
     },
     (error) => {
-        const errorStatus = [403,500, 400, 401, 404]
-        if (error.response && error.response.status === 403) {
-            location.href = '/403'
+        requestCount--;
+        if (requestCount === 0) {
+            window.dispatchEvent(new CustomEvent('loading', { detail: false }));
         }
-        else if (error.response && error.response.status === 500) {
-            location.href = '/500'
-        }
-        else if (error.response && error.response.status === 404 && window.location.pathname  !== '/404') {
-            location.href = '/404'
-        }
-        else if (error.response && error.response.status === 400) {
-            // location.href = '/400'
-        }
-        if (error.response && error.response.status === 401 && window.location.pathname  !== '/login' )
-        {
-            if (Cookies.get("refreshToken")) {
-                $axios.post('/Auth/refreshToken', {
-                    refreshToken: Cookies.get("refreshToken"),
-                    publicKey: "mynameisnguyen"
-                } )
-                    .then((res) => {
-                        Cookies.set("token", res.data.token, {expires: 0.1});
-                        Cookies.set('refreshToken', res.data.refreshToken, { expires: 7 });
-                        window.location.reload();
-                    })
-                    .catch((err) => {
-                        window.location.href = '/login'
-                        console.log("Error ", err)
-                    })
-            }
-            else {
-                window.location.href = '/login'
-            }
-        }
-        else if ( window.location.pathname  !== '/error' && !errorStatus.includes(error.response.status)) {
-            // location.href = '/error'
-        }
-        return Promise.reject(error);
+        return Promise.reject(error)
     }
-);
+)
+
+// Response interceptor to handle errors and token refresh
+$axios.interceptors.response.use(
+    (response) => {
+        requestCount--;
+        if (requestCount === 0) {
+            window.dispatchEvent(new CustomEvent('loading', { detail: false }));
+        }
+        return response
+    },
+    async (error) => {
+        requestCount--;
+        if (requestCount === 0) {
+            window.dispatchEvent(new CustomEvent('loading', { detail: false }));
+        }
+        const originalRequest = error.config
+
+        // Handle different error status codes
+        if (error.response) {
+            switch (error.response.data) {
+                case 401:
+                    if (!originalRequest._retry && window.location.pathname !== '/login') {
+                        originalRequest._retry = true
+                        const refreshToken = Cookies.get("refreshToken")
+                        
+                        if (refreshToken) {
+                            try {
+                                const response = await $axios.post('/Auth/refreshToken', {
+                                    refreshToken,
+                                    publicKey: "mynameisnguyen"
+                                })
+                                
+                                const { token, refreshToken: newRefreshToken } = response.data
+                                Cookies.set("token", token, { expires: 1/24})
+                                Cookies.set('refreshToken', newRefreshToken, { expires: 7 })
+                                
+                                originalRequest.headers.Authorization = `Bearer ${token}`
+                                return $axios(originalRequest)
+                            } catch (err) {
+                                Cookies.remove("token")
+                                Cookies.remove("refreshToken")
+                                window.location.href = '/login'
+                                return Promise.reject(err)
+                            }
+                        } else {
+                            window.location.href = '/login'
+                        }
+                    }
+                    break
+                    
+                case 403:
+                    window.location.href = '/403'
+                    break
+                    
+                case 404:
+                    if (!error.response.data && window.location.pathname !== '/404') {
+                        window.location.href = '/404'
+                    }
+                    break
+                    
+                case 500:
+                    window.location.href = '/500'
+                    break
+            }
+        }
+
+        return Promise.reject(error)
+    }
+)
+
+export const authorization = (token: string) => {
+    return { Authorization: `Bearer ${token}` }
+}
+
 export default $axios
