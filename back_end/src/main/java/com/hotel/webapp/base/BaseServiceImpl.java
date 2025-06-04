@@ -38,6 +38,13 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
     this(repository, null, authService);
   }
 
+  @Override
+  public Page<E> getAll(Map<String, Object> filters, String sort) {
+    Specification<E> spec = buildSpecification(filters);
+    Pageable defaultPage = buildPageable(sort);
+    return repository.findAll(spec, defaultPage);
+  }
+
   private static String convertDateToString(Object value) {
     if (value instanceof LocalDate localDate) {
       return localDate.format(DateTimeFormatter.ISO_LOCAL_DATE);
@@ -58,6 +65,9 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
   private <E> Specification<E> buildSpecification(Map<String, Object> filters) {
     return (root, query, cb) -> {
       List<Predicate> predicates = new ArrayList<>();
+
+      predicates.add(cb.isNull(root.get("deletedAt")));
+      predicates.add(cb.notEqual(root.get("email"), "sa@gmail.com"));
 
       if (filters != null) {
         for (Map.Entry<String, Object> entry : filters.entrySet()) {
@@ -87,12 +97,7 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
     };
   }
 
-  @Override
-  public Page<E> getAll(Map<String, Object> filters, String sort) {
-    Specification<E> spec = buildSpecification(filters);
-    Pageable defaultPage = buildPageable(sort);
-    return repository.findAll(spec, defaultPage);
-  }
+
 
   private Pageable buildPageable(String sort) {
     int page = 0;

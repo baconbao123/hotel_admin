@@ -26,7 +26,6 @@ public class UserDTO {
   @Trim
   @FieldNotEmpty(field = "Phone number")
   String phoneNumber;
-  @FieldNotEmpty(field = "Password")
   String password;
   @Nullable
   MultipartFile avatarUrl;

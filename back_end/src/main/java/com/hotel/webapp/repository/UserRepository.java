@@ -16,7 +16,7 @@ public interface UserRepository extends BaseRepository<User, Integer> {
 
   boolean existsByEmail(String email);
 
-  boolean existsByEmailAndIdNotAndDeletedAtIsNull(String email, int id);
+  boolean existsByEmailAndIdNot(String email, int id);
 
   boolean existsByIdAndStatusIsTrueAndDeletedAtIsNull(Integer id);
 

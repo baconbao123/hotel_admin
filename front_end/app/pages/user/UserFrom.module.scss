@@ -1,0 +1,57 @@
+.group_input {
+  display: flex;
+  align-items: center;
+  //   width: 100%;
+  gap: 20px;
+
+  .group_a,
+  .group_b {
+    width: 100%;
+  }
+}
+
+.btn_view {
+  background-color: transparent;
+  border-color: transparent;
+  outline: none;
+  box-shadow: none;
+
+  &:focus {
+    border-color: transparent;
+    outline: none;
+    box-shadow: none;
+  }
+}
+
+.icons {
+  display: flex;
+  gap: 10px;
+
+
+  .icons_view {
+    color: #2563eb;
+    width: 24px;
+
+    &:hover {
+      color: #112f71;
+    }
+  }
+
+   .icons_edit {
+    color: #dee205;
+    width: 24px;
+
+    &:hover {
+      color: #112f71;
+    }
+  }
+
+  .icons_trash {
+    color: #d61010;
+    width: 24px;
+
+    &:hover {
+      color: #112f71;
+    }
+  }
+}
