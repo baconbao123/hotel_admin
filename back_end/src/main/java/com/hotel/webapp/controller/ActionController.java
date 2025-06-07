@@ -45,14 +45,12 @@ public class ActionController {
   @Permission(name = "view")
   public ApiResponse<Page<Actions>> getAll(
         @RequestParam(required = false) Map<String, String> filters,
-        @RequestParam(required = false) String sort) {
-    Map<String, Object> filterMap = filters != null ? new HashMap<>(filters) : new HashMap<>();
-    if (filters != null) {
-      filterMap.putAll(filters);
-      filterMap.remove("sort");
-    }
+        @RequestParam(required = false) Map<String, String> sort,
+        @RequestParam int size,
+        @RequestParam int page
+  ) {
     return ApiResponse.<Page<Actions>>builder()
-                      .result(actionServiceImpl.getAll(filterMap, sort))
+                      .result(actionServiceImpl.getAll(filters, sort, size, page))
                       .build();
   }
 

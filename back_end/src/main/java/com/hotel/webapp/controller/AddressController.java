@@ -44,14 +44,12 @@ public class AddressController {
   @Permission(name = "view")
   public ApiResponse<Page<Address>> getAll(
         @RequestParam(required = false) Map<String, String> filters,
-        @RequestParam(required = false) String sort) {
-    Map<String, Object> filterMap = filters != null ? new HashMap<>(filters) : new HashMap<>();
-    if (filters != null) {
-      filterMap.putAll(filters);
-      filterMap.remove("sort");
-    }
+        @RequestParam(required = false) Map<String, String> sort,
+        @RequestParam int size,
+        @RequestParam int page
+  ) {
     return ApiResponse.<Page<Address>>builder()
-                      .result(addressService.getAll(filterMap, sort))
+                      .result(addressService.getAll(filters, sort, size, page))
                       .build();
   }
 

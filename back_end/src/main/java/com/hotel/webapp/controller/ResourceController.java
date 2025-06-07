@@ -13,7 +13,6 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -44,14 +43,12 @@ public class ResourceController {
   @Permission(name = "view")
   public ApiResponse<Page<Resources>> getAll(
         @RequestParam(required = false) Map<String, String> filters,
-        @RequestParam(required = false) String sort) {
-    Map<String, Object> filterMap = filters != null ? new HashMap<>(filters) : new HashMap<>();
-    if (filters != null) {
-      filterMap.putAll(filters);
-      filterMap.remove("sort");
-    }
+        @RequestParam(required = false) Map<String, String> sort,
+        @RequestParam int size,
+        @RequestParam int page
+  ) {
     return ApiResponse.<Page<Resources>>builder()
-                      .result(resourceService.getAll(filterMap, sort))
+                      .result(resourceService.getAll(filters, sort, size, page))
                       .build();
   }
 

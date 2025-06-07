@@ -61,14 +61,12 @@ public class HotelController {
   @Permission(name = "view")
   public ApiResponse<Page<Hotels>> getAll(
         @RequestParam(required = false) Map<String, String> filters,
-        @RequestParam(required = false) String sort) {
-    Map<String, Object> filterMap = filters != null ? new HashMap<>(filters) : new HashMap<>();
-    if (filters != null) {
-      filterMap.putAll(filters);
-      filterMap.remove("sort");
-    }
+        @RequestParam(required = false) Map<String, String> sort,
+        @RequestParam int size,
+        @RequestParam int page
+  ) {
     return ApiResponse.<Page<Hotels>>builder()
-                      .result(hotelService.getAll(filterMap, sort))
+                      .result(hotelService.getAll(filters, sort, size, page))
                       .build();
   }
 }

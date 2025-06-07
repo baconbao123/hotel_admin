@@ -144,12 +144,12 @@ export default function UserList() {
           rowHover
           lazy
           loading={loading}
-          rowsPerPageOptions={[5, 10, 25, 30]}
+          rowsPerPageOptions={[1, 5, 10, 25, 30]} // Added 1
           paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
           currentPageReportTemplate="From {first} to {last} of {totalRecords}"
           paginatorLeft={paginatorLeft}
           totalRecords={totalRecords}
-          first={page * pageSize} // Đồng bộ chỉ số bản ghi đầu tiên
+          first={page * pageSize}
           onPage={handlePageChange}
           onSort={handleSortChange}
           sortField={sortField}

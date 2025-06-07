@@ -16,10 +16,7 @@ import org.springframework.data.jpa.domain.Specification;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Transactional
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
@@ -32,17 +29,11 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
     this.repository = repository;
     this.mapper = mapper;
     this.authService = authService;
+
   }
 
   public BaseServiceImpl(R repository, AuthService authService) {
     this(repository, null, authService);
-  }
-
-  @Override
-  public Page<E> getAll(Map<String, Object> filters, String sort) {
-    Specification<E> spec = buildSpecification(filters);
-    Pageable defaultPage = buildPageable(sort);
-    return repository.findAll(spec, defaultPage);
   }
 
   private static String convertDateToString(Object value) {
@@ -60,6 +51,23 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
       return Long.parseLong(value);
     }
     return value;
+  }
+
+  @Override
+  public Page<E> getAll(Map<String, String> filters, Map<String, String> sort, int size, int page) {
+    Map<String, Object> filterMap = filters != null ? new HashMap<>(filters) : new HashMap<>();
+    filterMap.remove("size");
+    filterMap.remove("page");
+    filterMap.keySet().removeIf(key -> key.startsWith("sort["));
+
+    Map<String, Object> sortMap = sort != null ? new HashMap<>(sort) : new HashMap<>();
+    sortMap.remove("size");
+    sortMap.remove("page");
+    sortMap.keySet().removeIf(key -> key.startsWith("filters["));
+
+    Specification<E> spec = buildSpecification(filterMap);
+    Pageable defaultPage = buildPageable(sortMap, page, size);
+    return repository.findAll(spec, defaultPage);
   }
 
   private <E> Specification<E> buildSpecification(Map<String, Object> filters) {
@@ -97,19 +105,34 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
     };
   }
 
-
-
-  private Pageable buildPageable(String sort) {
-    int page = 0;
-    int size = 30;
-
-    if (sort == null || sort.trim().isEmpty()) {
+  public Pageable buildPageable(Map<String, Object> sort, int page, int size) {
+    if (sort == null || sort.isEmpty()) {
       return PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "id"));
     }
 
-    Sort.Direction direction = sort.toLowerCase().equalsIgnoreCase("desc") ? Sort.Direction.DESC : Sort.Direction.ASC;
+    List<Sort.Order> orders = new ArrayList<>();
 
-    return PageRequest.of(page, size, Sort.by(direction, "createdAt"));
+    for (Map.Entry<String, Object> entry : sort.entrySet()) {
+      String key = entry.getKey();
+      Object value = entry.getValue();
+
+      // Kiểm tra key có đúng định dạng sort[fieldName]
+      if (key != null && key.startsWith("sort[") && key.endsWith("]") &&
+            value != null && !value.toString().trim().isEmpty()) {
+        // Lấy tên trường, ví dụ: "id" từ "sort[id]"
+        String fieldName = key.replaceAll("sort\\[(.*)\\]", "$1");
+        if (!fieldName.isEmpty()) {
+          String directionStr = value.toString().trim().toUpperCase();
+          if (directionStr.equals("ASC") || directionStr.equals("DESC")) {
+            Sort.Direction direction = Sort.Direction.fromString(directionStr);
+            orders.add(new Sort.Order(direction, fieldName));
+          }
+        }
+      }
+    }
+
+    Sort sortResult = orders.isEmpty() ? Sort.by(Sort.Direction.DESC, "id") : Sort.by(orders);
+    return PageRequest.of(page, size, sortResult);
   }
 
   @Override

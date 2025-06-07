@@ -13,5 +13,5 @@ public interface BaseService<E, ID, DTO> {
 
   E getById(ID id);
 
-  Page<E> getAll(Map<String, Object> filters, String sort);
+  Page<E> getAll(Map<String, String> filters, Map<String, String> sort, int size, int page);
 }

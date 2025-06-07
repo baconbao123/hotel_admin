@@ -10,7 +10,10 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/hotel-facility-type")
@@ -34,6 +37,19 @@ public class HotelFacilityTypeController {
   public ApiResponse<FacilityType> updateFacility(@PathVariable Integer id, @Valid @RequestBody NameDTO dto) {
     return ApiResponse.<FacilityType>builder()
                       .result(facilityTypeService.update(id, dto))
+                      .build();
+  }
+
+  @GetMapping("/get-all")
+  @Permission(name = "view")
+  public ApiResponse<Page<FacilityType>> getAll(
+        @RequestParam(required = false) Map<String, String> filters,
+        @RequestParam(required = false) Map<String, String> sort,
+        @RequestParam int size,
+        @RequestParam int page
+  ) {
+    return ApiResponse.<Page<FacilityType>>builder()
+                      .result(facilityTypeService.getAll(filters, sort, size, page))
                       .build();
   }
 
