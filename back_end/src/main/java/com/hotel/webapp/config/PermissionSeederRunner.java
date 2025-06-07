@@ -15,7 +15,6 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class PermissionSeederRunner implements CommandLineRunner {
   PermissionSystemSeeder permissionSystemSeeder;
-
   // java -jar target/webapp-1.0.0.jar seeder-permission
   @Override
   public void run(String... args) throws Exception {

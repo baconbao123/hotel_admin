@@ -10,9 +10,11 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/permission")
@@ -36,6 +38,19 @@ public class PermissionController {
         @Valid @RequestBody PermissionDTO permissionUpdate) {
     return ApiResponse.<List<Permissions>>builder()
                       .result(permissionService.updateCollectionBulk(id, permissionUpdate))
+                      .build();
+  }
+
+  @GetMapping("/get-all")
+  @Permission(name = "view")
+  public ApiResponse<Page<Permissions>> getAll(
+        @RequestParam(required = false) Map<String, String> filters,
+        @RequestParam(required = false) Map<String, String> sort,
+        @RequestParam int size,
+        @RequestParam int page
+  ) {
+    return ApiResponse.<Page<Permissions>>builder()
+                      .result(permissionService.getAll(filters, sort, size, page))
                       .build();
   }
 }

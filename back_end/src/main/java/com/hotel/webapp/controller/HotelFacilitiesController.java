@@ -4,6 +4,7 @@ import com.hotel.webapp.dto.request.FacilitiesDTO;
 import com.hotel.webapp.dto.request.MapHotelFacilityDTO;
 import com.hotel.webapp.dto.response.ApiResponse;
 import com.hotel.webapp.entity.Facilities;
+import com.hotel.webapp.entity.Hotels;
 import com.hotel.webapp.entity.MapHotelFacility;
 import com.hotel.webapp.service.admin.FacilitiesServiceImpl;
 import com.hotel.webapp.service.admin.MapHotelFacilityServiceImpl;
@@ -13,9 +14,11 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/hotel-facilities")
@@ -40,6 +43,19 @@ public class HotelFacilitiesController {
   public ApiResponse<Facilities> updateFacility(@PathVariable Integer id, @Valid @RequestBody FacilitiesDTO dto) {
     return ApiResponse.<Facilities>builder()
                       .result(facilitiesService.update(id, dto))
+                      .build();
+  }
+
+  @GetMapping("/get-all")
+  @Permission(name = "view")
+  public ApiResponse<Page<Facilities>> getAll(
+        @RequestParam(required = false) Map<String, String> filters,
+        @RequestParam(required = false) Map<String, String> sort,
+        @RequestParam int size,
+        @RequestParam int page
+  ) {
+    return ApiResponse.<Page<Facilities>>builder()
+                      .result(facilitiesService.getAll(filters, sort, size, page))
                       .build();
   }
 

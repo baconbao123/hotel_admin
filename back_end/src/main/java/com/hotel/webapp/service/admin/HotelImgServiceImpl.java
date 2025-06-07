@@ -29,6 +29,7 @@ public class HotelImgServiceImpl {
   HotelRepository hotelRepository;
   AuthService authService;
 
+  // hotel images
   public void uploadHotelAvatar(MultipartFile hotelAvatar) {
     if (hotelAvatar != null && !hotelAvatar.isEmpty()) {
       String filePath = storageFileService.uploadHotelImg(hotelAvatar);

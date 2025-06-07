@@ -1,27 +1,26 @@
 import { useState, useEffect, useCallback } from "react";
 import $axios from "@/axios";
-import { ApiResponse } from "@/types/apiresponse.type";
+import { ApiResponse } from "@/types/apiResponse.type";
 
 export default function useCrud(baseUrl: string) {
   const [data, setData] = useState<any[]>([]);
-  const [allData, setAllData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [openForm, setopenForm] = useState(false);
   const [page, setPage] = useState(0);
-  const [pageSize, setPageSize] = useState(5);
+  const [pageSize, setPageSize] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
-  const [sort, setSort] = useState<string | null>(null);
   const [sortField, setSortField] = useState<string | undefined>(undefined);
   const [sortOrder, setSortOrder] = useState<number | undefined>(undefined);
   const [searchFilters, setSearchFilters] = useState<Record<string, string>>(
     {}
   );
 
-  // READ 
+  // READ
   const loadDataTable = async (
     filters: Record<string, string> = searchFilters,
-    sortField: string | null = sort,
+    sortFieldParam: string | null | undefined = sortField,
+    sortOrderParam: number | null | undefined = sortOrder,
     setLoadingState: boolean = true
   ) => {
     if (setLoadingState) setLoading(true);
@@ -31,66 +30,56 @@ export default function useCrud(baseUrl: string) {
         if (value) queryParams.append(key, value);
       });
 
-      if (sortField) {
-        queryParams.append("sort", sortField);
+      if (sortFieldParam && sortOrderParam !== 0) {
+        const direction = sortOrderParam === 1 ? "desc" : "asc";
+        queryParams.append(`sort[${sortFieldParam}]`, direction);
       }
 
+      queryParams.append("page", page.toString());
+      queryParams.append("size", pageSize.toString());
+
       const url = `${baseUrl}/get-all?${queryParams.toString()}`;
-      console.log("API Request URL:", url);
       const res = await $axios.get(url);
       const apiResponse = new ApiResponse(res.data);
       const newData = apiResponse.result.content || [];
-      console.log("API Response Data:", newData);
-      setAllData(newData);
+      setData(newData);
       setTotalRecords(apiResponse.result.totalElements || newData.length);
-      const start = page * pageSize;
-      const end = start + pageSize;
-      setData(newData.slice(start, end));
       setError(null);
     } catch (err) {
       setError(err);
       console.error("Failed to load data:", err);
       throw err;
     } finally {
-      if (setLoadingState) setLoading(false); 
+      if (setLoadingState) setLoading(false);
     }
   };
 
-  // Update page or page size
   const updatePageData = (newPage: number, newPageSize: number) => {
     setPage(newPage);
     setPageSize(newPageSize);
-    const start = newPage * newPageSize;
-    const end = start + newPageSize;
-    setData(allData.slice(start, end));
+    loadDataTable(searchFilters, sortField, sortOrder, false);
   };
 
   // Handle sorting
   const handleSort = (newSortField: string, newSortOrder: number) => {
-    const sortString =
-      newSortOrder === 0
-        ? null
-        : `${newSortField},${newSortOrder === 1 ? "desc" : "asc"}`;
-    setSort(sortString);
     setSortField(newSortField);
     setSortOrder(newSortOrder);
-    loadDataTable(searchFilters, sortString);
+    loadDataTable(searchFilters, newSortField, newSortOrder);
   };
 
   const handleSearchChange = (field: string, value: string) => {
     const newFilters = { ...searchFilters, [field]: value };
     if (!value) {
-      delete newFilters[field]; // Xóa key nếu value là chuỗi rỗng
+      delete newFilters[field];
     }
-    console.log("New Filters:", newFilters);
     setSearchFilters(newFilters);
-    loadDataTable(newFilters, sort, false);
+    loadDataTable(newFilters, sortField, sortOrder, false);
   };
 
   // Reset filters
   const resetFilters = () => {
     setSearchFilters({});
-    loadDataTable({}, sort);
+    loadDataTable({}, sortField, sortOrder);
   };
 
   // READ by ID
@@ -120,7 +109,7 @@ export default function useCrud(baseUrl: string) {
           : { headers: { "Content-Type": "application/json" } };
       const res = await $axios.post(baseUrl + "/create", newItem, config);
       if (res.data) {
-        await loadDataTable(); 
+        await loadDataTable();
         return res.data;
       }
     } catch (err) {

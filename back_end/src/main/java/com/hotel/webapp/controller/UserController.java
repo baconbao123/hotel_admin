@@ -10,14 +10,15 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
@@ -46,14 +47,13 @@ public class UserController {
   @Permission(name = "view")
   public ApiResponse<Page<User>> getAll(
         @RequestParam(required = false) Map<String, String> filters,
-        @RequestParam(required = false) String sort) {
-    Map<String, Object> filterMap = filters != null ? new HashMap<>(filters) : new HashMap<>();
-    if (filters != null) {
-      filterMap.putAll(filters);
-      filterMap.remove("sort");
-    }
+        @RequestParam(required = false) Map<String, String> sort,
+        @RequestParam int size,
+        @RequestParam int page
+  ) {
+    log.error("sort: " + sort);
     return ApiResponse.<Page<User>>builder()
-                      .result(userService.getAll(filterMap, sort))
+                      .result(userService.getAll(filters, sort, size, page))
                       .build();
   }
 

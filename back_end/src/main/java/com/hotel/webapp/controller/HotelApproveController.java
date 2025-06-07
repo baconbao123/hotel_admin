@@ -10,7 +10,10 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/hotel-approve")
@@ -35,6 +38,19 @@ public class HotelApproveController {
         @Valid @ModelAttribute ApproveHotelDTO dto) {
     return ApiResponse.<ApproveHotel>builder()
                       .result(approveHotelService.update(id, dto))
+                      .build();
+  }
+
+  @GetMapping("/get-all")
+  @Permission(name = "view")
+  public ApiResponse<Page<ApproveHotel>> findAll(
+        @RequestParam(required = false) Map<String, String> filters,
+        @RequestParam(required = false) Map<String, String> sort,
+        @RequestParam int size,
+        @RequestParam int page
+  ) {
+    return ApiResponse.<Page<ApproveHotel>>builder()
+                      .result(approveHotelService.getAll(filters, sort, size, page))
                       .build();
   }
 
