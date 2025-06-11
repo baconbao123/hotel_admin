@@ -2,7 +2,10 @@ package com.hotel.webapp.dto.request;
 
 import com.hotel.webapp.validation.FieldNotEmpty;
 import jakarta.annotation.Nullable;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 @Getter

@@ -20,7 +20,7 @@ public class MaxSizeListImgValidator implements ConstraintValidator<MaxSizeListI
     if (files.size() > maxSize) {
       context.disableDefaultConstraintViolation();
       context.buildConstraintViolationWithTemplate(
-            String.format("Maximum of %d", maxSize)
+              "Maximum of %d".formatted(maxSize)
       ).addConstraintViolation();
       return false;
     }

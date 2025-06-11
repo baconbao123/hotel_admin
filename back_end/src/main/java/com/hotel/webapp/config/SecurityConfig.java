@@ -39,9 +39,9 @@ public class SecurityConfig {
     this.jwtDecoder = jwtDecoder;
   }
 
-  @Bean
-  @Order(1)
-  public SecurityFilterChain publicFilterChain(HttpSecurity http) throws Exception {
+    @Bean
+    @Order(1)
+    SecurityFilterChain publicFilterChain(HttpSecurity http) throws Exception {
     RequestMatcher[] matchers = Arrays.stream(PUBLIC_URLS)
                                       .map(AntPathRequestMatcher::new)
                                       .toArray(RequestMatcher[]::new);
@@ -54,9 +54,9 @@ public class SecurityConfig {
     return http.build();
   }
 
-  @Bean
-  @Order(2)
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    @Bean
+    @Order(2)
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http.authorizeHttpRequests(req -> req.anyRequest().authenticated())
         .oauth2ResourceServer(oauth ->
               oauth.jwt(jwtConfigurer -> jwtConfigurer
@@ -70,8 +70,8 @@ public class SecurityConfig {
   }
 
 
-  @Bean
-  public CorsConfigurationSource corsConfigurationSource() {
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(List.of("http://localhost:9898", "http://localhost:5173", "http://localhost:5174"));
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));

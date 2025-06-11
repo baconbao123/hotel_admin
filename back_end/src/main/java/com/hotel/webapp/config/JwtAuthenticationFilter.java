@@ -100,8 +100,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     HandlerMethod handlerMethod = null;
     Object handlerObject = ((HandlerExecutionChain) handler).getHandler();
 
-    if (handlerObject instanceof HandlerMethod) {
-      handlerMethod = (HandlerMethod) handlerObject;
+    if (handlerObject instanceof HandlerMethod method) {
+      handlerMethod = method;
     } else {
       log.warn("Handler is not a HandlerMethod: {}", handlerObject);
       response.sendError(HttpServletResponse.SC_FORBIDDEN, "Invalid handler type");

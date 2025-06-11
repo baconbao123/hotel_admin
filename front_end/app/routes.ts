@@ -6,15 +6,15 @@ import {
 } from "@react-router/dev/routes";
 
 export default [
-  layout("./layouts/rootLayout.tsx", [
-    index("./pages/dashboard/DashboardPage.tsx"),
-   
-    route("profile", "./pages/profile/ProfilePage.tsx"),
-    route("setting", "./pages/settings/SettingPage.tsx"),
-  // User page
-    route("user", "./pages/user/UserList.tsx"),
+ layout("./layouts/rootLayout.tsx", [
+    route("", "./routes/protectedRoute.tsx", [
+      index("./pages/dashboard/DashboardPage.tsx"),
+      route("profile", "./pages/profile/ProfilePage.tsx"),
+      route("setting", "./pages/settings/SettingPage.tsx"),
+      route("user", "./pages/user/UserList.tsx"),]
+    )
   ]),
-  layout("./layouts/authLayout.tsx", [
+layout("./layouts/authLayout.tsx", [
     route("login", "./pages/login/LoginPage.tsx"),
     route("register", "./pages/register/RegisterPage.tsx"),
   ]),
