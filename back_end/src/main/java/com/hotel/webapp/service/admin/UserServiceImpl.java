@@ -53,6 +53,9 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
 
   @Override
   public User create(UserDTO createDto) {
+    if(createDto.getPassword() == null) {
+      throw new AppException(ErrorCode.COMMON_400, "Password is required");
+    }
     if (repository.existsByEmail(createDto.getEmail()))
       throw new AppException(ErrorCode.FIELD_EXISTED, "Email");
 
@@ -79,7 +82,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
   public User update(Integer id, UserDTO updateDto) {
     var user = getById(id);
 
-    if (repository.existsByEmailAndIdNotAndDeletedAtIsNull(updateDto.getEmail(), id))
+    if (repository.existsByEmailAndIdNot(updateDto.getEmail(), id))
       throw new AppException(ErrorCode.FIELD_EXISTED, "Email");
 
     mapper.toUpdate(user, updateDto);

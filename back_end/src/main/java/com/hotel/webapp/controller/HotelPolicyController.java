@@ -2,6 +2,7 @@ package com.hotel.webapp.controller;
 
 import com.hotel.webapp.dto.request.HotelPolicyDTO;
 import com.hotel.webapp.dto.response.ApiResponse;
+import com.hotel.webapp.entity.Facilities;
 import com.hotel.webapp.entity.HotelPolicy;
 import com.hotel.webapp.service.admin.HotelPolicyServiceImpl;
 import com.hotel.webapp.validation.Permission;
@@ -10,7 +11,10 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/hotel-policy")
@@ -34,6 +38,19 @@ public class HotelPolicyController {
   public ApiResponse<HotelPolicy> updatePolicy(@PathVariable Integer id, @Valid @RequestBody HotelPolicyDTO dto) {
     return ApiResponse.<HotelPolicy>builder()
                       .result(hotelPolicyService.update(id, dto))
+                      .build();
+  }
+
+  @GetMapping("/get-all")
+  @Permission(name = "view")
+  public ApiResponse<Page<HotelPolicy>> getAll(
+        @RequestParam(required = false) Map<String, String> filters,
+        @RequestParam(required = false) Map<String, String> sort,
+        @RequestParam int size,
+        @RequestParam int page
+  ) {
+    return ApiResponse.<Page<HotelPolicy>>builder()
+                      .result(hotelPolicyService.getAll(filters, sort, size, page))
                       .build();
   }
 

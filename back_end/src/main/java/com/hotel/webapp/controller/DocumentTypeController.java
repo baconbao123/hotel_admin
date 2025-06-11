@@ -10,7 +10,10 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/document-type")
@@ -33,6 +36,19 @@ public class DocumentTypeController {
   public ApiResponse<DocumentType> updateDocumentType(@PathVariable Integer id, @Valid @RequestBody NameDTO dto) {
     return ApiResponse.<DocumentType>builder()
                       .result(documentTypeService.update(id, dto))
+                      .build();
+  }
+
+  @GetMapping("/get-all")
+  @Permission(name = "view")
+  public ApiResponse<Page<DocumentType>> findAll(
+        @RequestParam(required = false) Map<String, String> filters,
+        @RequestParam(required = false) Map<String, String> sort,
+        @RequestParam int size,
+        @RequestParam int page
+  ) {
+    return ApiResponse.<Page<DocumentType>>builder()
+                      .result(documentTypeService.getAll(filters, sort, size, page))
                       .build();
   }
 

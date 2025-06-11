@@ -3,6 +3,7 @@ package com.hotel.webapp.controller;
 import com.hotel.webapp.dto.request.HotelImgsDto;
 import com.hotel.webapp.dto.request.MapHotelImgDTO;
 import com.hotel.webapp.dto.response.ApiResponse;
+import com.hotel.webapp.entity.HotelImages;
 import com.hotel.webapp.service.admin.HotelImgServiceImpl;
 import com.hotel.webapp.validation.Permission;
 import com.hotel.webapp.validation.Resource;
@@ -33,6 +34,15 @@ public class HotelImgController {
                       .build();
   }
 
+  @Permission(name = "view")
+  @GetMapping(value = "/find-by-id/{id}")
+  public ApiResponse<HotelImages> getById(@PathVariable Integer id) {
+    return ApiResponse.<HotelImages>builder()
+                      .code(200)
+                      .result(hotelImgService.getById(id))
+                      .build();
+  }
+
   @Permission(name = "update")
   @PutMapping(value = "/update-avatar/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ApiResponse<Void> updateHotelImg(@PathVariable Integer id, MultipartFile file) {
@@ -43,7 +53,7 @@ public class HotelImgController {
                       .build();
   }
 
-  @Permission(name = "create")
+  @Permission(name = "delete")
   @DeleteMapping(value = "/delete-avatar/{id}")
   public ApiResponse<Void> deleteHotelImg(@PathVariable Integer id) {
     hotelImgService.deleteAvatar(id);
@@ -53,6 +63,7 @@ public class HotelImgController {
                       .build();
   }
 
+  @Permission(name = "create")
   @PostMapping(value = "/upload-images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ApiResponse<Void> uploadHotelImages(@Valid HotelImgsDto dto) {
     if (dto.getHotelImgs() == null || dto.getHotelImgs().isEmpty()) {
@@ -67,6 +78,7 @@ public class HotelImgController {
   }
 
   // map img hotel
+  @Permission(name = "create")
   @PostMapping("/map-hotel-images")
   public ApiResponse<Void> mapHotelImages(@RequestBody MapHotelImgDTO dto) {
     hotelImgService.mapHotelImages(dto);
@@ -75,6 +87,7 @@ public class HotelImgController {
                       .build();
   }
 
+  @Permission(name = "update")
   @PutMapping("/update-map-hotel-images")
   public ApiResponse<Void> updateMapHotelImages(@RequestBody MapHotelImgDTO dto) {
     hotelImgService.updateMapHotelImages(dto);
