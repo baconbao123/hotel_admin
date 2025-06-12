@@ -6,10 +6,12 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./UserFrom.module.scss";
 import ImageUploader from "@/utils/ImageUploader";
 import { InputSwitch } from "primereact/inputswitch";
+import { Tag } from "primereact/tag";
 
 interface Props {
   readonly id?: string;
   readonly open: boolean;
+  readonly mode?: "create" | "edit" | "view";
   readonly onClose: () => void;
   readonly loadDataById: (id: string) => Promise<any>;
   readonly loadDataTable: () => Promise<void>;
@@ -17,9 +19,25 @@ interface Props {
   readonly updateItem: (id: string, data: object | FormData) => Promise<any>;
 }
 
+const ViewStatus = ({ status }: { status: boolean }) => {
+  return (
+    <Tag
+      value={status ? "Active" : "Inactive"}
+      severity={status ? "success" : "danger"}
+      style={{
+        maxWidth: "7rem",
+        display: "flex",
+        justifyContent: "center",
+        padding: "0.3rem 0.6rem",
+      }}
+    />
+  );
+};
+
 export default function UserForm({
   id,
   open = false,
+  mode = "create",
   onClose,
   loadDataById,
   loadDataTable,
@@ -37,28 +55,37 @@ export default function UserForm({
   const [submitting, setSubmitting] = useState(false);
   const toast = useRef<Toast>(null);
 
+  const getHeader = (): string => {
+    switch (mode) {
+      case "view":
+        return "USER DETAILS";
+      case "edit":
+        return "EDIT USER";
+      default:
+        return "ADD NEW USER";
+    }
+  };
+
   const footer = (
     <div className="flex justify-end gap-2">
       <Button
-        label="Cancel"
+        label="Close"
         onClick={onClose}
         className="p-button-text"
         disabled={submitting}
       />
-      <Button
-        label="Save"
-        type="submit"
-        form="user-form"
-        className="p-button-text"
-        disabled={submitting}
-        loading={submitting}
-      />
+      {mode !== "view" && (
+        <Button
+          label="Save"
+          type="submit"
+          form="user-form"
+          className="p-button-text"
+          disabled={submitting}
+          loading={submitting}
+        />
+      )}
     </div>
   );
-
-  const getHeader = (): string => {
-    return id ? "EDIT USER" : "ADD NEW USER";
-  };
 
   const submitData = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -122,7 +149,7 @@ export default function UserForm({
           setPhoneNumber(userData.phoneNumber || "");
           setStatus(userData.status ?? true);
           setAvatarUrl(userData.avatarUrl || null);
-          setSelectedFile(null); // Clear selected file for edit
+          setSelectedFile(null); 
         })
         .catch((err) => {
           toast.current?.show({
@@ -133,7 +160,7 @@ export default function UserForm({
           });
         });
     } else {
-      // Reset for new user
+      
       setFullName("");
       setEmail("");
       setPhoneNumber("");
@@ -163,8 +190,9 @@ export default function UserForm({
             <div className={styles.field_input}>Avatar</div>
             <ImageUploader
               onFileChange={(files) => {
-                console.log("File từ ImageUploader:", files);
-                setSelectedFile(files ? files[0] : null);
+                if (mode !== "view") {
+                  setSelectedFile(files ? files[0] : null);
+                }
               }}
               maxFileSize={2}
               maxCount={1}
@@ -175,6 +203,7 @@ export default function UserForm({
                     }/${avatarUrl}`
                   : undefined
               }
+              disabled={mode === "view"}
             />
           </div>
 
@@ -187,7 +216,7 @@ export default function UserForm({
                 <InputText
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  disabled={submitting}
+                  disabled={mode === "view" || submitting}
                 />
               </div>
             </div>
@@ -198,7 +227,7 @@ export default function UserForm({
                 <InputText
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  disabled={submitting}
+                  disabled={mode === "view" || submitting}
                 />
               </div>
             </div>
@@ -213,7 +242,7 @@ export default function UserForm({
                 <InputText
                   value={phoneNumber}
                   onChange={(e) => setPhoneNumber(e.target.value)}
-                  disabled={submitting}
+                  disabled={mode === "view" || submitting}
                 />
               </div>
             </div>
@@ -224,13 +253,11 @@ export default function UserForm({
                 <InputText
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
-                  disabled={submitting}
+                  disabled={mode === "view" || submitting}
                 />
               </div>
             </div>
           </div>
-
-          <div style={{ height: "10px" }}></div>
 
           <div className={styles.group_input}>
             <div className={styles.group_a}>
@@ -240,7 +267,7 @@ export default function UserForm({
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   type="password"
-                  disabled={submitting}
+                  disabled={mode === "view" || submitting}
                 />
               </div>
             </div>
@@ -248,11 +275,15 @@ export default function UserForm({
             <div className={styles.group_b}>
               <div className={styles.field_input}>Status</div>
               <div className={styles.input_enter}>
-                <InputSwitch
-                  checked={status}
-                  onChange={(e) => setStatus(e.value)}
-                  disabled={submitting}
-                />
+                {mode === "view" ? (
+                  <ViewStatus status={status} />
+                ) : (
+                  <InputSwitch
+                    checked={status}
+                    onChange={(e) => setStatus(e.value)}
+                    disabled={submitting}
+                  />
+                )}
               </div>
             </div>
           </div>

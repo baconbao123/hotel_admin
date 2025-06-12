@@ -2,10 +2,16 @@ import { useState, useEffect, useCallback } from "react";
 import $axios from "@/axios";
 import { ApiResponse } from "@/types/apiResponse.type";
 
+
+interface ErrorResponse {
+  code: number;
+  message: string;
+}
+
 export default function useCrud(baseUrl: string) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [openForm, setopenForm] = useState(false);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -45,10 +51,11 @@ export default function useCrud(baseUrl: string) {
       setData(newData);
       setTotalRecords(apiResponse.result.totalElements || newData.length);
       setError(null);
-    } catch (err) {
-      setError(err);
-      console.error("Failed to load data:", err);
-      throw err;
+    } catch (err: any) {
+      const errorResponse = err.response?.data as ErrorResponse;
+      setError(errorResponse?.message || "Failed to load data");
+      console.error("Failed to load data:", errorResponse?.message || err);
+      throw new Error(errorResponse?.message || "Failed to load data");
     } finally {
       if (setLoadingState) setLoading(false);
     }
@@ -89,9 +96,10 @@ export default function useCrud(baseUrl: string) {
       try {
         const res = await $axios.get(`${baseUrl}/find-by-id/${id}`);
         return res.data.result;
-      } catch (err) {
-        setError(err);
-        throw err;
+      } catch (err: any) {
+        const errorResponse = err.response?.data as ErrorResponse;
+        setError(errorResponse?.message || "Failed to load data");
+        throw new Error(errorResponse?.message || "Failed to load data");
       } finally {
         setLoading(false);
       }
@@ -112,10 +120,10 @@ export default function useCrud(baseUrl: string) {
         await loadDataTable();
         return res.data;
       }
-    } catch (err) {
-      console.error("Error creating item:", err);
-      setError(err);
-      throw err;
+    } catch (err: any) {
+      const errorResponse = err.response?.data as ErrorResponse;
+      setError(errorResponse?.message || "Failed to create item");
+      throw new Error(errorResponse?.message || "Failed to create item");
     } finally {
       setLoading(false);
     }
@@ -139,10 +147,10 @@ export default function useCrud(baseUrl: string) {
         setError(null);
         return res.data;
       }
-    } catch (err) {
-      console.error("Error updating item:", err);
-      setError(err);
-      throw err;
+    } catch (err: any) {
+      const errorResponse = err.response?.data as ErrorResponse;
+      setError(errorResponse?.message || "Failed to update item");
+      throw new Error(errorResponse?.message || "Failed to update item");
     } finally {
       setLoading(false);
     }
@@ -155,9 +163,10 @@ export default function useCrud(baseUrl: string) {
       const res = await $axios.delete(`${baseUrl}/delete/${id}`);
       await loadDataTable();
       return res.data;
-    } catch (err) {
-      setError(err);
-      throw err;
+    } catch (err: any) {
+      const errorResponse = err.response?.data as ErrorResponse;
+      setError(errorResponse?.message || "Failed to delete item");
+      throw new Error(errorResponse?.message || "Failed to delete item");
     } finally {
       setLoading(false);
     }

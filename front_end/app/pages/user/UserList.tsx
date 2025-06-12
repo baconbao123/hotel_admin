@@ -5,7 +5,6 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { Image } from "antd";
-import { EyeIcon, PencilIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Toast } from "primereact/toast";
 import BreadCrumbComponent from "@/components/common/breadCrumb/BreadCrumbComponent";
 import useCrud from "@/hooks/crudHook";
@@ -13,10 +12,24 @@ import UserForm from "./UserForm";
 import noImg from "@/asset/images/no-img.png";
 import styles from "@/pages/user/UserFrom.module.scss";
 import Swal from "sweetalert2";
+import { Tag } from "primereact/tag";
+
+
+interface User {
+  id: number;
+  fullName: string;
+  email: string;
+  phoneNumber: string;
+  avatarUrl?: string;
+  status: boolean;
+}
 
 export default function UserList() {
   const [selectedUserId, setSelectedUserId] = useState<string | undefined>(
     undefined
+  );
+  const [formMode, setFormMode] = useState<"create" | "edit" | "view">(
+    "create"
   );
   const toast = useRef<Toast>(null);
 
@@ -89,6 +102,28 @@ export default function UserList() {
           });
       }
     });
+  };
+
+  // thêm cột trạng thái
+  const getStatusSeverity = (status: boolean) => {
+    return status ? "success" : "danger";
+  };
+
+  const statusBodyTemplate = (rowData: User) => {
+    const statusLabel = rowData.status ? "Active" : "Inactive";
+
+    return (
+      <Tag
+        value={statusLabel}
+        severity={getStatusSeverity(rowData.status)}
+        style={{
+          maxWidth: "5rem",
+          display: "flex",
+          justifyContent: "center",
+          padding: "0.3rem 0.6rem",
+        }}
+      />
+    );
   };
 
   return (
@@ -179,19 +214,51 @@ export default function UserList() {
           <Column sortable field="fullName" header="Name"></Column>
           <Column sortable field="email" header="Email"></Column>
           <Column
+            field="status"
+            header="Status"
+            sortable
+            body={statusBodyTemplate}
+            style={{ width: "12%", textAlign: "center" }}
+          ></Column>
+          <Column
+            header="Actions"
+            style={{ width: "15%" }}
             body={(rowData: any) => (
-              <div className={styles.icons}>
-                <EyeIcon className={styles.icons_view} />
-                <PencilIcon
-                  className={styles.icons_edit}
+              <div className="flex gap-2 ">
+                <Button
+                  icon="pi pi-eye"
+                  rounded
+                  text
+                  severity="info"
                   onClick={() => {
                     setSelectedUserId(rowData.id);
+                    setFormMode("view");
                     setopenForm(true);
                   }}
+                  tooltip="View"
+                  tooltipOptions={{ position: "top" }}
                 />
-                <TrashIcon
-                  className={styles.icons_trash}
+                <Button
+                  icon="pi pi-pencil"
+                  rounded
+                  text
+                  severity="success"
+                  onClick={() => {
+                    setSelectedUserId(rowData.id);
+                    setFormMode("edit");
+                    setopenForm(true);
+                  }}
+                  tooltip="Edit"
+                  tooltipOptions={{ position: "top" }}
+                />
+                <Button
+                  icon="pi pi-trash"
+                  rounded
+                  text
+                  severity="danger"
                   onClick={() => handleDelete(rowData.id)}
+                  tooltip="Delete"
+                  tooltipOptions={{ position: "top" }}
                 />
               </div>
             )}
@@ -202,9 +269,11 @@ export default function UserList() {
       <UserForm
         id={selectedUserId}
         open={openForm}
+        mode={formMode}
         onClose={() => {
           setopenForm(false);
           setSelectedUserId(undefined);
+          setFormMode("create");
         }}
         loadDataTable={loadDataTable}
         loadDataById={loadDataById}
