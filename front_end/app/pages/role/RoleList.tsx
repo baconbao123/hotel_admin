@@ -8,22 +8,20 @@ import { Image } from "antd";
 import { Toast } from "primereact/toast";
 import BreadCrumbComponent from "@/components/common/breadCrumb/BreadCrumbComponent";
 import useCrud from "@/hooks/crudHook";
-import UserForm from "./UserForm";
+import UserForm from "./RoleForm";
 import noImg from "@/asset/images/no-img.png";
 import styles from "@/pages/user/UserFrom.module.scss";
 import Swal from "sweetalert2";
 import { Tag } from "primereact/tag";
 
-interface User {
+interface Role {
   id: number;
-  fullName: string;
-  email: string;
-  phoneNumber: string;
-  avatarUrl?: string;
+  name: string;
+  description?: string;
   status: boolean;
 }
 
-export default function UserList() {
+export default function RoleList() {
   const [selectedUserId, setSelectedUserId] = useState<string | undefined>(
     undefined
   );
@@ -35,7 +33,6 @@ export default function UserList() {
   const {
     data,
     loading,
-    error,
     openForm,
     setopenForm,
     loadDataById,
@@ -53,7 +50,7 @@ export default function UserList() {
     searchFilters,
     sortField,
     sortOrder,
-  } = useCrud("/user");
+  } = useCrud("/role");
 
   const paginatorLeft = (
     <Button
@@ -108,7 +105,7 @@ export default function UserList() {
     return status ? "success" : "danger";
   };
 
-  const statusBodyTemplate = (rowData: User) => {
+  const statusBodyTemplate = (rowData: Role) => {
     const statusLabel = rowData.status ? "Active" : "Inactive";
 
     return (
@@ -130,7 +127,7 @@ export default function UserList() {
       <Toast ref={toast} />
 
       <div className="mb-5">
-        <BreadCrumbComponent name="UserList" />
+        <BreadCrumbComponent name="RoleList" />
       </div>
 
       <div className="mb-5">
@@ -140,14 +137,8 @@ export default function UserList() {
               <InputText
                 placeholder="Search by name"
                 className="w-full"
-                value={searchFilters.fullName || ""}
-                onChange={(e) => handleSearchChange("fullName", e.target.value)}
-              />
-              <InputText
-                placeholder="Search by email"
-                className="w-full"
-                value={searchFilters.email || ""}
-                onChange={(e) => handleSearchChange("email", e.target.value)}
+                value={searchFilters.name || ""}
+                onChange={(e) => handleSearchChange("name", e.target.value)}
               />
             </div>
           </div>
@@ -168,7 +159,7 @@ export default function UserList() {
         </div>
       </div>
 
-      <Card title="Users management">
+      <Card title="Role management">
         <DataTable
           value={data}
           tableStyle={{ minWidth: "50rem" }}
@@ -190,28 +181,9 @@ export default function UserList() {
           sortOrder={sortOrder as 1 | -1 | 0 | undefined}
         >
           <Column sortable field="id" header="Id"></Column>
-          <Column
-            field="avatarUrl"
-            header="Avatar"
-            body={(rowData: any) => {
-              return rowData.avatarUrl ? (
-                <Image
-                  src={`${
-                    import.meta.env.VITE_REACT_APP_BACK_END_LINK_UPLOAD_USER
-                  }/${rowData.avatarUrl}`}
-                  alt="User Avatar"
-                  width={50}
-                  height={50}
-                  style={{ objectFit: "cover", borderRadius: "4px" }}
-                  preview
-                />
-              ) : (
-                <Image src={noImg} width={50} height={50} />
-              );
-            }}
-          ></Column>
-          <Column sortable field="fullName" header="Name"></Column>
-          <Column sortable field="email" header="Email"></Column>
+          <Column sortable field="name" header="Name"></Column>
+          <Column field="description" header="Description"></Column>
+
           <Column
             field="status"
             header="Status"

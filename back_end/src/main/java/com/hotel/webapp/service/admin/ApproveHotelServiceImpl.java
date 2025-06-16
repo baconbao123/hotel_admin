@@ -104,7 +104,7 @@ public class ApproveHotelServiceImpl extends BaseServiceImpl<ApproveHotel, Integ
       var hotelRoles = HotelRoles.builder()
                                  .name("sa_hotel")
                                  .hotelId(hotels.getId())
-                                 .isActive(true)
+                                 .status(true)
                                  .createdAt(LocalDateTime.now())
                                  .createdBy(getAuthId())
                                  .build();

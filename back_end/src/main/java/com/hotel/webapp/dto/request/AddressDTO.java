@@ -2,15 +2,13 @@ package com.hotel.webapp.dto.request;
 
 import com.hotel.webapp.validation.FieldNotEmpty;
 import jakarta.annotation.Nullable;
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AddressDTO {
   @FieldNotEmpty(field = "Province code")
@@ -26,3 +24,5 @@ public class AddressDTO {
   @Nullable
   String note;
 }
+
+

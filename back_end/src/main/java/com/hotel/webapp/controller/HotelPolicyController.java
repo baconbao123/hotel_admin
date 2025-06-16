@@ -25,7 +25,7 @@ public class HotelPolicyController {
   HotelPolicyServiceImpl hotelPolicyService;
 
   // policy
-  @PostMapping("/create")
+  @PostMapping
   @Permission(name = "create")
   public ApiResponse<HotelPolicy> createPolicy(@Valid @RequestBody HotelPolicyDTO dto) {
     return ApiResponse.<HotelPolicy>builder()
@@ -33,7 +33,7 @@ public class HotelPolicyController {
                       .build();
   }
 
-  @PutMapping("/update/{id}")
+  @PutMapping("/{id}")
   @Permission(name = "update")
   public ApiResponse<HotelPolicy> updatePolicy(@PathVariable Integer id, @Valid @RequestBody HotelPolicyDTO dto) {
     return ApiResponse.<HotelPolicy>builder()
@@ -41,7 +41,7 @@ public class HotelPolicyController {
                       .build();
   }
 
-  @GetMapping("/get-all")
+  @GetMapping
   @Permission(name = "view")
   public ApiResponse<Page<HotelPolicy>> getAll(
         @RequestParam(required = false) Map<String, String> filters,
@@ -54,7 +54,7 @@ public class HotelPolicyController {
                       .build();
   }
 
-  @GetMapping("/find-by-id/{id}")
+  @GetMapping("/{id}")
   @Permission(name = "view")
   public ApiResponse<HotelPolicy> getByIdPolicy(@PathVariable Integer id) {
     return ApiResponse.<HotelPolicy>builder()
@@ -62,7 +62,7 @@ public class HotelPolicyController {
                       .build();
   }
 
-  @DeleteMapping("/delete/{id}")
+  @DeleteMapping("/{id}")
   @Permission(name = "delete")
   public ApiResponse<Void> deletePolicy(@PathVariable Integer id) {
     hotelPolicyService.delete(id);

@@ -1,17 +1,16 @@
 package com.hotel.webapp.controller;
 
+import com.hotel.webapp.dto.request.StreetsDTO;
 import com.hotel.webapp.dto.response.ApiResponse;
 import com.hotel.webapp.dto.response.LocalResponse;
+import com.hotel.webapp.entity.Streets;
 import com.hotel.webapp.service.admin.LocalServiceImpl;
-import com.hotel.webapp.validation.Permission;
-import com.hotel.webapp.validation.Resource;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -19,31 +18,67 @@ import java.util.List;
 @RequestMapping("/api/local")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@Resource(name = "local")
 public class LocalController {
   LocalServiceImpl localService;
 
-  @Permission(name = "view")
-  @GetMapping("/provinces")
-  public ApiResponse<List<LocalResponse>> getProvinces() {
+  @GetMapping("/get-province")
+  public ApiResponse<List<LocalResponse>> getProvince() {
     return ApiResponse.<List<LocalResponse>>builder()
                       .result(localService.getProvinces())
                       .build();
   }
 
-  @Permission(name = "view")
-  @GetMapping("/districts")
-  public ApiResponse<List<LocalResponse>> getDistricts(@RequestParam String provinceCode) {
+  @GetMapping("/get-district")
+  public ApiResponse<List<LocalResponse>> getDistrict(
+        @RequestParam @NotBlank(message = "PROVINCE_CODE_REQUIRED") String provinceCode) {
     return ApiResponse.<List<LocalResponse>>builder()
                       .result(localService.findDistrictsByProvinceCode(provinceCode))
                       .build();
   }
 
-  @Permission(name = "view")
-  @GetMapping("/wards")
-  public ApiResponse<List<LocalResponse>> getWards(@RequestParam String districtCode) {
+  @GetMapping("/get-ward")
+  public ApiResponse<List<LocalResponse>> getWard(
+        @RequestParam @NotBlank(message = "DISTRICT_CODE_REQUIRED") String districtCode) {
     return ApiResponse.<List<LocalResponse>>builder()
                       .result(localService.findWardsByDistrict(districtCode))
+                      .build();
+  }
+
+  @GetMapping("/get-street")
+  public ApiResponse<List<LocalResponse.StreetResponse>> getStreet(@RequestParam
+  @NotBlank(message = "WARD_CODE_REQUIRED") String wardCode) {
+    return ApiResponse.<List<LocalResponse.StreetResponse>>builder()
+                      .result(localService.findStreetByWard(wardCode))
+                      .build();
+  }
+
+  // street
+  @PostMapping
+  public ApiResponse<Streets> createStreet(@RequestBody @Valid StreetsDTO dto) {
+    return ApiResponse.<Streets>builder()
+                      .result(localService.create(dto))
+                      .build();
+  }
+
+  @PutMapping("/{id}")
+  public ApiResponse<Streets> updateStreet(@PathVariable Integer id, @RequestBody @Valid StreetsDTO dto) {
+    return ApiResponse.<Streets>builder()
+                      .result(localService.update(id, dto))
+                      .build();
+  }
+
+  @GetMapping("/{id}")
+  public ApiResponse<Streets> findStreetById(@PathVariable Integer id) {
+    return ApiResponse.<Streets>builder()
+                      .result(localService.getById(id))
+                      .build();
+  }
+
+  @DeleteMapping("/{id}")
+  public ApiResponse<Object> updateStreet(@PathVariable Integer id) {
+    localService.delete(id);
+    return ApiResponse.builder()
+                      .message("Delete street successful")
                       .build();
   }
 }

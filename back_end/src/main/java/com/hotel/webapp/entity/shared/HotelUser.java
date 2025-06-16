@@ -28,7 +28,7 @@ public class HotelUser {
   Integer addressId;
   @Lob
   String refreshToken;
-  Boolean isActive;
+  Boolean status;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;
   Integer createdBy;

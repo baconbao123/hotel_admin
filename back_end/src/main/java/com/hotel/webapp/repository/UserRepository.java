@@ -3,7 +3,6 @@ package com.hotel.webapp.repository;
 import com.hotel.webapp.base.BaseRepository;
 import com.hotel.webapp.entity.User;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -23,9 +22,18 @@ public interface UserRepository extends BaseRepository<User, Integer> {
   // ----------------------
   boolean existsByIdAndDeletedAtIsNull(Integer id);
 
-//  @Query("SELECT u FROM User u WHERE u.deletedAt IS NULL AND lower(u.email) like lower(concat('%', :email, '%')) " +
-//        "AND u.email <> 'sa@gmail.com'")
-//  List<User> findAllByEmail(@Param("email") String email);
-
   Optional<User> findByRefreshToken(String refreshToken);
+
+  @Query("select u.id, u.fullName, u.email, u.phoneNumber, u.avatarUrl, " +
+        "u.status, a.streetNumber, a.streetId, a.wardCode, a.districtCode, a.provinceCode, a.note " +
+        "from User u " +
+        "join Address a on u.addressId = a.id " +
+        "where u.id = :id")
+  List<Object[]> getUserById(Integer id);
+
+  @Query("select r.id, r.name " +
+        "from Role r " +
+        "left join MapUserRoles mur on mur.roleId = r.id and mur.userId = :userId " +
+        "where mur.userId = :userId and mur.deletedAt is null")
+  List<Object[]> getRolesByUserId(Integer userId);
 }

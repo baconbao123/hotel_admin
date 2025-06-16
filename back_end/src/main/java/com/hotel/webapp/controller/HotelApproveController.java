@@ -24,7 +24,7 @@ public class HotelApproveController {
   ApproveHotelServiceImpl approveHotelService;
 
   // approve hotel
-  @PostMapping(value = "/create")
+  @PostMapping
   @Permission(name = "create")
   public ApiResponse<ApproveHotel> createApproveHotel(@Valid @RequestBody ApproveHotelDTO dto) {
     return ApiResponse.<ApproveHotel>builder()
@@ -32,7 +32,7 @@ public class HotelApproveController {
                       .build();
   }
 
-  @PutMapping(value = "/update/{id}")
+  @PutMapping(value = "/{id}")
   @Permission(name = "update")
   public ApiResponse<ApproveHotel> updateApproveHotel(@PathVariable Integer id,
         @Valid @ModelAttribute ApproveHotelDTO dto) {
@@ -41,7 +41,7 @@ public class HotelApproveController {
                       .build();
   }
 
-  @GetMapping("/get-all")
+  @GetMapping()
   @Permission(name = "view")
   public ApiResponse<Page<ApproveHotel>> findAll(
         @RequestParam(required = false) Map<String, String> filters,
@@ -54,7 +54,7 @@ public class HotelApproveController {
                       .build();
   }
 
-  @GetMapping("/find-by-id/{id}")
+  @GetMapping("/{id}")
   @Permission(name = "view")
   public ApiResponse<ApproveHotel> getByApproveHotelId(@PathVariable Integer id) {
     return ApiResponse.<ApproveHotel>builder()
@@ -62,7 +62,7 @@ public class HotelApproveController {
                       .build();
   }
 
-  @DeleteMapping("/delete/{id}")
+  @DeleteMapping("/{id}")
   @Permission(name = "delete")
   public ApiResponse<Void> deleteApproveById(@PathVariable Integer id) {
     approveHotelService.delete(id);

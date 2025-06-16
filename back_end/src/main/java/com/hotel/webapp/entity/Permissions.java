@@ -21,7 +21,7 @@ public class Permissions implements AuditEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer id;
-  Integer mapUserRolesId;
+  Integer roleId;
   Integer mapResourcesActionId;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;

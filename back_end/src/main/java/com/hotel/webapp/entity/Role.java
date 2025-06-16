@@ -23,7 +23,7 @@ public class Role implements AuditEntity {
   Integer id;
   String name;
   String description;
-  Boolean isActive;
+  Boolean status;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;
   Integer createdBy;

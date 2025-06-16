@@ -51,6 +51,15 @@ public class RoleServiceImpl extends BaseServiceImpl<Role, Integer, RoleDTO, Rol
   }
 
   @Override
+  protected void afterCreate(Role entity, RoleDTO roleDTO) {
+    Permissions permissions = new Permissions();
+    permissions.setRoleId(entity.getId());
+    permissions.setCreatedAt(LocalDateTime.now());
+    permissions.setCreatedBy(getAuthId());
+    permissionsRepository.save(permissions);
+  }
+
+  @Override
   protected void validateUpdate(Integer id, RoleDTO update) {
     if (repository.existsByNameAndIdNotAndDeletedAtIsNull(update.getName(), id))
       throw new AppException(ErrorCode.FIELD_EXISTED, "Role");
@@ -85,12 +94,18 @@ public class RoleServiceImpl extends BaseServiceImpl<Role, Integer, RoleDTO, Rol
   }
 
   private void updatePermissionIfUserDelete(Collection<Integer> mapUserRoleId, int authId) {
-    List<Permissions> findAllPermissions = permissionsRepository.findAllByMapURId(mapUserRoleId);
+//    List<Permissions> findAllPermissions = permissionsRepository.findAllByMapURId(mapUserRoleId);
+
+    List<Permissions> findAllPermissions = null;
 
     for (Permissions permission : findAllPermissions) {
       permission.setDeletedAt(LocalDateTime.now());
       permission.setUpdatedBy(authId);
       permissionsRepository.save(permission);
     }
+  }
+
+  public List<Role> getRoles() {
+    return repository.findAllByDeletedAtIsNull();
   }
 }

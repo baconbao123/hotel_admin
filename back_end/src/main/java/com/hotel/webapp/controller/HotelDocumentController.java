@@ -25,7 +25,7 @@ import java.util.Map;
 public class HotelDocumentController {
   DocumentsHotelServiceImpl documentsHotelService;
 
-  @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @Permission(name = "create")
   public ApiResponse<DocumentsHotel> createDocumentsHotel(@Valid @ModelAttribute DocumentsHotelDTO dto) {
     return ApiResponse.<DocumentsHotel>builder()
@@ -33,7 +33,7 @@ public class HotelDocumentController {
                       .build();
   }
 
-  @PutMapping(value = "/update/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   @Permission(name = "update")
   public ApiResponse<DocumentsHotel> updateDocumentsHotel(@PathVariable Integer id,
         @Valid @ModelAttribute DocumentsHotelDTO dto) {
@@ -42,7 +42,7 @@ public class HotelDocumentController {
                       .build();
   }
 
-  @GetMapping("/get-all")
+  @GetMapping
   @Permission(name = "view")
   public ApiResponse<Page<DocumentsHotel>> getAll(
         @RequestParam(required = false) Map<String, String> filters,
@@ -55,7 +55,7 @@ public class HotelDocumentController {
                       .build();
   }
 
-  @GetMapping("/find-by-id/{id}")
+  @GetMapping("/{id}")
   @Permission(name = "view")
   public ApiResponse<DocumentsHotel> getByDocumentsHotelId(@PathVariable Integer id) {
     return ApiResponse.<DocumentsHotel>builder()
@@ -63,7 +63,7 @@ public class HotelDocumentController {
                       .build();
   }
 
-  @DeleteMapping("/delete/{id}")
+  @DeleteMapping("/{id}")
   @Permission(name = "delete")
   public ApiResponse<Void> deleteByDocumentHotel(@PathVariable Integer id) {
     documentsHotelService.delete(id);

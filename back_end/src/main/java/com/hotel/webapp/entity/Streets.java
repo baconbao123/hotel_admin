@@ -23,7 +23,7 @@ public class Streets implements AuditEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer id;
   String name;
-  String districtCode;
+  String wardCode;
   BigDecimal width;
   BigDecimal curbWith;
   LocalDateTime createdAt;

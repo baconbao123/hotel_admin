@@ -7,6 +7,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.Builder;
 import org.springframework.http.HttpStatus;
 
+import java.util.Map;
+
 @Builder
 @Getter
 @Setter
@@ -19,4 +21,5 @@ public class ApiResponse<T> {
   int code = 200;
   String message;
   T result;
+  Map<String, String> errorMessages;
 }

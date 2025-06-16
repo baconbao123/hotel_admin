@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from "react";
 import $axios from "@/axios";
 import { ApiResponse } from "@/types/apiResponse.type";
 
-
 interface ErrorResponse {
   code: number;
   message: string;
@@ -44,7 +43,7 @@ export default function useCrud(baseUrl: string) {
       queryParams.append("page", page.toString());
       queryParams.append("size", pageSize.toString());
 
-      const url = `${baseUrl}/get-all?${queryParams.toString()}`;
+      const url = `${baseUrl}?${queryParams.toString()}`;
       const res = await $axios.get(url);
       const apiResponse = new ApiResponse(res.data);
       const newData = apiResponse.result.content || [];
@@ -94,7 +93,7 @@ export default function useCrud(baseUrl: string) {
     async (id: string) => {
       setLoading(true);
       try {
-        const res = await $axios.get(`${baseUrl}/find-by-id/${id}`);
+        const res = await $axios.get(`${baseUrl}/${id}`);
         return res.data.result;
       } catch (err: any) {
         const errorResponse = err.response?.data as ErrorResponse;
@@ -115,7 +114,7 @@ export default function useCrud(baseUrl: string) {
         newItem instanceof FormData
           ? { headers: { "Content-Type": "multipart/form-data" } }
           : { headers: { "Content-Type": "application/json" } };
-      const res = await $axios.post(baseUrl + "/create", newItem, config);
+      const res = await $axios.post(baseUrl, newItem, config);
       if (res.data) {
         await loadDataTable();
         return res.data;
@@ -137,11 +136,7 @@ export default function useCrud(baseUrl: string) {
         updatedItem instanceof FormData
           ? { headers: { "Content-Type": "multipart/form-data" } }
           : { headers: { "Content-Type": "application/json" } };
-      const res = await $axios.put(
-        `${baseUrl}/update/${id}`,
-        updatedItem,
-        config
-      );
+      const res = await $axios.put(`${baseUrl}/${id}`, updatedItem, config);
       if (res.data) {
         await loadDataTable();
         setError(null);
@@ -160,7 +155,7 @@ export default function useCrud(baseUrl: string) {
   const deleteItem = async (id: string) => {
     setLoading(true);
     try {
-      const res = await $axios.delete(`${baseUrl}/delete/${id}`);
+      const res = await $axios.delete(`${baseUrl}/${id}`);
       await loadDataTable();
       return res.data;
     } catch (err: any) {

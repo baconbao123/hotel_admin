@@ -23,7 +23,7 @@ import java.util.Map;
 public class RoleController {
   RoleServiceImpl roleService;
 
-  @PostMapping("/create")
+  @PostMapping
   @Permission(name = "create")
   public ApiResponse<Role> create(@Valid @RequestBody RoleDTO roleDTO) {
     return ApiResponse.<Role>builder()
@@ -31,7 +31,7 @@ public class RoleController {
                       .build();
   }
 
-  @PutMapping("/update/{id}")
+  @PutMapping("/{id}")
   @Permission(name = "update")
   public ApiResponse<Role> update(@PathVariable int id, @Valid @RequestBody RoleDTO roleDTO) {
     return ApiResponse.<Role>builder()
@@ -39,7 +39,7 @@ public class RoleController {
                       .build();
   }
 
-  @GetMapping("/get-all")
+  @GetMapping
   @Permission(name = "view")
   public ApiResponse<Page<Role>> getAll(
         @RequestParam(required = false) Map<String, String> filters,
@@ -53,7 +53,7 @@ public class RoleController {
   }
 
 
-  @GetMapping("/find-by-id/{id}")
+  @GetMapping("/{id}")
   @Permission(name = "view")
   public ApiResponse<Role> findById(@PathVariable int id) {
     return ApiResponse.<Role>builder()
@@ -61,7 +61,7 @@ public class RoleController {
                       .build();
   }
 
-  @DeleteMapping("/delete/{id}")
+  @DeleteMapping("/{id}")
   @Permission(name = "delete")
   public ApiResponse<Void> deleteById(@PathVariable int id) {
     roleService.delete(id);

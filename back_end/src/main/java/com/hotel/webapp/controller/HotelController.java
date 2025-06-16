@@ -13,7 +13,6 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -24,7 +23,7 @@ import java.util.Map;
 public class HotelController {
   HotelServiceImpl hotelService;
 
-  @PostMapping(value = "/create")
+  @PostMapping
   @Permission(name = "create")
   public ApiResponse<Hotels> createHotel(@Valid @RequestBody HotelDTO hotelDTO) {
     return ApiResponse.<Hotels>builder()
@@ -32,7 +31,7 @@ public class HotelController {
                       .build();
   }
 
-  @PutMapping("/update/{id}")
+  @PutMapping("/{id}")
   @Permission(name = "update")
   public ApiResponse<Hotels> updateHotel(@PathVariable int id, @Valid @RequestBody HotelDTO hotelDTO) {
     return ApiResponse.<Hotels>builder()
@@ -40,7 +39,7 @@ public class HotelController {
                       .build();
   }
 
-  @DeleteMapping("/delete/{id}")
+  @DeleteMapping("/{id}")
   @Permission(name = "delete")
   public ApiResponse<Void> deleteHotel(@PathVariable int id) {
     hotelService.delete(id);
@@ -49,7 +48,7 @@ public class HotelController {
                       .build();
   }
 
-  @GetMapping("/find-by-id/{id}")
+  @GetMapping("/{id}")
   @Permission(name = "view")
   public ApiResponse<Hotels> getById(@PathVariable Integer id) {
     return ApiResponse.<Hotels>builder()
@@ -57,7 +56,7 @@ public class HotelController {
                       .build();
   }
 
-  @GetMapping("/get-all")
+  @GetMapping
   @Permission(name = "view")
   public ApiResponse<Page<Hotels>> getAll(
         @RequestParam(required = false) Map<String, String> filters,

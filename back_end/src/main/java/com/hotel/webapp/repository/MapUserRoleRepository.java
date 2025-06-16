@@ -11,10 +11,8 @@ import java.util.Optional;
 
 @Repository
 public interface MapUserRoleRepository extends BaseRepository<MapUserRoles, Integer> {
+  // start app
   Optional<MapUserRoles> findByRoleIdAndUserId(int roleId, int userId);
-
-  @Query("select mur.id from MapUserRoles mur where mur.roleId = :roleId and mur.userId = :userId")
-  int findIdByRoleIdAndUserId(int roleId, int userId);
 
   //  find all
   List<MapUserRoles> findAllByUserId(int userId);

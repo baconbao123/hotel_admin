@@ -23,7 +23,7 @@ public class HotelRoles implements AuditEntity {
   String name;
   Integer hotelId;
   String description;
-  Boolean isActive;
+  Boolean status;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;
   Integer createdBy;

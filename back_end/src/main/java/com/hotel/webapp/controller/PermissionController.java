@@ -1,7 +1,8 @@
 package com.hotel.webapp.controller;
 
-import com.hotel.webapp.dto.request.PermissionDTO;
+import com.hotel.webapp.dto.request.MappingDTO;
 import com.hotel.webapp.dto.response.ApiResponse;
+import com.hotel.webapp.dto.response.PermissionRes;
 import com.hotel.webapp.entity.Permissions;
 import com.hotel.webapp.service.admin.PermissionServiceImpl;
 import com.hotel.webapp.validation.Permission;
@@ -11,8 +12,12 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -24,33 +29,61 @@ import java.util.Map;
 public class PermissionController {
   PermissionServiceImpl permissionService;
 
-  @PostMapping("/create")
-  @Permission(name = "create")
-  public ApiResponse<List<Permissions>> create(@Valid @RequestBody PermissionDTO permissionDTO) {
-    return ApiResponse.<List<Permissions>>builder()
-                      .result(permissionService.createCollectionBulk(permissionDTO))
-                      .build();
-  }
-
-  @PutMapping("/update/{id}")
+  @PutMapping
   @Permission(name = "update")
-  public ApiResponse<List<Permissions>> update(@PathVariable int id,
-        @Valid @RequestBody PermissionDTO permissionUpdate) {
+  public ApiResponse<List<Permissions>> update(@Valid @RequestBody MappingDTO permissionUpdate) {
     return ApiResponse.<List<Permissions>>builder()
-                      .result(permissionService.updateCollectionBulk(id, permissionUpdate))
+                      .result(permissionService.updatePermission(permissionUpdate))
                       .build();
   }
 
-  @GetMapping("/get-all")
+  @GetMapping
   @Permission(name = "view")
-  public ApiResponse<Page<Permissions>> getAll(
-        @RequestParam(required = false) Map<String, String> filters,
-        @RequestParam(required = false) Map<String, String> sort,
-        @RequestParam int size,
-        @RequestParam int page
-  ) {
-    return ApiResponse.<Page<Permissions>>builder()
-                      .result(permissionService.getAll(filters, sort, size, page))
+  public ApiResponse<Page<PermissionRes>> getAllPermissions(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+//        @RequestParam(required = false) String name,
+        @RequestParam(required = false) Map<String, String> sort) {
+    Pageable pageable = buildPageable(page, size, sort);
+    Page<PermissionRes> permissions = permissionService.getAllPermissions(pageable);
+    return ApiResponse.<Page<PermissionRes>>builder()
+                      .result(permissions)
+                      .build();
+  }
+
+  private Pageable buildPageable(int page, int size, Map<String, String> sort) {
+    List<Sort.Order> orders = new ArrayList<>();
+    if (sort == null || sort.isEmpty()) {
+      orders.add(new Sort.Order(Sort.Direction.ASC, "role_id"));
+    } else {
+      sort.forEach((field, direction) -> {
+        if (field.startsWith("sort[")) {
+          String cleanField = field.replaceAll("sort\\[(.*?)\\]", "$1");
+          Sort.Direction sortDirection = direction.equalsIgnoreCase("desc")
+                ? Sort.Direction.DESC : Sort.Direction.ASC;
+          orders.add(new Sort.Order(sortDirection, cleanField));
+        }
+      });
+    }
+
+    return orders.isEmpty()
+          ? PageRequest.of(page, size)
+          : PageRequest.of(page, size, Sort.by(orders));
+  }
+
+  @GetMapping("/{roleId}")
+  @Permission(name = "view")
+  public ApiResponse<PermissionRes> findById(@PathVariable("roleId") Integer roleId) {
+    return ApiResponse.<PermissionRes>builder()
+                      .result(permissionService.getPermissionsByRoleId(roleId))
+                      .build();
+  }
+
+  @GetMapping("/resource-actions")
+  @Permission(name = "view")
+  public ApiResponse<List<PermissionRes.DataResponse>> findActions() {
+    return ApiResponse.<List<PermissionRes.DataResponse>>builder()
+                      .result(permissionService.getMapResourcesActions())
                       .build();
   }
 }

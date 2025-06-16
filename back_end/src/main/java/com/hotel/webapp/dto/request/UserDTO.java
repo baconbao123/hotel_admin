@@ -11,6 +11,8 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
@@ -22,15 +24,33 @@ public class UserDTO {
   @Trim
   @FieldNotEmpty(field = "Otp")
   String email;
-  @Pattern(regexp = "^\\d{10}$")
+//  @Pattern(regexp = "^\\d{10}$")
   @Trim
   @FieldNotEmpty(field = "Phone number")
   String phoneNumber;
   String password;
-  @Nullable
   MultipartFile avatarUrl;
-  @Nullable
-  Integer addressId;
+
+  String keepAvatar;
+
   @FieldNotEmpty(field = "Status")
   Boolean status;
+
+  // roles
+  List<Integer> rolesIds;
+
+  // address
+  @FieldNotEmpty(field = "Province code")
+  String provinceCode;
+  @FieldNotEmpty(field = "District code")
+  String districtCode;
+  @FieldNotEmpty(field = "Ward code")
+  String wardCode;
+  @FieldNotEmpty(field = "Street id")
+  Integer streetId;
+  @FieldNotEmpty(field = "Street number")
+  String streetNumber;
+  String note;
 }
+
+

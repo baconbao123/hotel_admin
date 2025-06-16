@@ -1,6 +1,5 @@
 package com.hotel.webapp.dto.request;
 
-import com.hotel.webapp.dto.request.properties.MapRAPropertiesDTO;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,6 +10,8 @@ import java.util.List;
 @Getter
 @Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class MapRADTO {
-  List<MapRAPropertiesDTO> properties;
+public class MappingDTO {
+  Integer roleId;
+  List<Integer> mapResourceActionIds;
 }
+

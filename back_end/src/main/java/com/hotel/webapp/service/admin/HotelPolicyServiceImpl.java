@@ -29,7 +29,7 @@ public class HotelPolicyServiceImpl extends BaseServiceImpl<HotelPolicy, Integer
 
     if (hotelPolicy.getHotelId() != null &&
           (update.getHotelId() == null || update.getHotelId() == 0)) {
-      throw new AppException(ErrorCode.NOT_NULL, "Hotel");
+      throw new AppException(ErrorCode.FIELD_NOT_EMPTY, "Hotel");
     }
   }
 

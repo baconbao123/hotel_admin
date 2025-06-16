@@ -73,31 +73,46 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
   private <E> Specification<E> buildSpecification(Map<String, Object> filters) {
     return (root, query, cb) -> {
       List<Predicate> predicates = new ArrayList<>();
-
       predicates.add(cb.isNull(root.get("deletedAt")));
-      predicates.add(cb.notEqual(root.get("email"), "sa@gmail.com"));
 
-      if (filters != null) {
-        for (Map.Entry<String, Object> entry : filters.entrySet()) {
-          String fieldName = entry.getKey();
-          Object value = entry.getValue();
+      // Loại trừ email sa@gmail.com nếu field email tồn tại
+      boolean hasEmailField = true;
+      try {
+        root.get("email");
+        predicates.add(cb.notEqual(root.get("email"), "sa@gmail.com"));
+      } catch (IllegalArgumentException e) {
+        hasEmailField = false;
+      }
 
-          if (fieldName != null && !fieldName.trim().isEmpty() && value != null && !value.toString().trim().isEmpty()) {
-            String searchValue = convertDateToString(value).toLowerCase();
-            Class<?> fieldType = root.get(fieldName).getJavaType();
+      if (filters == null) return cb.conjunction();
 
-            if (fieldType.equals(LocalDate.class)) {
-              predicates.add(
-                    cb.equal(root.get(fieldName), LocalDate.parse(searchValue, DateTimeFormatter.ISO_LOCAL_DATE)));
-            } else if (fieldType.equals(Boolean.class)) {
-              predicates.add(cb.equal(root.get(fieldName), Boolean.parseBoolean(searchValue)));
-            } else if (fieldType.equals(Integer.class) || fieldType.equals(int.class)
-                  || fieldType.equals(Long.class) || fieldType.equals(long.class)) {
-              predicates.add(cb.equal(root.get(fieldName), parseNumber(searchValue, fieldType)));
-            } else {
-              predicates.add(cb.like(cb.lower(root.get(fieldName).as(String.class)), "%" + searchValue + "%"));
-            }
+      for (var entry : filters.entrySet()) {
+        String field = entry.getKey();
+        Object value = entry.getValue();
+
+        if (field == null || field.isBlank() || value == null || value.toString().isBlank()) {
+          continue;
+        }
+
+        // Bỏ qua filter email nếu là sa@gmail.com
+        if (field.equals("email") && hasEmailField && value.toString().trim().equalsIgnoreCase("sa@gmail.com")) {
+          continue;
+        }
+
+        try {
+          String searchValue = convertDateToString(value).toLowerCase();
+          Class<?> type = root.get(field).getJavaType();
+
+          if (type.equals(LocalDate.class)) {
+            predicates.add(cb.equal(root.get(field), LocalDate.parse(searchValue, DateTimeFormatter.ISO_LOCAL_DATE)));
+          } else if (type.equals(Boolean.class)) {
+            predicates.add(cb.equal(root.get(field), Boolean.parseBoolean(searchValue)));
+          } else if (Number.class.isAssignableFrom(type) || type.equals(int.class) || type.equals(long.class)) {
+            predicates.add(cb.equal(root.get(field), parseNumber(searchValue, type)));
+          } else {
+            predicates.add(cb.like(cb.lower(root.get(field).as(String.class)), "%" + searchValue + "%"));
           }
+        } catch (IllegalArgumentException e) {
         }
       }
 
@@ -141,6 +156,8 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
     validateCreate(create);
     E entity = mapper.toCreate(create);
 
+    beforeCreate(entity, create);
+
     if (entity instanceof AuditEntity audit) {
       audit.setCreatedAt(LocalDateTime.now());
       audit.setCreatedBy(getAuthId());
@@ -149,6 +166,8 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
     entity = repository.save(entity);
 
     afterCreate(entity, create);
+    afterCommon(entity, create);
+
     return entity;
   }
 
@@ -161,12 +180,15 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
     validateUpdate((Integer) id, update);
     mapper.toUpdate(entity, update);
 
+    beforeUpdate(entity, update);
+
     if (entity instanceof AuditEntity audit) {
       audit.setUpdatedAt(LocalDateTime.now());
       audit.setUpdatedBy(getAuthId());
     }
 
     afterUpdate(entity, update);
+    afterCommon(entity, update);
 
     return repository.save(entity);
   }
@@ -209,6 +231,15 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
     throw new RuntimeException("Not implemented yet");
   }
 
+  protected void beforeCreate(E e, DTO create) {
+  }
+
+  protected void beforeUpdate(E e, DTO update) {
+  }
+
+  protected void beforeDelete(ID id) {
+  }
+
   protected void validateCreate(DTO create) {
   }
 
@@ -230,6 +261,8 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
   protected void afterUpdate(E entity, DTO dto) {
   }
 
-  protected void beforeDelete(ID id) {
+  protected void afterCommon(E entity, DTO dto) {
   }
+
+
 }

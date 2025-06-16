@@ -30,7 +30,7 @@ public class HotelFacilitiesController {
   MapHotelFacilityServiceImpl mapHotelFacilityService;
 
   // facilities
-  @PostMapping("/create")
+  @PostMapping
   @Permission(name = "create")
   public ApiResponse<Facilities> createFacilities(@Valid @RequestBody FacilitiesDTO dto) {
     return ApiResponse.<Facilities>builder()
@@ -38,7 +38,7 @@ public class HotelFacilitiesController {
                       .build();
   }
 
-  @PutMapping("/update/{id}")
+  @PutMapping("/{id}")
   @Permission(name = "update")
   public ApiResponse<Facilities> updateFacility(@PathVariable Integer id, @Valid @RequestBody FacilitiesDTO dto) {
     return ApiResponse.<Facilities>builder()
@@ -46,7 +46,7 @@ public class HotelFacilitiesController {
                       .build();
   }
 
-  @GetMapping("/get-all")
+  @GetMapping
   @Permission(name = "view")
   public ApiResponse<Page<Facilities>> getAll(
         @RequestParam(required = false) Map<String, String> filters,
@@ -59,7 +59,7 @@ public class HotelFacilitiesController {
                       .build();
   }
 
-  @GetMapping("/find-by-id/{id}")
+  @GetMapping("/{id}")
   @Permission(name = "view")
   public ApiResponse<Facilities> getByFacilitiesId(@PathVariable Integer id) {
     return ApiResponse.<Facilities>builder()
@@ -67,7 +67,7 @@ public class HotelFacilitiesController {
                       .build();
   }
 
-  @DeleteMapping("/delete/{id}")
+  @DeleteMapping("/{id}")
   @Permission(name = "delete")
   public ApiResponse<Void> deleteByFacilities(@PathVariable Integer id) {
     facilitiesService.delete(id);
