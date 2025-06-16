@@ -14,9 +14,7 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -120,7 +118,8 @@ public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer,
 //    return new ArrayList<>(permissionMap.values());
 //  }
 
-  public Page<PermissionRes> getAllPermissions(Pageable pageable) {
+  public Page<PermissionRes> getAllPermissions(int page, int size, Map<String, String> sort) {
+    Pageable pageable = buildPageable(page, size, sort);
     Page<Object[]> results = repository.getAllPermissions(pageable);
     Map<String, PermissionRes> permissionMap = new HashMap<>();
 
@@ -166,8 +165,27 @@ public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer,
     }
 
     List<PermissionRes> permissionList = new ArrayList<>(permissionMap.values());
-    // Giữ nguyên thứ tự từ database bằng cách không sắp xếp lại
     return new PageImpl<>(permissionList, pageable, results.getTotalElements());
+  }
+
+  private Pageable buildPageable(int page, int size, Map<String, String> sort) {
+    List<Sort.Order> orders = new ArrayList<>();
+    if (sort == null || sort.isEmpty()) {
+      orders.add(new Sort.Order(Sort.Direction.ASC, "role_id"));
+    } else {
+      sort.forEach((field, direction) -> {
+        if (field.startsWith("sort[")) {
+          String cleanField = field.replaceAll("sort\\[(.*?)\\]", "$1");
+          Sort.Direction sortDirection = direction.equalsIgnoreCase("desc")
+                ? Sort.Direction.DESC : Sort.Direction.ASC;
+          orders.add(new Sort.Order(sortDirection, cleanField));
+        }
+      });
+    }
+
+    return orders.isEmpty()
+          ? PageRequest.of(page, size)
+          : PageRequest.of(page, size, Sort.by(orders));
   }
 
 

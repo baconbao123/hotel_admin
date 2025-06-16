@@ -17,7 +17,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -44,31 +43,10 @@ public class PermissionController {
         @RequestParam(defaultValue = "10") int size,
 //        @RequestParam(required = false) String name,
         @RequestParam(required = false) Map<String, String> sort) {
-    Pageable pageable = buildPageable(page, size, sort);
-    Page<PermissionRes> permissions = permissionService.getAllPermissions(pageable);
+    Page<PermissionRes> permissions = permissionService.getAllPermissions(page, size,  sort);
     return ApiResponse.<Page<PermissionRes>>builder()
                       .result(permissions)
                       .build();
-  }
-
-  private Pageable buildPageable(int page, int size, Map<String, String> sort) {
-    List<Sort.Order> orders = new ArrayList<>();
-    if (sort == null || sort.isEmpty()) {
-      orders.add(new Sort.Order(Sort.Direction.ASC, "role_id"));
-    } else {
-      sort.forEach((field, direction) -> {
-        if (field.startsWith("sort[")) {
-          String cleanField = field.replaceAll("sort\\[(.*?)\\]", "$1");
-          Sort.Direction sortDirection = direction.equalsIgnoreCase("desc")
-                ? Sort.Direction.DESC : Sort.Direction.ASC;
-          orders.add(new Sort.Order(sortDirection, cleanField));
-        }
-      });
-    }
-
-    return orders.isEmpty()
-          ? PageRequest.of(page, size)
-          : PageRequest.of(page, size, Sort.by(orders));
   }
 
   @GetMapping("/{roleId}")
