@@ -32,7 +32,7 @@ const ViewStatus = ({ status }: { status: boolean }) => {
   );
 };
 
-export default function RoleForm({
+export default function RoleDetail({
   id,
   open = false,
   mode = "create",
@@ -69,19 +69,6 @@ export default function RoleForm({
         style={{padding: '8px 40px '}}
         disabled={submitting}
       />
-      {mode !== "view" && (
-        <Button
-          label="Save"
-          type="submit"
-          form="user-form"
-          severity="success"
-          className="w-100"
-          style={{padding: '8px 40px '}}
-          disabled={submitting}
-          loading={submitting}
-          onClick={() => submitData()}
-        />
-      )}
     </div>
   );
 
@@ -165,39 +152,25 @@ export default function RoleForm({
         className="p-fluid"
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          <div>
-            <label htmlFor="name">Name <span className="text-red-500">*</span></label>
-            <InputText
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              disabled={mode === "view" || submitting}
-            />
-            {getErrorMessage('name') && (
-              <small className="p-error text-red-500">{getErrorMessage('name')}</small>
-            )}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-3 gap-2 items-center mb-2">
+            <label htmlFor="name" className="font-bold col-span-1">Name:</label>
+            <span id="name" className="col-span-2">
+                {name || '-'}
+            </span>
           </div>
-         <div>
-            <label htmlFor="description">Description</label>
-            <InputText
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              disabled={mode === "view" || submitting}
-            />
+          <div className="grid grid-cols-3 gap-2 items-center mb-2">
+            <label htmlFor="description" className="font-bold col-span-1">Description:</label>
+            <span id="description" className="col-span-2">
+              {description || '-'}
+            </span>
           </div>
-         <div className="flex align-items-center gap-4">
-            <label htmlFor="status">Status</label>
-            <InputSwitch
-              id="status"
-              className="w-50"
-              checked={status}
-              onChange={(e) => setStatus(e.value)}
-              disabled={submitting}
-            />
+          <div className="grid grid-cols-3 gap-2 items-center mb-2">
+            <label htmlFor="status" className="font-bold col-span-1">Status:</label>
+            <span id="status" className="col-span-2">
+              <Tag value={status ? 'Active' : 'Inactive'} severity={status ? 'success' : 'danger'} />
+            </span>
           </div>
-         
         </div>
       </Dialog>
     </div>

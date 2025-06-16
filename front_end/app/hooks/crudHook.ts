@@ -10,8 +10,10 @@ interface ErrorResponse {
 export default function useCrud(baseUrl: string) {
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<Object | null>(null);
   const [openForm, setopenForm] = useState(false);
+  const [openFormDetail, setopenFormDetail] = useState(false);
+
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
@@ -28,7 +30,7 @@ export default function useCrud(baseUrl: string) {
     sortOrderParam: number | null | undefined = sortOrder,
     setLoadingState: boolean = true
   ) => {
-    if (setLoadingState) setLoading(true);
+    if (setLoadingState)  window.dispatchEvent(new CustomEvent('loading', { detail: true }));
     try {
       const queryParams = new URLSearchParams();
       Object.entries(filters).forEach(([key, value]) => {
@@ -91,7 +93,7 @@ export default function useCrud(baseUrl: string) {
   // READ by ID
   const loadDataById = useCallback(
     async (id: string) => {
-      setLoading(true);
+      window.dispatchEvent(new CustomEvent('loading', { detail: true }))
       try {
         const res = await $axios.get(`${baseUrl}/${id}`);
         return res.data.result;
@@ -108,7 +110,7 @@ export default function useCrud(baseUrl: string) {
 
   // CREATE
   const createItem = async (newItem: object | FormData) => {
-    setLoading(true);
+    window.dispatchEvent(new CustomEvent('loading', { detail: true }))
     try {
       const config =
         newItem instanceof FormData
@@ -120,9 +122,10 @@ export default function useCrud(baseUrl: string) {
         return res.data;
       }
     } catch (err: any) {
-      const errorResponse = err.response?.data as ErrorResponse;
-      setError(errorResponse?.message || "Failed to create item");
-      throw new Error(errorResponse?.message || "Failed to create item");
+       console.log(err?.response?.data?.errorMessages);
+      
+      setError(err?.response?.data?.errorMessages);
+      throw new Error(err?.response?.data?.message || "Failed to create item");
     } finally {
       setLoading(false);
     }
@@ -130,7 +133,7 @@ export default function useCrud(baseUrl: string) {
 
   // UPDATE
   const updateItem = async (id: string, updatedItem: object | FormData) => {
-    setLoading(true);
+    // setLoading(true);
     try {
       const config =
         updatedItem instanceof FormData
@@ -177,6 +180,8 @@ export default function useCrud(baseUrl: string) {
     error,
     openForm,
     setopenForm,
+    setopenFormDetail,
+    openFormDetail,
     loadDataById,
     loadDataTable,
     updatePageData,
