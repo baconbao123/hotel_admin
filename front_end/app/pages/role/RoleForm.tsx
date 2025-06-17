@@ -1,101 +1,49 @@
-import { Button } from "primereact/button";
+import { useState, useEffect, useRef } from "react";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
+import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
-import { useEffect, useRef, useState } from "react";
 import { InputSwitch } from "primereact/inputswitch";
-import { Tag } from "primereact/tag";
-interface Props {
-  readonly id?: string;
-  readonly open: boolean;
-  readonly mode?: "create" | "edit" | "view";
-  readonly onClose: () => void;
-  readonly loadDataById: (id: string) => Promise<any>;
-  readonly loadDataTable: () => Promise<void>;
-  readonly createItem: (data: object | FormData) => Promise<any>;
-  readonly updateItem: (id: string, data: object | FormData) => Promise<any>;
-  readonly error: Object | null;
-}
 
-const ViewStatus = ({ status }: { status: boolean }) => {
-  return (
-    <Tag
-      value={status ? "Active" : "Inactive"}
-      severity={status ? "success" : "danger"}
-      style={{
-        maxWidth: "7rem",
-        display: "flex",
-        justifyContent: "center",
-        padding: "0.3rem 0.6rem",
-      }}
-    />
-  );
-};
+interface Props {
+  id?: string;
+  open: boolean;
+  mode?: "create" | "edit" | "view";
+  onClose: () => void;
+  loadDataById: (id: string) => Promise<any>;
+  createItem: (data: object | FormData) => Promise<any>;
+  updateItem: (id: string, data: object | FormData) => Promise<any>;
+  error: Object | null;
+}
 
 export default function RoleForm({
   id,
-  open = false,
-  mode = "create",
+  open,
+  mode,
   onClose,
   loadDataById,
-  loadDataTable,
   createItem,
   updateItem,
-  error
+  error,
 }: Props) {
-  const [name, setName] = useState<string>("");
-  const [description, setDescription] = useState<string>("");
-  const [status, setStatus] = useState<boolean>(true);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [status, setStatus] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const toast = useRef<Toast>(null);
 
-  const getHeader = (): string => {
-    switch (mode) {
-      case "view":
-        return "ROLE DETAILS";
-      case "edit":
-        return "EDIT ROLE";
-      default:
-        return "ADD NEW ROLE";
-    }
-  };
+  const header = mode === "edit" ? "EDIT ROLE" : "ADD NEW ROLE";
 
-  const footer = (
-    <div className="flex justify-center gap-2">
-      <Button
-        label="Close"
-        onClick={onClose}
-        severity="secondary"
-        style={{padding: '8px 40px '}}
-        disabled={submitting}
-      />
-      {mode !== "view" && (
-        <Button
-          label="Save"
-          type="submit"
-          form="user-form"
-          severity="success"
-          className="w-100"
-          style={{padding: '8px 40px '}}
-          disabled={submitting}
-          loading={submitting}
-          onClick={() => submitData()}
-        />
-      )}
-    </div>
-  );
-
-  const submitData = async () => {
+  const submit = async () => {
     setSubmitting(true);
     const roleDTO = { name, description, status };
-
     try {
       if (id) {
         await updateItem(id, roleDTO);
         toast.current?.show({
           severity: "success",
           summary: "Success",
-          detail: "Role updated successfully",
+          detail: "Role updated",
           life: 3000,
         });
       } else {
@@ -103,48 +51,45 @@ export default function RoleForm({
         toast.current?.show({
           severity: "success",
           summary: "Success",
-          detail: "Role created successfully",
+          detail: "Role created",
           life: 3000,
         });
       }
-
       onClose();
-    } catch (error: any) {
-      console.log( error?.response);
+    } catch (err: any) {
       toast.current?.show({
         severity: "error",
         summary: "Error",
-        detail: error.message ?? "Failed to save role",
+        detail: err.message || "Failed to save role",
         life: 3000,
       });
-    } 
-    finally {
+    } finally {
       setSubmitting(false);
     }
   };
 
-  const getErrorMessage = (field: string): string | null => { 
-    if (error && typeof error === 'object' && error !== null && field in error) {
-      return (error as Record<string, string>)[field] || null;
-    }
-    return null;
-  }
+  const getError = (field: string) =>
+    (error &&
+      typeof error === "object" &&
+      (error as Record<string, string>)[field]) ||
+    null;
+
   useEffect(() => {
     if (id && open) {
       loadDataById(id)
-        .then((roleData) => {
-          setName(roleData.name ?? "");
-          setDescription(roleData.description ?? "");
-          setStatus(roleData.status ?? true);
+        .then((data) => {
+          setName(data.name || "");
+          setDescription(data.description || "");
+          setStatus(data.status ?? true);
         })
-        .catch((err) => {
+        .catch(() =>
           toast.current?.show({
             severity: "error",
             summary: "Error",
-            detail: "Failed to load user data",
+            detail: "Failed to load role",
             life: 3000,
-          });
-        });
+          })
+        );
     } else {
       setName("");
       setDescription("");
@@ -158,8 +103,26 @@ export default function RoleForm({
       <Dialog
         visible={open}
         onHide={onClose}
-        header={getHeader()}
-        footer={footer}
+        header={header}
+        footer={
+          <div className="flex justify-center gap-2">
+            <Button
+              label="Close"
+              onClick={onClose}
+              severity="secondary"
+              disabled={submitting}
+              style={{ padding: "8px 40px" }}
+            />
+            <Button
+              label="Save"
+              onClick={submit}
+              severity="success"
+              disabled={submitting}
+              loading={submitting}
+              style={{ padding: "8px 40px" }}
+            />
+          </div>
+        }
         style={{ width: "40%" }}
         modal
         className="p-fluid"
@@ -167,27 +130,29 @@ export default function RoleForm({
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           <div>
-            <label htmlFor="name">Name <span className="text-red-500">*</span></label>
+            <label htmlFor="name">
+              Name <span className="text-red-500">*</span>
+            </label>
             <InputText
               id="name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              disabled={mode === "view" || submitting}
+              disabled={submitting}
             />
-            {getErrorMessage('name') && (
-              <small className="p-error text-red-500">{getErrorMessage('name')}</small>
+            {getError("name") && (
+              <small className="p-error text-red-500">{getError("name")}</small>
             )}
           </div>
-         <div>
+          <div>
             <label htmlFor="description">Description</label>
             <InputText
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              disabled={mode === "view" || submitting}
+              disabled={submitting}
             />
           </div>
-         <div className="flex align-items-center gap-4">
+          <div className="flex align-items-center gap-4">
             <label htmlFor="status">Status</label>
             <InputSwitch
               id="status"
@@ -197,7 +162,6 @@ export default function RoleForm({
               disabled={submitting}
             />
           </div>
-         
         </div>
       </Dialog>
     </div>

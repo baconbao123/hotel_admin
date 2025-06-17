@@ -24,10 +24,15 @@ public interface UserRepository extends BaseRepository<User, Integer> {
 
   Optional<User> findByRefreshToken(String refreshToken);
 
-  @Query("select u.id, u.fullName, u.email, u.phoneNumber, u.avatarUrl, " +
-        "u.status, a.streetNumber, a.streetId, a.wardCode, a.districtCode, a.provinceCode, a.note " +
+  @Query("select u.id, u.fullName, u.email, u.phoneNumber, u.avatarUrl, u.status, " +
+        "a.streetNumber, a.streetId, a.wardCode, w.name, a.districtCode, d.name, a.provinceCode, p.name, s.name, " +
+        "a.note " +
         "from User u " +
         "join Address a on u.addressId = a.id " +
+        "join Provinces p on a.provinceCode = p.code " +
+        "join Wards w on a.wardCode = w.code " +
+        "join Districts d on a.districtCode = d.code " +
+        "join Streets s on a.streetId = s.id " +
         "where u.id = :id")
   List<Object[]> getUserById(Integer id);
 

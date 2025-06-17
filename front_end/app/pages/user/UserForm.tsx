@@ -3,49 +3,33 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
-import styles from "@/pages/user/UserFrom.module.scss";
 import ImageUploader from "@/utils/ImageUploader";
 import { InputSwitch } from "primereact/inputswitch";
-import { Tag } from "primereact/tag";
 import { Dropdown } from "primereact/dropdown";
 import $axios from "@/axios";
 import { MultiSelect } from "primereact/multiselect";
+import "./UserFrom.scss";
 
 interface Props {
-  readonly id?: string;
-  readonly open: boolean;
-  readonly mode?: "create" | "edit" | "view";
-  readonly onClose: () => void;
-  readonly loadDataById: (id: string) => Promise<any>;
-  readonly loadDataTable: () => Promise<void>;
-  readonly createItem: (data: object | FormData) => Promise<any>;
-  readonly updateItem: (id: string, data: object | FormData) => Promise<any>;
+  id?: string;
+  open: boolean;
+  mode?: "create" | "edit" | "view";
+  onClose: () => void;
+  loadDataById: (id: string) => Promise<any>;
+  createItem: (data: object | FormData) => Promise<any>;
+  updateItem: (id: string, data: object | FormData) => Promise<any>;
+  error: Object | null;
 }
-
-const ViewStatus = ({ status }: { status: boolean }) => {
-  return (
-    <Tag
-      value={status ? "Active" : "Inactive"}
-      severity={status ? "success" : "danger"}
-      style={{
-        maxWidth: "7rem",
-        display: "flex",
-        justifyContent: "center",
-        padding: "0.3rem 0.6rem",
-      }}
-    />
-  );
-};
 
 export default function UserForm({
   id,
-  open = false,
+  open,
   mode = "create",
   onClose,
   loadDataById,
-  loadDataTable,
   createItem,
   updateItem,
+  error,
 }: Props) {
   const [userData, setUserData] = useState<any>();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -70,37 +54,7 @@ export default function UserForm({
 
   const toast = useRef<Toast>(null);
 
-  const getHeader = (): string => {
-    switch (mode) {
-      case "view":
-        return "USER DETAILS";
-      case "edit":
-        return "EDIT USER";
-      default:
-        return "ADD NEW USER";
-    }
-  };
-
-  const footer = (
-    <div className="flex justify-end gap-2">
-      <Button
-        label="Close"
-        onClick={onClose}
-        className="p-button-text"
-        disabled={submitting}
-      />
-      {mode !== "view" && (
-        <Button
-          label="Save"
-          type="submit"
-          form="user-form"
-          className="p-button-text"
-          disabled={submitting}
-          loading={submitting}
-        />
-      )}
-    </div>
-  );
+  const header = mode === "edit" ? "EDIT ROLE" : "ADD NEW ROLE";
 
   // Fetch provinces on component mount
   useEffect(() => {
@@ -351,9 +305,9 @@ export default function UserForm({
       setSelectedStreet(null);
       setStreetNumber("");
     }
-  }, [id, open, loadDataById, provinceData]);
+  }, [id, open, loadDataById]);
 
-  const submitData = async (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (
@@ -371,10 +325,10 @@ export default function UserForm({
       });
       return;
     }
-   
 
     setSubmitting(true);
     const formData = new FormData();
+
     formData.append("fullName", fullName);
     formData.append("email", email);
     if (password) {
@@ -419,31 +373,24 @@ export default function UserForm({
           life: 3000,
         });
       }
-      await loadDataTable();
       onClose();
-    } catch (error: any) {
-      let errorMessage = "Failed to save user";
-      if (error.response?.data) {
-        const { message, errors } = error.response.data;
-        if (errors && typeof errors === "object") {
-          errorMessage = Object.entries(errors)
-            .map(([field, msg]) => `${msg}`)
-            .join("; ");
-        } else if (message) {
-          errorMessage = message;
-        }
-      }
+    } catch (err: any) {
       toast.current?.show({
         severity: "error",
         summary: "Error",
-        detail: errorMessage,
-        life: 5000,
+        detail: err.message || "Failed to save role",
+        life: 3000,
       });
-      console.error("Error saving user:", error.response?.data || error);
     } finally {
       setSubmitting(false);
     }
   };
+
+  const getError = (field: string) =>
+    (error &&
+      typeof error === "object" &&
+      (error as Record<string, string>)[field]) ||
+    null;
 
   return (
     <div>
@@ -451,22 +398,36 @@ export default function UserForm({
       <Dialog
         visible={open}
         onHide={onClose}
-        header={getHeader()}
-        footer={footer}
+        header={header}
+        footer={
+          <div className="flex justify-center gap-2">
+            <Button
+              label="Close"
+              onClick={onClose}
+              severity="secondary"
+              disabled={submitting}
+              style={{ padding: "8px 40px" }}
+            />
+            <Button
+              label="Save"
+              onClick={submit}
+              severity="success"
+              disabled={submitting}
+              loading={submitting}
+              style={{ padding: "8px 40px" }}
+            />
+          </div>
+        }
         style={{ width: "50%" }}
         modal
-        className="p-fluid"
+        className="dialog p-fluid"
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
       >
-        <form id="user-form" onSubmit={submitData}>
-          <div className={styles.group_input}>
-            <div className={styles.field_input}>Avatar</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label htmlFor="avatar">Avatar</label>
             <ImageUploader
-              onFileChange={(files) => {
-                if (mode !== "view") {
-                  setSelectedFile(files ? files[0] : null);
-                }
-              }}
+              onFileChange={(files) => setSelectedFile(files ? files[0] : null)}
               maxFileSize={2}
               maxCount={1}
               initialImageUrl={
@@ -476,178 +437,218 @@ export default function UserForm({
                     }/${avatarUrl}`
                   : undefined
               }
-              disabled={mode === "view"}
+              disabled={submitting}
             />
+            {getError("avatar") && (
+              <small className="p-error text-red-500">
+                {getError("avatar")}
+              </small>
+            )}
           </div>
 
-          <div style={{ height: "10px" }}></div>
-
-          <div className={styles.group_input}>
-            <div className={styles.group_a}>
-              <div className={styles.field_input}>Full name</div>
-              <div className={styles.input_enter}>
-                <InputText
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  disabled={mode === "view" || submitting}
-                />
-              </div>
-            </div>
-
-            <div className={styles.group_b}>
-              <div className={styles.field_input}>Email</div>
-              <div className={styles.input_enter}>
-                <InputText
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  disabled={mode === "view" || submitting}
-                />
-              </div>
-            </div>
+          <div className="col-span-1 md:col-span-2">
+            <div className="h-4"></div>
           </div>
 
-          <div style={{ height: "10px" }}></div>
-
-          <div className={styles.group_input}>
-            <div className={styles.group_a}>
-              <div className={styles.field_input}>Phone number</div>
-              <div className={styles.input_enter}>
-                <InputText
-                  value={phoneNumber}
-                  onChange={(e) => setPhoneNumber(e.target.value)}
-                  disabled={mode === "view" || submitting}
-                />
-              </div>
-            </div>
-
-            <div className={styles.group_b}>
-              <div className={styles.field_input}>Password</div>
-              <div className={styles.input_enter}>
-                <InputText
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  type="password"
-                  disabled={mode === "view" || submitting}
-                />
-              </div>
-            </div>
+          <div>
+            <label htmlFor="fullName">
+              Full Name <span className="text-red-500">*</span>
+            </label>
+            <InputText
+              id="fullName"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              disabled={submitting}
+            />
+            {getError("fullName") && (
+              <small className="p-error text-red-500">
+                {getError("fullName")}
+              </small>
+            )}
+          </div>
+          <div>
+            <label htmlFor="email">
+              Email <span className="text-red-500">*</span>
+            </label>
+            <InputText
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={submitting}
+            />
+            {getError("email") && (
+              <small className="p-error text-red-500">
+                {getError("email")}
+              </small>
+            )}
+          </div>
+          <div>
+            <label htmlFor="phoneNumber">Phone Number</label>
+            <InputText
+              id="phoneNumber"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
+              disabled={submitting}
+            />
+            {getError("phoneNumber") && (
+              <small className="p-error text-red-500">
+                {getError("phoneNumber")}
+              </small>
+            )}
+          </div>
+          <div>
+            <label htmlFor="password">
+              Password <span className="text-red-500">*</span>
+            </label>
+            <InputText
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              type="password"
+              disabled={submitting}
+            />
+            {getError("password") && (
+              <small className="p-error text-red-500">
+                {getError("password")}
+              </small>
+            )}
+          </div>
+          <div>
+            <label htmlFor="roles">Roles</label>
+            <MultiSelect
+              id="roles"
+              value={selectedRoles}
+              onChange={(e) => setSelectedRoles(e.value)}
+              options={roleData}
+              optionLabel="name"
+              display="chip"
+              placeholder="Select Roles"
+              maxSelectedLabels={3}
+              className="w-full"
+              disabled={submitting}
+            />
+            {getError("roles") && (
+              <small className="p-error text-red-500">
+                {getError("roles")}
+              </small>
+            )}
           </div>
 
-          <div style={{ height: "10px" }}></div>
+          <div className="col-span-1 md:col-span-2"></div>
 
-          <div className={styles.group_input}>
-            <div className={styles.group_a}>
-              <div className={styles.field_input}>Province</div>
-              <div className={styles.input_enter}>
-                <Dropdown
-                  value={selectedProvince}
-                  onChange={(e) => setSelectedProvince(e.value)}
-                  options={provinceData}
-                  optionLabel="name"
-                  placeholder="Select a Province"
-                  className="w-full md:w-14rem"
-                  disabled={mode === "view" || submitting}
-                />
-              </div>
-            </div>
-
-            <div className={styles.group_b}>
-              <div className={styles.field_input}>District</div>
-              <div className={styles.input_enter}>
-                <Dropdown
-                  value={selectedDistrict}
-                  onChange={(e) => setSelectedDistrict(e.value)}
-                  options={districtData}
-                  optionLabel="name"
-                  placeholder="Select a District"
-                  className="w-full md:w-14rem"
-                  disabled={mode === "view" || submitting || !selectedProvince}
-                />
-              </div>
-            </div>
+          <div>
+            <label htmlFor="province">
+              Province <span className="text-red-500">*</span>
+            </label>
+            <Dropdown
+              id="province"
+              value={selectedProvince}
+              onChange={(e) => setSelectedProvince(e.value)}
+              options={provinceData}
+              optionLabel="name"
+              placeholder="Select a Province"
+              className="w-full"
+              disabled={submitting}
+            />
+            {getError("province") && (
+              <small className="p-error text-red-500">
+                {getError("province")}
+              </small>
+            )}
+          </div>
+          <div>
+            <label htmlFor="district">
+              District <span className="text-red-500">*</span>
+            </label>
+            <Dropdown
+              id="district"
+              value={selectedDistrict}
+              onChange={(e) => setSelectedDistrict(e.value)}
+              options={districtData}
+              optionLabel="name"
+              placeholder="Select a District"
+              className="w-full"
+              disabled={submitting || !selectedProvince}
+            />
+            {getError("district") && (
+              <small className="p-error text-red-500">
+                {getError("district")}
+              </small>
+            )}
+          </div>
+          <div>
+            <label htmlFor="ward">
+              Ward <span className="text-red-500">*</span>
+            </label>
+            <Dropdown
+              id="ward"
+              value={selectedWard}
+              onChange={(e) => setSelectedWard(e.value)}
+              options={wardData}
+              optionLabel="name"
+              placeholder="Select a Ward"
+              className="w-full"
+              disabled={submitting || !selectedDistrict}
+            />
+            {getError("ward") && (
+              <small className="p-error text-red-500">{getError("ward")}</small>
+            )}
+          </div>
+          <div>
+            <label htmlFor="street">
+              Street <span className="text-red-500">*</span>
+            </label>
+            <Dropdown
+              id="street"
+              value={selectedStreet}
+              onChange={(e) => setSelectedStreet(e.value)}
+              options={streetData}
+              optionLabel="name"
+              placeholder="Select a Street"
+              className="w-full"
+              disabled={submitting || !selectedWard}
+            />
+            {getError("street") && (
+              <small className="p-error text-red-500">
+                {getError("street")}
+              </small>
+            )}
+          </div>
+          <div>
+            <label htmlFor="streetNumber">
+              Street Number <span className="text-red-500">*</span>
+            </label>
+            <InputText
+              id="streetNumber"
+              value={streetNumber}
+              onChange={(e) => setStreetNumber(e.target.value)}
+              disabled={submitting}
+            />
+            {getError("streetNumber") && (
+              <small className="p-error text-red-500">
+                {getError("streetNumber")}
+              </small>
+            )}
           </div>
 
-          <div style={{ height: "10px" }}></div>
-
-          <div className={styles.group_input}>
-            <div className={styles.group_a}>
-              <div className={styles.field_input}>Ward</div>
-              <div className={styles.input_enter}>
-                <Dropdown
-                  value={selectedWard}
-                  onChange={(e) => setSelectedWard(e.value)}
-                  options={wardData}
-                  optionLabel="name"
-                  placeholder="Select a Ward"
-                  className="w-full md:w-14rem"
-                  disabled={mode === "view" || submitting || !selectedDistrict}
-                />
-              </div>
-            </div>
-
-            <div className={styles.group_b}>
-              <div className={styles.field_input}>Street</div>
-              <div className={styles.input_enter}>
-                <Dropdown
-                  value={selectedStreet}
-                  onChange={(e) => setSelectedStreet(e.value)}
-                  options={streetData}
-                  optionLabel="name"
-                  placeholder="Select a Street"
-                  className="w-full md:w-14rem"
-                  disabled={mode === "view" || submitting || !selectedWard}
-                />
-              </div>
-            </div>
-
-            <div className={styles.group_b}>
-              <div className={styles.field_input}>Street Number</div>
-              <div className={styles.input_enter}>
-                <InputText
-                  value={streetNumber}
-                  onChange={(e) => setStreetNumber(e.target.value)}
-                  disabled={mode === "view" || submitting}
-                />
-              </div>
-            </div>
+          <div className="flex items-center gap-4">
+            <label htmlFor="status">
+              Status <span className="text-red-500">*</span>
+            </label>
+            <InputSwitch
+              id="status"
+              className="w-50"
+              checked={status}
+              onChange={(e) => setStatus(e.value)}
+              disabled={submitting}
+            />
+            {getError("status") && (
+              <small className="p-error text-red-500">
+                {getError("status")}
+              </small>
+            )}
           </div>
-
-          <div style={{ height: "10px" }}></div>
-
-          <div className={styles.group_input}>
-            <div className={styles.group_a}>
-              <div className={styles.field_input}>Role</div>
-              <div className={styles.input_enter}>
-                <MultiSelect
-                  value={selectedRoles}
-                  onChange={(e) => setSelectedRoles(e.value)}
-                  options={roleData}
-                  optionLabel="name"
-                  display="chip"
-                  placeholder="Select Roles"
-                  maxSelectedLabels={3}
-                  className="w-full md:w-20rem"
-                  disabled={mode === "view" || submitting}
-                />
-              </div>
-            </div>
-
-            <div className={styles.group_b}>
-              <div className={styles.field_input}>Status</div>
-              <div className={styles.input_enter}>
-                {mode === "view" ? (
-                  <ViewStatus status={status} />
-                ) : (
-                  <InputSwitch
-                    checked={status}
-                    onChange={(e) => setStatus(e.value)}
-                    disabled={submitting}
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        </form>
+        </div>
       </Dialog>
     </div>
   );

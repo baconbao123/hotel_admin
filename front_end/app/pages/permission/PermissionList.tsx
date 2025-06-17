@@ -41,7 +41,7 @@ export default function PermissionList() {
   const [pageSize, setPageSize] = useState(20);
   const [totalRecords, setTotalRecords] = useState(0);
   const [sortField, setSortField] = useState<string>("roleId");
-  const [sortOrder, setSortOrder] = useState<number>(1); 
+  const [sortOrder, setSortOrder] = useState<number>(1);
   const [searchFilters, setSearchFilters] = useState<Record<string, string>>(
     {}
   );
@@ -74,7 +74,6 @@ export default function PermissionList() {
       const permissions = res.data.result.content || [];
       const roleMap = new Map<number, RoleData>();
 
-      // Duy trì thứ tự theo roleId
       permissions.forEach((perm: PermissionRes) => {
         perm.roleRes.forEach((role: RoleData) => {
           if (!roleMap.has(role.roleId)) {
@@ -208,27 +207,27 @@ export default function PermissionList() {
         <BreadCrumbComponent name="RoleList" />
       </div>
 
-      <div className="mb-5">
-        <div className="grid grid-cols-4 gap-10 card">
-          <div className="col-span-4 2xl:col-span-3 xl:col-span-3 lg:col-span-3 md:col-span-3">
-            <div className="grid gap-2 2xl:grid-cols-6 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 grid-cols-2">
-              <InputText
-                placeholder="Search by name"
-                className="w-full"
-                value={searchFilters.name || ""}
-                onChange={(e) => handleSearchChange("name", e.target.value)}
-              />
+      <Card title="Permission management">
+        <div className="mb-5">
+          <div className="grid grid-cols-4 gap-10 card">
+            <div className="col-span-4 2xl:col-span-3 xl:col-span-3 lg:col-span-3 md:col-span-3">
+              <div className="grid gap-2 2xl:grid-cols-6 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 grid-cols-2">
+                <InputText
+                  placeholder="Search by name"
+                  className="w-full"
+                  value={searchFilters.name || ""}
+                  onChange={(e) => handleSearchChange("name", e.target.value)}
+                />
+              </div>
             </div>
-          </div>
-          <div className="col-span-4 2xl:col-span-1 xl:col-span-1 lg:col-span-1 md:col-span-1">
-            <div className="flex flex-wrap gap-2 justify-end">
-              <Button className="me-2" label="Export excel" />
+            <div className="col-span-4 2xl:col-span-1 xl:col-span-1 lg:col-span-1 md:col-span-1">
+              <div className="flex flex-wrap gap-2 justify-end">
+                <Button className="me-2" label="Export excel" />
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <Card title="Role management">
         <DataTable
           value={data}
           tableStyle={{ minWidth: "50rem" }}

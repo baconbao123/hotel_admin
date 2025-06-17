@@ -23,8 +23,12 @@ public class UserRes {
   String streetNumber;
   Integer streetId;
   String wardCode;
+  String wardName;
   String districtCode;
+  String districtName;
   String provinceCode;
+  String provinceName;
+  String streetName;
   String note;
 
   List<RoleRes> roles;

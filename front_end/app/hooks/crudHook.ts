@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import $axios from "@/axios";
 import { ApiResponse } from "@/types/apiResponse.type";
 
@@ -9,91 +9,116 @@ interface ErrorResponse {
 
 export default function useCrud(baseUrl: string) {
   const [data, setData] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [tableLoading, setTableLoading] = useState(true); 
+  const [actionLoading, setActionLoading] = useState(false); 
   const [error, setError] = useState<Object | null>(null);
-  const [openForm, setopenForm] = useState(false);
-  const [openFormDetail, setopenFormDetail] = useState(false);
-
+  const [openForm, setOpenForm] = useState(false);
+  const [openFormDetail, setOpenFormDetail] = useState(false);
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
-  const [sortField, setSortField] = useState<string | undefined>(undefined);
-  const [sortOrder, setSortOrder] = useState<number | undefined>(undefined);
-  const [searchFilters, setSearchFilters] = useState<Record<string, string>>(
-    {}
-  );
+  const [sortField, setSortField] = useState<string>();
+  const [sortOrder, setSortOrder] = useState<number>();
+  const [filters, setFilters] = useState<Record<string, string>>({});
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // READ
-  const loadDataTable = async (
-    filters: Record<string, string> = searchFilters,
-    sortFieldParam: string | null | undefined = sortField,
-    sortOrderParam: number | null | undefined = sortOrder,
-    setLoadingState: boolean = true
-  ) => {
-    if (setLoadingState)  window.dispatchEvent(new CustomEvent('loading', { detail: true }));
-    try {
-      const queryParams = new URLSearchParams();
-      Object.entries(filters).forEach(([key, value]) => {
-        if (value) queryParams.append(key, value);
-      });
-
-      if (sortFieldParam && sortOrderParam !== 0) {
-        const direction = sortOrderParam === 1 ? "desc" : "asc";
-        queryParams.append(`sort[${sortFieldParam}]`, direction);
+  const parseQueryParams = useCallback(() => {
+    const params = new URLSearchParams(window.location.search);
+    const result: Record<string, string> = {};
+    params.forEach((value, key) => {
+      if (key !== "page" && key !== "size" && !key.startsWith("sort[")) {
+        result[key] = value;
       }
+    });
+    return result;
+  }, []);
 
-      queryParams.append("page", page.toString());
-      queryParams.append("size", pageSize.toString());
+  useEffect(() => {
+    const initialFilters = parseQueryParams();
+    setFilters(initialFilters);
+    loadData(initialFilters);
+  }, [baseUrl, parseQueryParams]);
 
-      const url = `${baseUrl}?${queryParams.toString()}`;
-      const res = await $axios.get(url);
+  const loadData = async (
+    currentFilters: Record<string, string>,
+    sortFieldParam = sortField,
+    sortOrderParam = sortOrder,
+    showLoading = true
+  ) => {
+    if (showLoading) setTableLoading(true);
+    try {
+      const query = new URLSearchParams();
+      Object.entries(currentFilters).forEach(
+        ([key, value]) => value && query.append(key, value)
+      );
+      if (sortFieldParam && sortOrderParam)
+        query.append(
+          `sort[${sortFieldParam}]`,
+          sortOrderParam === 1 ? "desc" : "asc"
+        );
+      query.append("page", page.toString());
+      query.append("size", pageSize.toString());
+
+      const res = await $axios.get(`${baseUrl}?${query}`);
       const apiResponse = new ApiResponse(res.data);
-      const newData = apiResponse.result.content || [];
-      setData(newData);
-      setTotalRecords(apiResponse.result.totalElements || newData.length);
+      setData(apiResponse.result.content || []);
+      setTotalRecords(apiResponse.result.totalElements || 0);
       setError(null);
+
+      const urlParams = new URLSearchParams();
+      Object.entries(currentFilters).forEach(
+        ([key, value]) => value && urlParams.append(key, value)
+      );
+      window.history.replaceState(
+        null,
+        "",
+        urlParams.toString()
+          ? `${window.location.pathname}?${urlParams}`
+          : window.location.pathname
+      );
     } catch (err: any) {
       const errorResponse = err.response?.data as ErrorResponse;
       setError(errorResponse?.message || "Failed to load data");
-      console.error("Failed to load data:", errorResponse?.message || err);
       throw new Error(errorResponse?.message || "Failed to load data");
     } finally {
-      if (setLoadingState) setLoading(false);
+      if (showLoading) setTableLoading(false);
     }
   };
 
   const updatePageData = (newPage: number, newPageSize: number) => {
     setPage(newPage);
     setPageSize(newPageSize);
-    loadDataTable(searchFilters, sortField, sortOrder, false);
+    loadData(filters, sortField, sortOrder, false);
   };
 
-  // Handle sorting
-  const handleSort = (newSortField: string, newSortOrder: number) => {
-    setSortField(newSortField);
-    setSortOrder(newSortOrder);
-    loadDataTable(searchFilters, newSortField, newSortOrder);
+  const handleSort = (field: string, order: number) => {
+    setSortField(field);
+    setSortOrder(order);
+    loadData(filters, field, order);
   };
 
-  const handleSearchChange = (field: string, value: string) => {
-    const newFilters = { ...searchFilters, [field]: value };
-    if (!value) {
-      delete newFilters[field];
-    }
-    setSearchFilters(newFilters);
-    loadDataTable(newFilters, sortField, sortOrder, false);
-  };
+  const handleSearch = useCallback(
+    (field: string, value: string) => {
+      const newFilters = { ...filters, [field]: value };
+      if (!value) delete newFilters[field];
+      setFilters(newFilters);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      timeoutRef.current = setTimeout(
+        () => loadData(newFilters, sortField, sortOrder, false),
+        1000
+      );
+    },
+    [filters, sortField, sortOrder]
+  );
 
-  // Reset filters
   const resetFilters = () => {
-    setSearchFilters({});
-    loadDataTable({}, sortField, sortOrder);
+    setFilters({});
+    loadData({});
   };
 
-  // READ by ID
-  const loadDataById = useCallback(
+  const loadById = useCallback(
     async (id: string) => {
-      window.dispatchEvent(new CustomEvent('loading', { detail: true }))
+      setActionLoading(true);
       try {
         const res = await $axios.get(`${baseUrl}/${id}`);
         return res.data.result;
@@ -102,91 +127,79 @@ export default function useCrud(baseUrl: string) {
         setError(errorResponse?.message || "Failed to load data");
         throw new Error(errorResponse?.message || "Failed to load data");
       } finally {
-        setLoading(false);
+        setActionLoading(false);
       }
     },
     [baseUrl]
   );
 
-  // CREATE
-  const createItem = async (newItem: object | FormData) => {
-    window.dispatchEvent(new CustomEvent('loading', { detail: true }))
+  const createItem = async (item: object | FormData) => {
+    setActionLoading(true);
     try {
       const config =
-        newItem instanceof FormData
+        item instanceof FormData
           ? { headers: { "Content-Type": "multipart/form-data" } }
-          : { headers: { "Content-Type": "application/json" } };
-      const res = await $axios.post(baseUrl, newItem, config);
-      if (res.data) {
-        await loadDataTable();
-        return res.data;
-      }
-    } catch (err: any) {
-       console.log(err?.response?.data?.errorMessages);
-      
-      setError(err?.response?.data?.errorMessages);
-      throw new Error(err?.response?.data?.message || "Failed to create item");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // UPDATE
-  const updateItem = async (id: string, updatedItem: object | FormData) => {
-    // setLoading(true);
-    try {
-      const config =
-        updatedItem instanceof FormData
-          ? { headers: { "Content-Type": "multipart/form-data" } }
-          : { headers: { "Content-Type": "application/json" } };
-      const res = await $axios.put(`${baseUrl}/${id}`, updatedItem, config);
-      if (res.data) {
-        await loadDataTable();
-        setError(null);
-        return res.data;
-      }
-    } catch (err: any) {
-      const errorResponse = err.response?.data as ErrorResponse;
-      setError(errorResponse?.message || "Failed to update item");
-      throw new Error(errorResponse?.message || "Failed to update item");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // DELETE
-  const deleteItem = async (id: string) => {
-    setLoading(true);
-    try {
-      const res = await $axios.delete(`${baseUrl}/${id}`);
-      await loadDataTable();
+          : { headers: { "Content-Type": "application/json" } };;
+      const res = await $axios.post(baseUrl, item, config);
+      await loadData(filters, sortField, sortOrder, true); // Tải lại table
+      setError(null);
       return res.data;
     } catch (err: any) {
-      const errorResponse = err.response?.data as ErrorResponse;
-      setError(errorResponse?.message || "Failed to delete item");
-      throw new Error(errorResponse?.message || "Failed to delete item");
+      setError(err.response?.data?.errorMessages || "Failed to create item");
+      throw new Error(err.response?.data?.message || "Failed to create item");
     } finally {
-      setLoading(false);
+      setActionLoading(false);
     }
   };
 
-  useEffect(() => {
-    loadDataTable();
-  }, [baseUrl]);
+  const updateItem = async (id: string, item: object | FormData) => {
+    setActionLoading(true);
+    try {
+      const config =
+        item instanceof FormData
+          ? { headers: { "Content-Type": "multipart/form-data" } }
+          : { headers: { "Content-Type": "application/json" } };
+      const res = await $axios.put(`${baseUrl}/${id}`, item, config);
+      await loadData(filters, sortField, sortOrder, true); // Tải lại table
+      setError(null);
+      return res.data;
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to update item");
+      throw new Error(err.response?.data?.message || "Failed to update item");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const deleteItem = async (id: string) => {
+    setActionLoading(true);
+    try {
+      const res = await $axios.delete(`${baseUrl}/${id}`);
+      await loadData(filters, sortField, sortOrder, true); 
+      setError(null);
+      return res.data;
+    } catch (err: any) {
+      setError(err.response?.data?.message || "Failed to delete item");
+      throw new Error(err.response?.data?.message || "Failed to delete item");
+    } finally {
+      setActionLoading(false);
+    }
+  };
 
   return {
     data,
-    loading,
+    tableLoading,
+    actionLoading,
     error,
     openForm,
-    setopenForm,
-    setopenFormDetail,
+    setOpenForm,
     openFormDetail,
-    loadDataById,
-    loadDataTable,
+    setOpenFormDetail,
+    loadById,
+    loadData,
     updatePageData,
     handleSort,
-    handleSearchChange,
+    handleSearch,
     resetFilters,
     createItem,
     updateItem,
@@ -194,8 +207,7 @@ export default function useCrud(baseUrl: string) {
     page,
     pageSize,
     totalRecords,
-    searchFilters,
-    setSearchFilters,
+    filters,
     sortField,
     sortOrder,
   };

@@ -186,6 +186,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
   public UserRes findUserById(Integer id) {
     List<Object[]> userObjList = repository.getUserById(id);
 
+    if (userObjList.isEmpty()) throw new AppException(ErrorCode.NOT_FOUND, "User");
+
     Object[] userObj = userObjList.get(0);
 
     Integer userId = (Integer) userObj[0];
@@ -202,17 +204,21 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
 
     return new UserRes(
           userId,
-          (String) userObj[1], // fulname
-          (String) userObj[2],// email
-          (String) userObj[3], //phoneNumber
+          (String) userObj[1], // fullName
+          (String) userObj[2], // email
+          (String) userObj[3], // phoneNumber
           (String) userObj[4], // avatarUrl
           (Boolean) userObj[5], // status
           (String) userObj[6], // streetNumber
-          (Integer) userObj[7],//streetId
+          (Integer) userObj[7], // streetId
           (String) userObj[8], // wardCode
-          (String) userObj[9], // districtCode
-          (String) userObj[10], // provinceCode
-          (String) userObj[11],
+          (String) userObj[9], // wardName
+          (String) userObj[10], // districtCode
+          (String) userObj[11], // districtName
+          (String) userObj[12], // provinceCode
+          (String) userObj[13], // provinceName
+          (String) userObj[14], // note
+          (String) userObj[15], // streetName
           roleRes);
   }
 
