@@ -110,6 +110,7 @@ export default function RoleForm({
               label="Close"
               onClick={onClose}
               severity="secondary"
+              outlined 
               disabled={submitting}
               style={{ padding: "8px 40px" }}
             />

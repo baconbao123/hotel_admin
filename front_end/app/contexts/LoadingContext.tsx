@@ -15,7 +15,7 @@ export const LoadingProvider = ({ children }: { children: React.ReactNode }) => 
 
   useEffect(() => {
     const handleLoading = (event: CustomEvent) => {
-      console.log("get in loading ");
+      // console.log("get in loading ");
       
       setIsLoading(event.detail);
     };

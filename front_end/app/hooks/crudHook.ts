@@ -186,6 +186,11 @@ export default function useCrud(baseUrl: string) {
     }
   };
 
+  const closeForm = () => {
+    setOpenForm(false);
+    setError(null);
+  }
+
   return {
     data,
     tableLoading,
@@ -210,5 +215,6 @@ export default function useCrud(baseUrl: string) {
     filters,
     sortField,
     sortOrder,
+    closeForm
   };
 }

@@ -44,6 +44,7 @@ export default function RoleList() {
     filters,
     sortField,
     sortOrder,
+    closeForm
   } = useCrud("/role");
 
   useEffect(() => {
@@ -77,21 +78,23 @@ export default function RoleList() {
   };
 
   const statusBody = (row: any) => (
-    <Tag
-      rounded
-      value={row.status ? "Active" : "Inactive"}
-      severity={row.status ? "success" : "danger"}
-      style={{
-        maxWidth: "5rem",
-        display: "flex",
-        justifyContent: "center",
-        padding: "0.4rem 3rem",
-      }}
-    />
+    <div className="flex justify-center">
+      <Tag
+        rounded
+        value={row.status ? "Active" : "Inactive"}
+        severity={row.status ? "success" : "danger"}
+        style={{
+          maxWidth: "5rem",
+          display: "flex",
+          justifyContent: "center",
+          padding: "0.4rem 3rem",
+        }}
+      />
+    </div>
   );
 
   return (
-    <div>
+    <div className="main-container">
       {mounted && <Toast ref={toast} />}
       <div className="mb-5">
         {mounted ? (
@@ -107,14 +110,19 @@ export default function RoleList() {
             <div className="col-span-4 2xl:col-span-3">
               <div className="grid gap-2 2xl:grid-cols-6 grid-cols-2">
                 {mounted ? (
-                  <InputText
-                    placeholder="Name"
-                    className="w-full"
-                    value={filters.name || ""}
-                    onChange={(e) => handleSearch("name", e.target.value)}
-                  />
+                  <>
+                    <InputText
+                      placeholder="Name"
+                      className="w-full"
+                      value={filters.name || ""}
+                      onChange={(e) => handleSearch("name", e.target.value)}
+                    />
+                  </>
+                  
                 ) : (
+                  <>
                   <Skeleton height="100%" />
+                  </>
                 )}
               </div>
             </div>
@@ -128,14 +136,14 @@ export default function RoleList() {
                     setOpenForm(true);
                   }}
                 />
-                <Button label="Export excel" />
+                {/* <Button label="Export excel" /> */}
               </div>
             </div>
           </div>
         </div>
 
         {tableLoading ? (
-          SkeletonTemplate("Role Management", 5)
+          SkeletonTemplate("",5)
         ) : (
           <DataTable
             value={data}
@@ -150,6 +158,8 @@ export default function RoleList() {
             sortOrder={sortOrder as 1 | -1 | 0 | undefined}
             showGridlines
             rowHover
+            scrollable  
+            scrollHeight="570px" 
             lazy
             paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="From {first} to {last} of {totalRecords}"
@@ -163,10 +173,11 @@ export default function RoleList() {
             }
           >
             <Column sortable field="id" header="Id" className="w-20" />
-            <Column sortable field="name" header="Name" />
+            <Column sortable field="name" header="Name"  className="w-200"/>
             <Column
               field="description"
               header="Description"
+              className="w-200"
               body={(row) => row.description || "-"}
             />
             <Column
@@ -177,6 +188,7 @@ export default function RoleList() {
               body={statusBody}
             />
             <Column
+              frozen={true}
               header={() => <div className="flex justify-center">Actions</div>}
               className="w-60"
               body={(row: any) => (
@@ -222,14 +234,12 @@ export default function RoleList() {
           </DataTable>
         )}
       </Card>
-
       <RoleForm
         id={selectedId}
         open={openForm}
         mode={formMode}
         onClose={() => {
-          setOpenForm(false);
-          setSelectedId(undefined);
+          closeForm()
           setFormMode("create");
         }}
         loadDataById={loadById}
@@ -237,6 +247,7 @@ export default function RoleList() {
         updateItem={updateItem}
         error={error}
       />
+  
 
       <RoleDetail
         id={selectedId}

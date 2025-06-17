@@ -11,9 +11,9 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const location = useLocation();
 
   useEffect(() => {
-    console.log("Protected Route - Token:", token);
-    console.log("Protected Route - Location:", location);
-    console.log("Current Path:", window.location.pathname);
+    // console.log("Protected Route - Token:", token);
+    // console.log("Protected Route - Location:", location);
+    // console.log("Current Path:", window.location.pathname);
   }, [token, location]);
 
   if (!token) {

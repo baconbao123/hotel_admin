@@ -8,7 +8,7 @@ import {
 } from "react-router";
 import { Tooltip } from 'primereact/tooltip';
 import './app.css'
-
+import "@/asset/images/styles/main.scss";
 import { LoadingProvider } from './contexts/LoadingContext';
 
 // Error Boundary Component

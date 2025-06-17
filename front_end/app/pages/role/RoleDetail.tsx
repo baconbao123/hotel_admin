@@ -55,6 +55,7 @@ export default function RoleDetail({
         footer={
           <div className="flex justify-center gap-2">
             <Button
+              outlined
               label="Close"
               onClick={onClose}
               severity="secondary"
