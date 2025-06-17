@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 
 @Service
@@ -57,7 +56,7 @@ public class StorageFileService {
     createDir(folderPath);
     try {
       String fileName = fileHelperUtil.generateFileName(file.getOriginalFilename());
-      Path path = Paths.get(folderPath, fileName);
+      Path path = Path.of(folderPath, fileName);
       Files.copy(file.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
       return fileName;
     } catch (IOException e) {

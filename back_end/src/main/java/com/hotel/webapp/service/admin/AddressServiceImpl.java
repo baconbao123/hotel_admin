@@ -1,79 +1,88 @@
 package com.hotel.webapp.service.admin;
 
-import com.hotel.webapp.base.BaseMapper;
-import com.hotel.webapp.base.BaseServiceImpl;
-import com.hotel.webapp.dto.admin.request.AddressDTO;
+import com.hotel.webapp.dto.request.AddressDTO;
 import com.hotel.webapp.entity.Address;
+import com.hotel.webapp.entity.Districts;
+import com.hotel.webapp.entity.Streets;
+import com.hotel.webapp.entity.Wards;
 import com.hotel.webapp.exception.AppException;
 import com.hotel.webapp.exception.ErrorCode;
-import com.hotel.webapp.repository.*;
+import com.hotel.webapp.repository.AddressRepository;
+import com.hotel.webapp.repository.StreetsRepository;
 import com.hotel.webapp.service.admin.interfaces.AuthService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Objects;
+
 @Service
 @Transactional
+@RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class AddressServiceImpl extends BaseServiceImpl<Address, Integer, AddressDTO, AddressRepository> {
-  ProvincesRepository provincesRepository;
-  DistrictRepository districtRepository;
-  WardRepository wardRepository;
-  StreetRepository streetRepository;
+public class AddressServiceImpl {
+  AddressRepository repository;
+  StreetsRepository streetRepository;
+  AuthService authService;
 
-  public AddressServiceImpl(
-        AddressRepository repository,
-        BaseMapper<Address, AddressDTO> mapper,
-        AuthService authService,
-        ProvincesRepository provincesRepository,
-        DistrictRepository districtRepository,
-        WardRepository wardRepository,
-        StreetRepository streetRepository
-  ) {
-    super(repository, mapper, authService);
-    this.provincesRepository = provincesRepository;
-    this.districtRepository = districtRepository;
-    this.wardRepository = wardRepository;
-    this.streetRepository = streetRepository;
+  public Address save(AddressDTO addressDTO) {
+    validateDTOCommon(addressDTO);
+
+    var address = Address.builder()
+                         .streetNumber(addressDTO.getStreetNumber())
+                         .streetId(addressDTO.getStreetId())
+                         .wardCode(addressDTO.getWardCode())
+                         .districtCode(addressDTO.getDistrictCode())
+                         .provinceCode(addressDTO.getProvinceCode())
+                         .note(addressDTO.getNote())
+                         .createdAt(LocalDateTime.now())
+                         .createdBy(authService.getAuthLogin())
+                         .build();
+    return repository.save(address);
   }
 
-  @Override
-  protected void validateCreate(AddressDTO create) {
-    if (!provincesRepository.existsByCode(create.getProvinceCode()))
-      throw new AppException(ErrorCode.PROVINCE_NOTFOUND);
+  public void update(Integer id, AddressDTO addressDTO) {
+    validateDTOCommon(addressDTO);
+    var addressCrr = repository.findByIdAndDeletedAtIsNull(id)
+                               .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, id + "Address"));
 
-    if (!districtRepository.existsByCode(create.getDistrictCode()))
-      throw new AppException(ErrorCode.DISTRICT_NOTFOUND);
-
-    if (!wardRepository.existsByCode(create.getWardCode()))
-      throw new AppException(ErrorCode.WARD_NOTFOUND);
-
-    if (!streetRepository.existsById(create.getStreetId()))
-      throw new AppException(ErrorCode.STREET_NOTFOUND);
+    var address = Address.builder()
+                         .id(addressCrr.getId())
+                         .streetNumber(addressDTO.getStreetNumber())
+                         .streetId(addressDTO.getStreetId())
+                         .wardCode(addressDTO.getWardCode())
+                         .districtCode(addressDTO.getDistrictCode())
+                         .provinceCode(addressDTO.getProvinceCode())
+                         .note(addressDTO.getNote())
+                         .createdAt(LocalDateTime.now())
+                         .createdBy(authService.getAuthLogin())
+                         .build();
+    repository.save(address);
   }
 
-  @Override
-  protected void validateUpdate(Integer id, AddressDTO update) {
-    if (!provincesRepository.existsByCode(update.getProvinceCode()))
-      throw new AppException(ErrorCode.PROVINCE_NOTFOUND);
+  protected void validateDTOCommon(AddressDTO addressDTO) {
+    if (!streetRepository.existsProvincesByCode(addressDTO.getProvinceCode()))
+      throw new AppException(ErrorCode.NOT_FOUND, "Province");
 
-    if (!districtRepository.existsByCode(update.getDistrictCode()))
-      throw new AppException(ErrorCode.DISTRICT_NOTFOUND);
+    Districts districts = streetRepository.findDistrictByCode(addressDTO.getDistrictCode())
+                                          .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "District"));
 
-    if (!wardRepository.existsByCode(update.getWardCode()))
-      throw new AppException(ErrorCode.WARD_NOTFOUND);
+    if (!Objects.equals(districts.getProvinceCode(), addressDTO.getProvinceCode()))
+      throw new AppException(ErrorCode.COMMON_400, "District not include in province");
 
-    if (!streetRepository.existsById(update.getStreetId()))
-      throw new AppException(ErrorCode.STREET_NOTFOUND);
-  }
+    Wards wards = streetRepository.findWardByWardCode(addressDTO.getWardCode())
+                                  .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Ward"));
 
-  @Override
-  protected void validateDelete(Integer integer) {
-  }
+    if (!Objects.equals(wards.getDistrictCode(), addressDTO.getDistrictCode()))
+      throw new AppException(ErrorCode.COMMON_400, "Ward not include in district");
 
-  @Override
-  protected RuntimeException createNotFoundException(Integer integer) {
-    return null;
+    Streets streets = streetRepository.findById(addressDTO.getStreetId())
+                                      .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Street"));
+
+    if (!Objects.equals(streets.getWardCode(), addressDTO.getWardCode()))
+      throw new AppException(ErrorCode.COMMON_400, "Street not include in district");
   }
 }

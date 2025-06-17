@@ -1,0 +1,55 @@
+.resource-container {
+  padding: 5px;
+  max-height: 200px; /* Giới hạn chiều cao của toàn bộ cột */
+  overflow-y: auto; /* Cho phép cuộn toàn bộ cột */
+  position: relative;
+}
+
+.resource-item {
+  display: inline-flex;
+  align-items: center;
+  margin: 4px 8px 4px 0;
+  padding: 6px 12px;
+  border-radius: 20px;
+  background-color: #f9f9f9;
+  color: #000000;
+  font-size: 0.95em;
+  font-weight: 500;
+}
+
+.resource-item:hover {
+  background-color: #e0e0e0;
+}
+
+.action-list {
+  margin: 0 0 0 10px; /* Dịch sang phải để tránh đè */
+  padding: 0;
+  list-style-type: none;
+  color: #000000;
+  display: inline-flex; /* Hiển thị action ngay sau resource */
+  flex-wrap: wrap;
+  gap: 6px;
+  position: relative; /* Loại bỏ absolute để hiển thị trong luồng */
+}
+
+.action-list li {
+  padding: 4px 10px;
+  border: 1px solid #444444;
+  border-radius: 15px;
+  background-color: #ffffff;
+  color: #000000;
+  font-size: 0.9em;
+  font-weight: 400;
+  transition: background-color 0.3s ease;
+}
+
+.action-list li:hover {
+  background-color: #f0f0f0;
+}
+
+.no-resources {
+  color: #333333;
+  font-style: italic;
+  font-size: 0.9em;
+  padding: 4px;
+}

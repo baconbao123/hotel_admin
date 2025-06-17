@@ -2,7 +2,7 @@ package com.hotel.webapp.service.admin;
 
 import com.hotel.webapp.base.BaseMapper;
 import com.hotel.webapp.base.BaseServiceImpl;
-import com.hotel.webapp.dto.admin.request.FacilitiesDTO;
+import com.hotel.webapp.dto.request.FacilitiesDTO;
 import com.hotel.webapp.entity.Facilities;
 import com.hotel.webapp.entity.MapHotelFacility;
 import com.hotel.webapp.exception.AppException;
@@ -16,7 +16,6 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -43,21 +42,14 @@ public class FacilitiesServiceImpl extends BaseServiceImpl<Facilities, Integer, 
 
   @Override
   protected void validateDTOCommon(FacilitiesDTO facilitiesDTO) {
-    if (!facilityTypeRepository.existsByIdAndDeletedAtIsNull(facilitiesDTO.getTypeId()))
-      throw new AppException(ErrorCode.FACILITY_NOTFOUND);
+    if (!facilityTypeRepository.existsByColNameAndDeletedAtIsNull(facilitiesDTO.getColName()))
+      throw new AppException(ErrorCode.NOT_FOUND, "Facilities");
     validateDataInput.capitalizeFirstLetter(facilitiesDTO.getName());
   }
 
-  @Override
-  protected void validateCreate(FacilitiesDTO create) {
-  }
 
   @Override
-  protected void validateUpdate(Integer id, FacilitiesDTO update) {
-  }
-
-  @Override
-  protected void validateDelete(Integer id) {
+  protected void beforeDelete(Integer id) {
     var facilities = repository.findByIdAndDeletedAtIsNull(id);
     deleteMapHotelFacilities(facilities);
   }
@@ -67,7 +59,7 @@ public class FacilitiesServiceImpl extends BaseServiceImpl<Facilities, Integer, 
       var mapold = mapHotelFacilityRepository.findByFacilityIdAndDeletedAtIsNull(facility.getId());
       for (MapHotelFacility mapHotelFacility : mapold) {
         mapHotelFacility.setDeletedAt(LocalDateTime.now());
-        mapHotelFacility.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+        mapHotelFacility.setUpdatedAt(LocalDateTime.now());
         mapHotelFacility.setUpdatedBy(authService.getAuthLogin());
         mapHotelFacilityRepository.save(mapHotelFacility);
       }
@@ -76,6 +68,6 @@ public class FacilitiesServiceImpl extends BaseServiceImpl<Facilities, Integer, 
 
   @Override
   protected RuntimeException createNotFoundException(Integer integer) {
-    return new AppException(ErrorCode.FACILITY_NOTFOUND);
+    return new AppException(ErrorCode.NOT_FOUND, "Facilities");
   }
 }

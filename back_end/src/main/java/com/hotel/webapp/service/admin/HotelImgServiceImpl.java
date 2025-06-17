@@ -1,7 +1,7 @@
 package com.hotel.webapp.service.admin;
 
-import com.hotel.webapp.dto.admin.request.HotelImgsDto;
-import com.hotel.webapp.dto.admin.request.MapHotelImgDTO;
+import com.hotel.webapp.dto.request.HotelImgsDto;
+import com.hotel.webapp.dto.request.MapHotelImgDTO;
 import com.hotel.webapp.entity.HotelImages;
 import com.hotel.webapp.entity.MapHotelImages;
 import com.hotel.webapp.exception.AppException;
@@ -17,7 +17,6 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 @Service
@@ -30,13 +29,14 @@ public class HotelImgServiceImpl {
   HotelRepository hotelRepository;
   AuthService authService;
 
+  // hotel images
   public void uploadHotelAvatar(MultipartFile hotelAvatar) {
     if (hotelAvatar != null && !hotelAvatar.isEmpty()) {
       String filePath = storageFileService.uploadHotelImg(hotelAvatar);
       HotelImages hotelImg = HotelImages.builder()
                                         .name(filePath)
                                         .type("avatar")
-                                        .createdAt(new Timestamp(System.currentTimeMillis()))
+                                        .createdAt(LocalDateTime.now())
                                         .createdBy(authService.getAuthLogin())
                                         .build();
 
@@ -54,7 +54,7 @@ public class HotelImgServiceImpl {
     }
 
     var hotelImg = getById(id);
-    hotelImg.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+    hotelImg.setUpdatedAt(LocalDateTime.now());
     hotelImg.setUpdatedBy(authService.getAuthLogin());
     hotelImg.setDeletedAt(LocalDateTime.now());
     hotelImagesRepository.save(hotelImg);
@@ -64,7 +64,7 @@ public class HotelImgServiceImpl {
       HotelImages hotelAvatarNew = HotelImages.builder()
                                               .name(filePath)
                                               .type("avatar")
-                                              .createdAt(new Timestamp(System.currentTimeMillis()))
+                                              .createdAt(LocalDateTime.now())
                                               .createdBy(authService.getAuthLogin())
                                               .build();
       hotelImagesRepository.save(hotelAvatarNew);
@@ -87,7 +87,7 @@ public class HotelImgServiceImpl {
         String filePath = storageFileService.uploadHotelImg(file);
         hotelImg.setName(filePath);
         hotelImg.setType(images.getType());
-        hotelImg.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+        hotelImg.setCreatedAt(LocalDateTime.now());
         hotelImg.setCreatedBy(authService.getAuthLogin());
         hotelImagesRepository.save(hotelImg);
       }
@@ -97,24 +97,24 @@ public class HotelImgServiceImpl {
   public HotelImages getById(Integer id) {
     return hotelImagesRepository.findById(id)
                                 .filter(h -> h.getDeletedAt() == null)
-                                .orElseThrow(() -> new AppException(ErrorCode.IMAGE_NOTFOUND));
+                                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Hotel image"));
   }
 
   // map images with hotel
   public void mapHotelImages(MapHotelImgDTO dto) {
     if (!hotelRepository.existsByIdAndDeletedAtIsNull(dto.getHotelId()))
-      throw new AppException(ErrorCode.HOTEL_NOTFOUND);
+      throw new AppException(ErrorCode.NOT_FOUND, "Hotel");
 
     for (Integer imgId : dto.getHotelImgs()) {
       if (!hotelImagesRepository.existsByIdAndDeletedAtIsNull(imgId))
-        throw new AppException(ErrorCode.IMAGE_NOTFOUND);
+        throw new AppException(ErrorCode.NOT_FOUND, "Hotel image");
     }
 
     for (Integer imgId : dto.getHotelImgs()) {
       var mapHotelImages = new MapHotelImages();
       mapHotelImages.setHotelId(dto.getHotelId());
       mapHotelImages.setImageId(imgId);
-      mapHotelImages.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+      mapHotelImages.setCreatedAt(LocalDateTime.now());
       mapHotelImages.setCreatedBy(authService.getAuthLogin());
       mapHotelImagesRepository.save(mapHotelImages);
     }
@@ -122,20 +122,20 @@ public class HotelImgServiceImpl {
 
   public void updateMapHotelImages(MapHotelImgDTO dto) {
     if (!hotelRepository.existsByIdAndDeletedAtIsNull(dto.getHotelId()))
-      throw new AppException(ErrorCode.HOTEL_NOTFOUND);
+      throw new AppException(ErrorCode.NOT_FOUND, "Hotel");
 
-    if(!mapHotelImagesRepository.existsByHotelIdAndDeletedAtIsNull(dto.getHotelId()))
-      throw new AppException(ErrorCode.MAPPING_IMG_NOTFOUND);
+    if (!mapHotelImagesRepository.existsByHotelIdAndDeletedAtIsNull(dto.getHotelId()))
+      throw new AppException(ErrorCode.NOT_FOUND, "Mapping Img Hotel");
 
     for (Integer imgId : dto.getHotelImgs()) {
       if (!hotelImagesRepository.existsByIdAndDeletedAtIsNull(imgId))
-        throw new AppException(ErrorCode.IMAGE_NOTFOUND);
+        throw new AppException(ErrorCode.NOT_FOUND, "Hotel image");
     }
 
     var oldMaps = mapHotelImagesRepository.findByHotelIdAndDeletedAtIsNull(dto.getHotelId());
     for (MapHotelImages mapHotelImages : oldMaps) {
       mapHotelImages.setDeletedAt(LocalDateTime.now());
-      mapHotelImages.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+      mapHotelImages.setUpdatedAt(LocalDateTime.now());
       mapHotelImages.setUpdatedBy(authService.getAuthLogin());
       mapHotelImagesRepository.save(mapHotelImages);
     }
@@ -144,7 +144,7 @@ public class HotelImgServiceImpl {
       var mapHotelImages = new MapHotelImages();
       mapHotelImages.setHotelId(dto.getHotelId());
       mapHotelImages.setImageId(imgId);
-      mapHotelImages.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+      mapHotelImages.setCreatedAt(LocalDateTime.now());
       mapHotelImages.setCreatedBy(authService.getAuthLogin());
       mapHotelImagesRepository.save(mapHotelImages);
     }

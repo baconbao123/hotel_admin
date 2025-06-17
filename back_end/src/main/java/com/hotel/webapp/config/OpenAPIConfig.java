@@ -15,8 +15,8 @@ import java.util.List;
 @Configuration
 public class OpenAPIConfig {
 
-  @Bean
-  public OpenAPI openAPI() {
+    @Bean
+    OpenAPI openAPI() {
     Server server = new Server();
     server.setUrl("http://localhost:9898/hotel");
     server.description("Phoebe Dev");

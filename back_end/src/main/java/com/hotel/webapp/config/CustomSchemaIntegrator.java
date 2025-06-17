@@ -74,8 +74,7 @@ public class CustomSchemaIntegrator implements IntegratorProvider {
             Property property = persistentClass.getProperty(field.getName());
             if (property != null) {
               Value value = property.getValue();
-              if (value instanceof SimpleValue) {
-                SimpleValue simpleValue = (SimpleValue) value;
+              if (value instanceof SimpleValue simpleValue) {
                 orderedColumns.addAll(simpleValue.getColumns());
               } else {
                 // Skip complex mappings (e.g., collections) for now

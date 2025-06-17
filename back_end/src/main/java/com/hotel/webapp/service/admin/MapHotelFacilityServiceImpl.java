@@ -1,7 +1,7 @@
 package com.hotel.webapp.service.admin;
 
 import com.hotel.webapp.base.BaseServiceImpl;
-import com.hotel.webapp.dto.admin.request.MapHotelFacilityDTO;
+import com.hotel.webapp.dto.request.MapHotelFacilityDTO;
 import com.hotel.webapp.entity.MapHotelFacility;
 import com.hotel.webapp.exception.AppException;
 import com.hotel.webapp.exception.ErrorCode;
@@ -13,7 +13,6 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,7 +44,7 @@ public class MapHotelFacilityServiceImpl extends BaseServiceImpl<
       var mapHotelFacility = new MapHotelFacility();
       mapHotelFacility.setFacilityId(facilityId);
       mapHotelFacility.setHotelId(mapHotelFacilityDTO.getHotelId());
-      mapHotelFacility.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+      mapHotelFacility.setCreatedAt(LocalDateTime.now());
       mapHotelFacility.setCreatedBy(authService.getAuthLogin());
       mapHotelFacility = repository.save(mapHotelFacility);
       listDto.add(mapHotelFacility);
@@ -61,7 +60,7 @@ public class MapHotelFacilityServiceImpl extends BaseServiceImpl<
     var oldMapping = repository.findByHotelIdAndDeletedAtIsNull(mapHotelFacilityDTO.getHotelId());
     for (MapHotelFacility mapHotelFacility : oldMapping) {
       mapHotelFacility.setDeletedAt(LocalDateTime.now());
-      mapHotelFacility.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+      mapHotelFacility.setUpdatedAt(LocalDateTime.now());
       mapHotelFacility.setUpdatedBy(authService.getAuthLogin());
       repository.save(mapHotelFacility);
     }
@@ -71,7 +70,7 @@ public class MapHotelFacilityServiceImpl extends BaseServiceImpl<
       var mapHotelFacility = new MapHotelFacility();
       mapHotelFacility.setFacilityId(facilityId);
       mapHotelFacility.setHotelId(mapHotelFacilityDTO.getHotelId());
-      mapHotelFacility.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+      mapHotelFacility.setCreatedAt(LocalDateTime.now());
       mapHotelFacility.setCreatedBy(authService.getAuthLogin());
       mapHotelFacility = repository.save(mapHotelFacility);
       listDto.add(mapHotelFacility);
@@ -83,31 +82,16 @@ public class MapHotelFacilityServiceImpl extends BaseServiceImpl<
   @Override
   protected void validateDTOCommon(MapHotelFacilityDTO mapHotelFacilityDTO) {
     if (!hotelRepository.existsByIdAndDeletedAtIsNull(mapHotelFacilityDTO.getHotelId()))
-      throw new AppException(ErrorCode.HOTEL_NOTFOUND);
+      throw new AppException(ErrorCode.NOT_FOUND, "Hotel");
 
     for (Integer facilityId : mapHotelFacilityDTO.getFacilityId()) {
       if (!facilitiesRepository.existsByIdAndDeletedAtIsNull(facilityId))
-        throw new AppException(ErrorCode.FACILITY_NOTFOUND);
+        throw new AppException(ErrorCode.NOT_FOUND, "Facility");
     }
   }
 
   @Override
-  protected void validateCreate(MapHotelFacilityDTO create) {
-
-  }
-
-  @Override
-  protected void validateUpdate(Integer id, MapHotelFacilityDTO update) {
-
-  }
-
-  @Override
-  protected void validateDelete(Integer integer) {
-
-  }
-
-  @Override
   protected RuntimeException createNotFoundException(Integer integer) {
-    return new AppException(ErrorCode.MAPPING_HOTEL_NOTFOUND);
+    return new AppException(ErrorCode.NOT_FOUND, "Map Hotel Facility");
   }
 }

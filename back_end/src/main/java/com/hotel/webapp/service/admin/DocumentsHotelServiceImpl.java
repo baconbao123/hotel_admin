@@ -2,7 +2,7 @@ package com.hotel.webapp.service.admin;
 
 import com.hotel.webapp.base.BaseMapper;
 import com.hotel.webapp.base.BaseServiceImpl;
-import com.hotel.webapp.dto.admin.request.DocumentsHotelDTO;
+import com.hotel.webapp.dto.request.DocumentsHotelDTO;
 import com.hotel.webapp.entity.DocumentsHotel;
 import com.hotel.webapp.exception.AppException;
 import com.hotel.webapp.exception.ErrorCode;
@@ -15,7 +15,7 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -48,7 +48,7 @@ public class DocumentsHotelServiceImpl extends BaseServiceImpl<DocumentsHotel, I
       documentsHotel.setDocumentUrl(filePath);
     }
 
-    documentsHotel.setCreatedAt(new Timestamp(System.currentTimeMillis()));
+    documentsHotel.setCreatedAt(LocalDateTime.now());
     documentsHotel.setCreatedBy(authService.getAuthLogin());
 
     return repository.save(documentsHotel);
@@ -66,7 +66,7 @@ public class DocumentsHotelServiceImpl extends BaseServiceImpl<DocumentsHotel, I
       documentsHotel.setDocumentUrl(filePath);
     }
 
-    documentsHotel.setUpdatedAt(new Timestamp(System.currentTimeMillis()));
+    documentsHotel.setUpdatedAt(LocalDateTime.now());
     documentsHotel.setUpdatedBy(authService.getAuthLogin());
 
     return repository.save(documentsHotel);
@@ -75,26 +75,14 @@ public class DocumentsHotelServiceImpl extends BaseServiceImpl<DocumentsHotel, I
   @Override
   protected void validateDTOCommon(DocumentsHotelDTO documentsHotelDTO) {
     if (!hotelRepository.existsByIdAndDeletedAtIsNull(documentsHotelDTO.getHotelId()))
-      throw new AppException(ErrorCode.HOTEL_NOTFOUND);
+      throw new AppException(ErrorCode.NOT_FOUND, "Hotel");
 
-    if (!documentTypeRepository.existsByIdAndDeletedAtIsNull(documentsHotelDTO.getTypeId()))
-      throw new AppException(ErrorCode.DOCUMENTS_TYPE_NOTFOUND);
-  }
-
-  @Override
-  protected void validateCreate(DocumentsHotelDTO create) {
-  }
-
-  @Override
-  protected void validateUpdate(Integer id, DocumentsHotelDTO update) {
-  }
-
-  @Override
-  protected void validateDelete(Integer integer) {
+    if (!documentTypeRepository.existsByColNameAndDeletedAtIsNull(documentsHotelDTO.getColName()))
+      throw new AppException(ErrorCode.NOT_FOUND, "Document Type");
   }
 
   @Override
   protected RuntimeException createNotFoundException(Integer integer) {
-    return new AppException(ErrorCode.DOCUMENTS_NOTFOUND);
+    return new AppException(ErrorCode.NOT_FOUND, "Documents");
   }
 }

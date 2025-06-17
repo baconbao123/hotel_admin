@@ -1,6 +1,8 @@
 package com.hotel.webapp.base;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+
+import java.util.Map;
 
 public interface BaseService<E, ID, DTO> {
   E create(DTO create);
@@ -11,5 +13,5 @@ public interface BaseService<E, ID, DTO> {
 
   E getById(ID id);
 
-  List<E> getAll();
+  Page<E> getAll(Map<String, String> filters, Map<String, String> sort, int size, int page);
 }

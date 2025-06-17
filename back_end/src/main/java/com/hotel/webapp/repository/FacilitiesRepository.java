@@ -12,5 +12,5 @@ public interface FacilitiesRepository extends BaseRepository<Facilities, Integer
 
   List<Facilities> findByIdAndDeletedAtIsNull(Integer id);
 
-  List<Facilities> findByTypeIdAndDeletedAtIsNull(Integer typeId);
+  List<Facilities> findByColNameAndDeletedAtIsNull(String colName);
 }
