@@ -62,10 +62,29 @@ const data: BreadCrumbGroup[] = [
       },
       {
         icon: "pi pi-sitemap",
-        label: "Permission management",
+        label: "Permission Management",
         className: "text-gray-700",
         template: "",
         link: "/permission",
+      },
+    ],
+  },
+  {
+    name: "StreetList",
+    data: [
+      {
+        icon: "pi pi-home",
+        label: " Home page",
+        className: "text-gray-700",
+        template: "",
+        link: "/",
+      },
+      {
+        icon: "pi pi-map",
+        label: "Street Management",
+        className: "text-gray-700",
+        template: "",
+        link: "/streets",
       },
     ],
   },

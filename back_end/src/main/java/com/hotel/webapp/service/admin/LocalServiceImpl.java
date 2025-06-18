@@ -4,7 +4,10 @@ import com.hotel.webapp.base.BaseMapper;
 import com.hotel.webapp.base.BaseServiceImpl;
 import com.hotel.webapp.dto.request.StreetsDTO;
 import com.hotel.webapp.dto.response.LocalResponse;
+import com.hotel.webapp.entity.Districts;
+import com.hotel.webapp.entity.Provinces;
 import com.hotel.webapp.entity.Streets;
+import com.hotel.webapp.entity.Wards;
 import com.hotel.webapp.exception.AppException;
 import com.hotel.webapp.exception.ErrorCode;
 import com.hotel.webapp.repository.StreetsRepository;
@@ -45,6 +48,24 @@ public class LocalServiceImpl extends BaseServiceImpl<Streets, Integer, StreetsD
     return results.stream()
                   .map(result -> new LocalResponse.StreetResponse((Integer) result[0], (String) result[1]))
                   .toList();
+  }
+
+  public LocalResponse.WardInfoResponse findWardInfoByWardCode(String wardCode) {
+    Wards wards = repository.findWardByWardCode(wardCode)
+                            .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Ward"));
+
+    Districts district = repository.findDistrictByCode(wards.getDistrictCode())
+                                   .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "District"));
+
+    Provinces province =  repository.findProvinceByCode(district.getProvinceCode())
+                                    .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Province"));
+
+    return new LocalResponse.WardInfoResponse(
+          province.getCode(),
+          district.getCode(),
+          wards.getCode(),
+          wards.getName()
+    );
   }
 
   // street

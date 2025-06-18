@@ -266,7 +266,6 @@ export default function UserForm({
             ) || null;
           setSelectedProvince(selectedProvince);
 
-          // Reset các state phụ thuộc
           setSelectedDistrict(null);
           setSelectedWard(null);
           setSelectedStreet(null);

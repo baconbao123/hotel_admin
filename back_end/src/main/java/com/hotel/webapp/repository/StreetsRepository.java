@@ -3,6 +3,7 @@ package com.hotel.webapp.repository;
 import com.hotel.webapp.base.BaseRepository;
 import com.hotel.webapp.dto.response.LocalResponse;
 import com.hotel.webapp.entity.Districts;
+import com.hotel.webapp.entity.Provinces;
 import com.hotel.webapp.entity.Streets;
 import com.hotel.webapp.entity.Wards;
 import org.springframework.data.jpa.repository.Query;
@@ -29,6 +30,9 @@ public interface StreetsRepository extends BaseRepository<Streets, Integer> {
         "from Provinces p " +
         "where p.code = :code")
   boolean existsProvincesByCode(String code);
+
+  @Query("select p from Provinces p where p.code = :code")
+  Optional<Provinces> findProvinceByCode(String code);
 
   // district
   @Query("select new com.hotel.webapp.dto.response.LocalResponse(d.code, d.name) " +

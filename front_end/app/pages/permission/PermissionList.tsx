@@ -11,6 +11,8 @@ import "@/pages/permission/Permission.scss";
 import useCrud from "@/hooks/crudHook";
 import PermissionDetail from "./PermissionDetail";
 import { InputText } from "primereact/inputtext";
+import { Skeleton } from "primereact/skeleton";
+import { SkeletonTemplate } from "@/components/common/skeleton";
 
 interface Resource {
   id: number; // mapRsActionId
@@ -38,6 +40,9 @@ export default function PermissionList() {
   );
   const [permissionData, setPermissionData] = useState<any>(null);
   const [processedData, setProcessedData] = useState<RoleData[]>([]);
+
+  const [mounted, setMounted] = useState(false);
+
   const toast = useRef<Toast>(null);
 
   const {
@@ -60,6 +65,10 @@ export default function PermissionList() {
     sortOrder,
     openFormDetail,
   } = useCrud("/permission");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const roleMap = new Map<number, RoleData>();
@@ -115,183 +124,207 @@ export default function PermissionList() {
   };
 
   return (
-    <div>
-      <Toast ref={toast} />
+    <div className="main-container">
+      {mounted && <Toast ref={toast} />}
       <div className="mb-5">
-        <BreadCrumbComponent name="PermissionList" />
+        {mounted ? (
+          <BreadCrumbComponent name="RoleList" />
+        ) : (
+          <Skeleton width="100%" height="34px" />
+        )}
       </div>
+
       <Card title="Permission management">
         <div className="mb-5">
           <div className="grid grid-cols-4 gap-10 card">
             <div className="col-span-4 2xl:col-span-3 xl:col-span-3 lg:col-span-3 md:col-span-3">
               <div className="grid gap-2 2xl:grid-cols-6 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 grid-cols-2">
-                <InputText
-                  placeholder="Role"
-                  className="w-full"
-                  value={filters.roleName || ""}
-                  onChange={(e) => handleSearch("roleName", e.target.value)}
-                />
+                {mounted ? (
+                  <>
+                    <InputText
+                      placeholder="Name"
+                      className="w-full"
+                      value={filters.name || ""}
+                      onChange={(e) => handleSearch("name", e.target.value)}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Skeleton height="100%" />
+                  </>
+                )}
               </div>
             </div>
           </div>
         </div>
 
-        <DataTable
-          value={processedData}
-          paginator
-          rows={pageSize}
-          rowsPerPageOptions={[1, 5, 10, 25, 30]}
-          totalRecords={totalRecords}
-          first={page * pageSize}
-          onPage={handlePageChange}
-          onSort={handleSortChange}
-          sortField={sortField}
-          sortOrder={sortOrder as 1 | -1 | 0 | undefined}
-          showGridlines
-          rowHover
-          lazy
-          loading={tableLoading}
-          paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-          currentPageReportTemplate="From {first} to {last} of {totalRecords}"
-          paginatorLeft={
-            <Button
-              severity="secondary"
-              icon="pi pi-refresh"
-              text
-              onClick={resetFilters}
-            />
-          }
-        >
-          <Column sortable field="roleId" header="Id" className="w-20"></Column>
-          <Column
-            sortable
-            field="roleName"
-            header="Name"
-            className="w-30"
-          ></Column>
-          <Column
-            style={{ width: "700px" }}
-            field="permissions"
-            header="Resources"
-            body={(rowData) => {
-              const [expandedResource, setExpandedResource] =
-                useState<any>(null);
-              const uniqueResources = [
-                ...new Set(
-                  rowData.permissions?.map((res: Resource) => res.resourceName)
-                ),
-              ];
+        {tableLoading ? (
+          SkeletonTemplate("Permission Management", 5)
+        ) : (
+          <DataTable
+            value={processedData}
+            paginator
+            rows={pageSize}
+            rowsPerPageOptions={[1, 5, 10, 25, 30]}
+            totalRecords={totalRecords}
+            first={page * pageSize}
+            onPage={handlePageChange}
+            onSort={handleSortChange}
+            sortField={sortField}
+            sortOrder={sortOrder as 1 | -1 | 0 | undefined}
+            showGridlines
+            rowHover
+            lazy
+            loading={tableLoading}
+            paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
+            currentPageReportTemplate="From {first} to {last} of {totalRecords}"
+            paginatorLeft={
+              <Button
+                severity="secondary"
+                icon="pi pi-refresh"
+                text
+                onClick={resetFilters}
+              />
+            }
+          >
+            <Column
+              sortable
+              field="roleId"
+              header="Id"
+              className="w-20"
+            ></Column>
+            <Column
+              sortable
+              field="roleName"
+              header="Name"
+              className="w-30"
+            ></Column>
+            <Column
+              style={{ width: "700px" }}
+              field="permissions"
+              header="Resources"
+              body={(rowData) => {
+                const [expandedResource, setExpandedResource] =
+                  useState<any>(null);
+                const uniqueResources = [
+                  ...new Set(
+                    rowData.permissions?.map(
+                      (res: Resource) => res.resourceName
+                    )
+                  ),
+                ];
 
-              return (
-                <div
-                  className="resource-container"
-                  style={{ minWidth: "200px" }}
-                >
-                  {uniqueResources.length > 0 ? (
-                    uniqueResources.map((resourceName: any, index) => (
-                      <div
-                        key={index}
-                        style={{ marginBottom: "8px", position: "relative" }}
-                      >
-                        <span
-                          className={`resource-item ${
-                            expandedResource === resourceName ? "active" : ""
-                          }`}
-                          onClick={() =>
-                            setExpandedResource((prev: any) =>
-                              prev === resourceName ? null : resourceName
-                            )
-                          }
+                return (
+                  <div
+                    className="resource-container"
+                    style={{ minWidth: "200px" }}
+                  >
+                    {uniqueResources.length > 0 ? (
+                      uniqueResources.map((resourceName: any, index) => (
+                        <div
+                          key={index}
+                          style={{ marginBottom: "8px", position: "relative" }}
                         >
-                          {resourceName}
-                        </span>
-                        {expandedResource === resourceName && (
-                          <ul className="action-list">
-                            {rowData.permissions
-                              .filter(
-                                (res: Resource) =>
-                                  res.resourceName === resourceName
+                          <span
+                            className={`resource-item ${
+                              expandedResource === resourceName ? "active" : ""
+                            }`}
+                            onClick={() =>
+                              setExpandedResource((prev: any) =>
+                                prev === resourceName ? null : resourceName
                               )
-                              .map((res: Resource, idx: number) => (
-                                <li key={idx}>{res.actionName}</li>
-                              ))}
-                          </ul>
-                        )}
-                      </div>
-                    ))
-                  ) : (
-                    <span className="no-resources">-</span>
-                  )}
+                            }
+                          >
+                            {resourceName}
+                          </span>
+                          {expandedResource === resourceName && (
+                            <ul className="action-list">
+                              {rowData.permissions
+                                .filter(
+                                  (res: Resource) =>
+                                    res.resourceName === resourceName
+                                )
+                                .map((res: Resource, idx: number) => (
+                                  <li key={idx}>{res.actionName}</li>
+                                ))}
+                            </ul>
+                          )}
+                        </div>
+                      ))
+                    ) : (
+                      <span className="no-resources">-</span>
+                    )}
+                  </div>
+                );
+              }}
+            />
+            <Column
+              header="Actions"
+              style={{ width: "15%" }}
+              body={(rowData) => (
+                <div className="flex gap-2">
+                  <Button
+                    icon="pi pi-eye"
+                    rounded
+                    text
+                    severity="info"
+                    onClick={async () => {
+                      try {
+                        const response = await loadById(String(rowData.roleId));
+                        setSelectedId(String(rowData.roleId));
+                        setFormMode("view");
+                        setPermissionData(response);
+                        setOpenFormDetail(true);
+                      } catch (error) {
+                        toast.current?.show({
+                          severity: "error",
+                          summary: "Error",
+                          detail: "Failed to load permission details",
+                          life: 3000,
+                        });
+                      }
+                    }}
+                    tooltip="View"
+                    tooltipOptions={{ position: "top" }}
+                  />
+                  <Button
+                    icon="pi pi-pencil"
+                    rounded
+                    text
+                    severity="success"
+                    onClick={async () => {
+                      try {
+                        const response = await loadById(String(rowData.roleId));
+                        setSelectedId(String(rowData.roleId));
+                        setFormMode("edit");
+                        setPermissionData(response);
+                        setOpenForm(true);
+                      } catch (error) {
+                        toast.current?.show({
+                          severity: "error",
+                          summary: "Error",
+                          detail: "Failed to load permission details",
+                          life: 3000,
+                        });
+                      }
+                    }}
+                    tooltip="Edit"
+                    tooltipOptions={{ position: "top" }}
+                  />
+                  <Button
+                    icon="pi pi-trash"
+                    rounded
+                    text
+                    severity="danger"
+                    onClick={() => handleDelete(rowData.roleId.toString())}
+                    tooltip="Delete"
+                    tooltipOptions={{ position: "top" }}
+                  />
                 </div>
-              );
-            }}
-          />
-          <Column
-            header="Actions"
-            style={{ width: "15%" }}
-            body={(rowData) => (
-              <div className="flex gap-2">
-                <Button
-                  icon="pi pi-eye"
-                  rounded
-                  text
-                  severity="info"
-                  onClick={async () => {
-                    try {
-                      const response = await loadById(String(rowData.roleId));
-                      setSelectedId(String(rowData.roleId));
-                      setFormMode("view");
-                      setPermissionData(response);
-                      setOpenFormDetail(true);
-                    } catch (error) {
-                      toast.current?.show({
-                        severity: "error",
-                        summary: "Error",
-                        detail: "Failed to load permission details",
-                        life: 3000,
-                      });
-                    }
-                  }}
-                  tooltip="View"
-                  tooltipOptions={{ position: "top" }}
-                />
-                <Button
-                  icon="pi pi-pencil"
-                  rounded
-                  text
-                  severity="success"
-                  onClick={async () => {
-                    try {
-                      const response = await loadById(String(rowData.roleId));
-                      setSelectedId(String(rowData.roleId));
-                      setFormMode("edit");
-                      setPermissionData(response);
-                      setOpenForm(true);
-                    } catch (error) {
-                      toast.current?.show({
-                        severity: "error",
-                        summary: "Error",
-                        detail: "Failed to load permission details",
-                        life: 3000,
-                      });
-                    }
-                  }}
-                  tooltip="Edit"
-                  tooltipOptions={{ position: "top" }}
-                />
-                <Button
-                  icon="pi pi-trash"
-                  rounded
-                  text
-                  severity="danger"
-                  onClick={() => handleDelete(rowData.roleId.toString())}
-                  tooltip="Delete"
-                  tooltipOptions={{ position: "top" }}
-                />
-              </div>
-            )}
-          ></Column>
-        </DataTable>
+              )}
+            ></Column>
+          </DataTable>
+        )}
       </Card>
 
       <PermissionForm

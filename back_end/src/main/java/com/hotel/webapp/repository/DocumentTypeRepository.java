@@ -14,9 +14,6 @@ import java.util.Optional;
 public interface DocumentTypeRepository extends BaseRepository<DocumentType, Integer> {
   boolean existsByIdAndDeletedAtIsNull(Integer id);
 
-
-  boolean existsByColNameAndDeletedAtIsNull(String colName);
-
   // seeder
   Optional<DocumentType> findByNameAndDeletedAtIsNull(String name);
 

@@ -13,8 +13,10 @@ import useCrud from "@/hooks/crudHook";
 import RoleForm from "@/pages/role/RoleForm";
 import RoleDetail from "@/pages/role/RoleDetail";
 import { SkeletonTemplate } from "@/components/common/skeleton";
+import StreetForm from "./StreetForm";
+import StreetDetail from "./StreetDetail";
 
-export default function RoleList() {
+export default function StreetList() {
   const [selectedId, setSelectedId] = useState<string>();
   const [formMode, setFormMode] = useState<"create" | "edit" | "view">(
     "create"
@@ -45,7 +47,7 @@ export default function RoleList() {
     sortField,
     sortOrder,
     closeForm,
-  } = useCrud("/role");
+  } = useCrud("/local");
 
   useEffect(() => {
     setMounted(true);
@@ -57,7 +59,7 @@ export default function RoleList() {
 
   const handleDelete = (id: string) => {
     Swal.fire({
-      title: "Delete role?",
+      title: "Delete street?",
       showDenyButton: true,
       showCancelButton: true,
       confirmButtonText: "Delete",
@@ -77,34 +79,18 @@ export default function RoleList() {
     });
   };
 
-  const statusBody = (row: any) => (
-    <div className="flex justify-center">
-      <Tag
-        rounded
-        value={row.status ? "Active" : "Inactive"}
-        severity={row.status ? "success" : "danger"}
-        style={{
-          maxWidth: "5rem",
-          display: "flex",
-          justifyContent: "center",
-          padding: "0.4rem 3rem",
-        }}
-      />
-    </div>
-  );
-
   return (
     <div className="main-container">
       {mounted && <Toast ref={toast} />}
       <div className="mb-5">
         {mounted ? (
-          <BreadCrumbComponent name="RoleList" />
+          <BreadCrumbComponent name="StreetList" />
         ) : (
           <Skeleton width="100%" height="34px" />
         )}
       </div>
 
-      <Card title="Role management">
+      <Card title="Street management">
         <div className="mb-5">
           <div className="grid grid-cols-4 gap-10 card">
             <div className="col-span-4 2xl:col-span-3">
@@ -141,7 +127,7 @@ export default function RoleList() {
         </div>
 
         {tableLoading ? (
-          SkeletonTemplate("Role Management", 5)
+          SkeletonTemplate("Street Management", 5)
         ) : (
           <DataTable
             value={data}
@@ -173,17 +159,16 @@ export default function RoleList() {
             <Column sortable field="id" header="Id" className="w-20" />
             <Column sortable field="name" header="Name" className="w-200" />
             <Column
-              field="description"
-              header="Description"
+              field="width"
+              header="Width"
               className="w-200"
-              body={(row) => row.description || "-"}
+              body={(row) => row.width || "-"}
             />
             <Column
-              sortable
-              field="status"
-              header="Status"
-              className="text-center w-50"
-              body={statusBody}
+              field="curbWith"
+              header="Curb"
+              className="w-200"
+              body={(row) => row.curbWith || "-"}
             />
             <Column
               frozen={true}
@@ -232,7 +217,7 @@ export default function RoleList() {
           </DataTable>
         )}
       </Card>
-      <RoleForm
+      <StreetForm
         id={selectedId}
         open={openForm}
         mode={formMode}
@@ -246,7 +231,7 @@ export default function RoleList() {
         error={error}
       />
 
-      <RoleDetail
+      <StreetDetail
         id={selectedId}
         open={openFormDetail}
         mode={formMode}
