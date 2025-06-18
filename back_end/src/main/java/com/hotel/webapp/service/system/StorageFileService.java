@@ -29,6 +29,7 @@ public class StorageFileService {
     createDir(storageProperties.getUserUploadPath());
     createDir(storageProperties.getHotelPath());
     createDir(storageProperties.getDocumentPath());
+    createDir(storageProperties.getFacilityIconPath());
   }
 
   private void createDir(String path) {
@@ -42,6 +43,10 @@ public class StorageFileService {
 
   public String uploadUserImg(MultipartFile file) {
     return saveImage(file, storageProperties.getUserUploadPath());
+  }
+
+  public String uploadFacilityIcon(MultipartFile file) {
+    return saveImage(file, storageProperties.getFacilityIconPath());
   }
 
   public String uploadHotelImg(MultipartFile file) {

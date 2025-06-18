@@ -20,10 +20,9 @@ public class Facilities implements AuditEntity {
   Integer id;
   @Column(nullable = false)
   String name;
+  String icon;
   @Column(nullable = false)
-  String colName;
-  @Column(nullable = false)
-  Integer number;
+  Integer type;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;
   Integer createdBy;

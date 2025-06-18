@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -32,6 +33,12 @@ public class UserRes {
   String note;
 
   List<RoleRes> roles;
+
+  String createdName;
+  String updatedName;
+  LocalDateTime createdAt;
+  LocalDateTime updatedAt;
+
 
   @Getter
   @Setter

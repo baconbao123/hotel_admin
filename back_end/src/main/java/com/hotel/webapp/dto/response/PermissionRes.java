@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -13,7 +14,12 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PermissionRes {
-  Integer permissionId;
+  //  Integer permissionId;
+  String createdBy;
+  LocalDateTime createdAt;
+  String updateBy;
+  LocalDateTime updatedAt;
+
   List<RoleRes> roleRes;
 
   @Getter

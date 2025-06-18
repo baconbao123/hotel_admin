@@ -12,5 +12,5 @@ public interface MapHotelTypeRepository extends BaseRepository<MapHotelType, Int
 
   List<MapHotelType> findByHotelIdAndDeletedAtIsNull(int hotelId);
 
-  List<MapHotelType> findByColNameAndDeletedAtIsNull(String colName);
+//  List<MapHotelType> findByColNameAndDeletedAtIsNull(String colName);
 }

@@ -78,9 +78,9 @@ export default function RoleForm({
     if (id && open) {
       loadDataById(id)
         .then((data) => {
-          setName(data.name || "");
-          setDescription(data.description || "");
-          setStatus(data.status ?? true);
+          setName(data.entity.name || "");
+          setDescription(data.entity.description || "");
+          setStatus(data.entity.status ?? true);
         })
         .catch(() =>
           toast.current?.show({
@@ -110,7 +110,7 @@ export default function RoleForm({
               label="Close"
               onClick={onClose}
               severity="secondary"
-              outlined 
+              outlined
               disabled={submitting}
               style={{ padding: "8px 40px" }}
             />

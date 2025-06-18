@@ -1,13 +1,11 @@
 package com.hotel.webapp.controller;
 
 import com.hotel.webapp.dto.request.FacilitiesDTO;
-import com.hotel.webapp.dto.request.MapHotelFacilityDTO;
 import com.hotel.webapp.dto.response.ApiResponse;
+import com.hotel.webapp.dto.response.CommonRes;
 import com.hotel.webapp.entity.Facilities;
-import com.hotel.webapp.entity.Hotels;
-import com.hotel.webapp.entity.MapHotelFacility;
+import com.hotel.webapp.entity.FacilityType;
 import com.hotel.webapp.service.admin.FacilitiesServiceImpl;
-import com.hotel.webapp.service.admin.MapHotelFacilityServiceImpl;
 import com.hotel.webapp.validation.Permission;
 import com.hotel.webapp.validation.Resource;
 import jakarta.validation.Valid;
@@ -27,7 +25,6 @@ import java.util.Map;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class HotelFacilitiesController {
   FacilitiesServiceImpl facilitiesService;
-  MapHotelFacilityServiceImpl mapHotelFacilityService;
 
   // facilities
   @PostMapping
@@ -38,7 +35,7 @@ public class HotelFacilitiesController {
                       .build();
   }
 
-  @PutMapping("/{id}")
+  @PutMapping(value = "/{id}")
   @Permission(name = "update")
   public ApiResponse<Facilities> updateFacility(@PathVariable Integer id, @Valid @RequestBody FacilitiesDTO dto) {
     return ApiResponse.<Facilities>builder()
@@ -61,9 +58,17 @@ public class HotelFacilitiesController {
 
   @GetMapping("/{id}")
   @Permission(name = "view")
-  public ApiResponse<Facilities> getByFacilitiesId(@PathVariable Integer id) {
-    return ApiResponse.<Facilities>builder()
-                      .result(facilitiesService.getById(id))
+  public ApiResponse<CommonRes<Facilities>> getByFacilitiesId(@PathVariable Integer id) {
+    return ApiResponse.<CommonRes<Facilities>>builder()
+                      .result(facilitiesService.getEById(id))
+                      .build();
+  }
+
+  @GetMapping("/facilities-type")
+  @Permission(name = "view")
+  public ApiResponse<List<FacilityType>> getByFacilitiesId() {
+    return ApiResponse.<List<FacilityType>>builder()
+                      .result(facilitiesService.findAllFacilityType())
                       .build();
   }
 
@@ -73,24 +78,6 @@ public class HotelFacilitiesController {
     facilitiesService.delete(id);
     return ApiResponse.<Void>builder()
                       .message("Deleted facilities with id " + id + " successfully")
-                      .build();
-  }
-
-  // map-facility-hotel
-  @PostMapping("/map-hotel-facility")
-  @Permission(name = "create")
-  public ApiResponse<List<MapHotelFacility>> mapHotelFacility(@RequestBody MapHotelFacilityDTO dto) {
-    return ApiResponse.<List<MapHotelFacility>>builder()
-                      .result(mapHotelFacilityService.createCollectionBulk(dto))
-                      .build();
-  }
-
-  @PutMapping("/update-map-hotel-facility/{id}")
-  @Permission(name = "update")
-  public ApiResponse<List<MapHotelFacility>> updateMapHotelFacility(@PathVariable int id,
-        @RequestBody MapHotelFacilityDTO dto) {
-    return ApiResponse.<List<MapHotelFacility>>builder()
-                      .result(mapHotelFacilityService.updateCollectionBulk(id, dto))
                       .build();
   }
 }

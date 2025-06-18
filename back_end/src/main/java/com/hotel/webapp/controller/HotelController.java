@@ -2,6 +2,7 @@ package com.hotel.webapp.controller;
 
 import com.hotel.webapp.dto.request.HotelDTO;
 import com.hotel.webapp.dto.response.ApiResponse;
+import com.hotel.webapp.dto.response.CommonRes;
 import com.hotel.webapp.entity.Hotels;
 import com.hotel.webapp.service.admin.HotelServiceImpl;
 import com.hotel.webapp.validation.Permission;
@@ -50,9 +51,9 @@ public class HotelController {
 
   @GetMapping("/{id}")
   @Permission(name = "view")
-  public ApiResponse<Hotels> getById(@PathVariable Integer id) {
-    return ApiResponse.<Hotels>builder()
-                      .result(hotelService.getById(id))
+  public ApiResponse<CommonRes<Hotels>> getById(@PathVariable Integer id) {
+    return ApiResponse.<CommonRes<Hotels>>builder()
+                      .result(hotelService.getEById(id))
                       .build();
   }
 

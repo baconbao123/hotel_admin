@@ -144,7 +144,6 @@ export default function UserForm({
           );
           setWardData(res.data.result);
 
-          // Nếu đang chỉnh sửa/xem và có userData, chọn phường
           if (userData?.wardCode) {
             const selectedWard =
               res.data.result.find(

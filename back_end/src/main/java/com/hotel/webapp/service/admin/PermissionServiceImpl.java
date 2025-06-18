@@ -69,77 +69,35 @@ public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer,
     return repository.checkPermission(userId, resource, action);
   }
 
-//  public List<PermissionRes> getAllPermissions() {
-//    List<Object[]> results = repository.getAllPermissions();
-//    Map<String, PermissionRes> permissionMap = new HashMap<>();
-//
-//    for (Object[] result : results) {
-//      Integer permissionId = (Integer) result[0];
-//      Integer mapRsActionId = (Integer) result[1];
-//      Integer roleId = (Integer) result[2];
-//      String roleName = (String) result[3];
-//      Integer resourceId = (Integer) result[4];
-//      String resourceName = (String) result[5];
-//      Integer actionId = (Integer) result[6];
-//      String actionName = (String) result[7];
-//
-//      if (roleId == null || roleName == null) {
-//        continue;
-//      }
-//
-//      String key = permissionId != null ? "perm_" + permissionId : "role_" + roleId;
-//      PermissionRes permissionRes = permissionMap.computeIfAbsent(key, k ->
-//            new PermissionRes(permissionId, new ArrayList<>()));
-//
-//      PermissionRes.RoleRes roleRes = permissionRes.getRoleRes().stream()
-//                                                   .filter(res -> res.getRoleId().equals(roleId))
-//                                                   .findFirst()
-//                                                   .orElseGet(() -> {
-//                                                     PermissionRes.RoleRes newRes = new PermissionRes.RoleRes(
-//                                                           roleId, roleName, new ArrayList<>());
-//                                                     permissionRes.getRoleRes().add(newRes);
-//                                                     return newRes;
-//                                                   });
-//
-//      if (resourceId != null && resourceName != null && actionId != null && actionName != null) {
-//        boolean resourceExists = roleRes.getPermissions().stream()
-//                                        .anyMatch(res -> res.getResourceId().equals(resourceId) && res.getActionId()
-//                                                                                                      .equals(
-//                                                                                                            actionId));
-//
-//        if (!resourceExists) {
-//          PermissionRes.DataResponse resourceRes = new PermissionRes.DataResponse(
-//                mapRsActionId, resourceId, resourceName, actionId, actionName);
-//          roleRes.getPermissions().add(resourceRes);
-//        }
-//      }
-//    }
-//
-//    return new ArrayList<>(permissionMap.values());
-//  }
-
-  public Page<PermissionRes> getAllPermissions(int page, int size, Map<String, String> sort) {
+  public Page<PermissionRes> getAllPermissions(int page, int size, Map<String, String> sort,
+        Map<String, String> filters) {
     Pageable pageable = buildPageable(page, size, sort);
-    Page<Object[]> results = repository.getAllPermissions(pageable);
-    Map<String, PermissionRes> permissionMap = new HashMap<>();
+    String roleName = filters != null ? filters.get("roleName") : null;
 
-    for (Object[] result : results.getContent()) {
-      Integer permissionId = (Integer) result[0];
-      Integer mapRsActionId = (Integer) result[1];
-      Integer roleId = (Integer) result[2];
-      String roleNameResult = (String) result[3];
-      Integer resourceId = (Integer) result[4];
-      String resourceName = (String) result[5];
-      Integer actionId = (Integer) result[6];
-      String actionName = (String) result[7];
+    Page<Object[]> roleResults = repository.getPaginatedRoles(roleName, pageable);
+    List<Integer> roleIds = roleResults.getContent().stream()
+                                       .map(row -> (Integer) row[0])
+                                       .toList();
+
+    List<Object[]> permissionResults = repository.getPermissionsForRoles(roleIds);
+
+    Map<String, PermissionRes> permissionMap = new HashMap<>();
+    for (Object[] result : permissionResults) {
+      Integer mapRsActionId = (Integer) result[0];
+      Integer roleId = (Integer) result[1];
+      String roleNameResult = (String) result[2];
+      Integer resourceId = (Integer) result[3];
+      String resourceName = (String) result[4];
+      Integer actionId = (Integer) result[5];
+      String actionName = (String) result[6];
 
       if (roleId == null || roleNameResult == null) {
         continue;
       }
 
-      String key = permissionId != null ? "perm_" + permissionId : "role_" + roleId;
+      String key = "role_" + roleId;
       PermissionRes permissionRes = permissionMap.computeIfAbsent(key, k ->
-            new PermissionRes(permissionId, new ArrayList<>()));
+            new PermissionRes(null, null, null, null, new ArrayList<>()));
 
       PermissionRes.RoleRes roleRes = permissionRes.getRoleRes().stream()
                                                    .filter(res -> res.getRoleId().equals(roleId))
@@ -151,7 +109,8 @@ public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer,
                                                      return newRes;
                                                    });
 
-      if (resourceId != null && resourceName != null && actionId != null && actionName != null) {
+      if (mapRsActionId != null && resourceId != null &&
+            resourceName != null && actionId != null && actionName != null) {
         boolean resourceExists = roleRes.getPermissions().stream()
                                         .anyMatch(res -> res.getResourceId().equals(resourceId) &&
                                               res.getActionId().equals(actionId));
@@ -165,13 +124,14 @@ public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer,
     }
 
     List<PermissionRes> permissionList = new ArrayList<>(permissionMap.values());
-    return new PageImpl<>(permissionList, pageable, results.getTotalElements());
+    long totalRoles = repository.countDistinctRoles(roleName);
+    return new PageImpl<>(permissionList, pageable, totalRoles);
   }
 
   private Pageable buildPageable(int page, int size, Map<String, String> sort) {
     List<Sort.Order> orders = new ArrayList<>();
     if (sort == null || sort.isEmpty()) {
-      orders.add(new Sort.Order(Sort.Direction.ASC, "role_id"));
+      orders.add(new Sort.Order(Sort.Direction.DESC, "role_id"));
     } else {
       sort.forEach((field, direction) -> {
         if (field.startsWith("sort[")) {
@@ -195,33 +155,38 @@ public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer,
     }
 
     List<Object[]> results = repository.getPermissionsByRoleId(roleId);
+
     if (results == null || results.isEmpty()) {
-      return new PermissionRes(null, new ArrayList<>());
+      return new PermissionRes(null, null, null, null, new ArrayList<>());
     }
 
-    Map<String, PermissionRes> permissionMap = new HashMap<>();
-    String key = "role_" + roleId;
-    PermissionRes permissionRes = permissionMap.computeIfAbsent(key, k ->
-          new PermissionRes(null, new ArrayList<>()));
+    Object[] firstResult = results.get(0);
+    PermissionRes permissionRes = new PermissionRes(
+          (String) firstResult[0],
+          (LocalDateTime) firstResult[1],
+          (String) firstResult[2],
+          (LocalDateTime) firstResult[3],
+          new ArrayList<>()
+    );
 
     Map<Integer, PermissionRes.RoleRes> roleResMap = new HashMap<>();
 
     for (Object[] result : results) {
-      Integer permissionId = (Integer) result[0];
-      Integer mapRsActionId = (Integer) result[1];
-      Integer resourceId = (Integer) result[2];
-      String resourceName = (String) result[3];
-      Integer actionId = (Integer) result[4];
-      String actionName = (String) result[5];
-      Integer currentRoleId = (Integer) result[6];
-      String roleName = (String) result[7];
+      Integer mapRsActionId = (Integer) result[4];
+      Integer resourceId = (Integer) result[5];
+      String resourceName = (String) result[6];
+      Integer actionId = (Integer) result[7];
+      String actionName = (String) result[8];
+      Integer currentRoleId = (Integer) result[9];
+      String roleName = (String) result[10];
 
       if (resourceId != null && resourceName != null && actionId != null && actionName != null) {
-        PermissionRes.RoleRes roleRes = roleResMap.computeIfAbsent(currentRoleId != null ? currentRoleId : 0, k -> {
-          PermissionRes.RoleRes newRes = new PermissionRes.RoleRes(currentRoleId, roleName, new ArrayList<>());
-          permissionRes.getRoleRes().add(newRes);
-          return newRes;
-        });
+        PermissionRes.RoleRes roleRes = roleResMap.computeIfAbsent(
+              currentRoleId != null ? currentRoleId : 0, k -> {
+                PermissionRes.RoleRes newRes = new PermissionRes.RoleRes(currentRoleId, roleName, new ArrayList<>());
+                permissionRes.getRoleRes().add(newRes);
+                return newRes;
+              });
 
         if (mapRsActionId != null) {
           boolean resourceExists = roleRes.getPermissions().stream()
@@ -238,7 +203,7 @@ public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer,
       }
     }
 
-    return permissionMap.get(key);
+    return permissionRes;
   }
 
   public List<PermissionRes.DataResponse> getMapResourcesActions() {

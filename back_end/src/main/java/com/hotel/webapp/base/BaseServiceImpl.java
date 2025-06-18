@@ -1,5 +1,6 @@
 package com.hotel.webapp.base;
 
+import com.hotel.webapp.dto.response.CommonRes;
 import com.hotel.webapp.exception.AppException;
 import com.hotel.webapp.exception.ErrorCode;
 import com.hotel.webapp.service.admin.interfaces.AuthService;
@@ -23,13 +24,12 @@ import java.util.*;
 public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID>> implements BaseService<E, ID, DTO> {
   R repository;
   BaseMapper<E, DTO> mapper;
-  AuthService authService; // get authId
+  AuthService authService;
 
   public BaseServiceImpl(R repository, BaseMapper<E, DTO> mapper, AuthService authService) {
     this.repository = repository;
     this.mapper = mapper;
     this.authService = authService;
-
   }
 
   public BaseServiceImpl(R repository, AuthService authService) {
@@ -156,6 +156,7 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
     validateCreate(create);
     E entity = mapper.toCreate(create);
 
+    beforeCommon(entity, create);
     beforeCreate(entity, create);
 
     if (entity instanceof AuditEntity audit) {
@@ -176,10 +177,11 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
 
     validateDTOCommon(update);
 
-    E entity = getById(id);
+    E entity = findById(id);
     validateUpdate((Integer) id, update);
     mapper.toUpdate(entity, update);
 
+    beforeCommon(entity, update);
     beforeUpdate(entity, update);
 
     if (entity instanceof AuditEntity audit) {
@@ -196,7 +198,7 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
 
   @Override
   public void delete(ID id) {
-    E entity = getById(id);
+    E entity = findById(id);
     validateDelete(id);
 
     beforeDelete(id);
@@ -208,7 +210,14 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
   }
 
   @Override
-  public E getById(ID id) {
+  public CommonRes<E> getEById(ID id) {
+    return repository.findByIdWithFullname(id)
+                     .filter(e -> !(e instanceof AuditEntity audit) || audit.getDeletedAt() == null)
+                     .orElseThrow(() -> createNotFoundException(id));
+  }
+
+  @Override
+  public E findById(ID id) {
     return repository.findById(id)
                      .filter(e -> !(e instanceof AuditEntity audit) || audit.getDeletedAt() == null)
                      .orElseThrow(() -> createNotFoundException(id));
@@ -229,6 +238,9 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
 
   public Collection<E> updateCollectionBulk(ID id, DTO dto) {
     throw new RuntimeException("Not implemented yet");
+  }
+
+  protected void beforeCommon(E entity, DTO dto) {
   }
 
   protected void beforeCreate(E e, DTO create) {
@@ -263,6 +275,7 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
 
   protected void afterCommon(E entity, DTO dto) {
   }
+
 
 
 }

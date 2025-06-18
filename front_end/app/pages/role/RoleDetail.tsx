@@ -3,6 +3,7 @@ import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { Tag } from "primereact/tag";
+import { format } from "date-fns";
 
 interface Props {
   id?: string;
@@ -22,6 +23,11 @@ export default function RoleDetail({
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState(true);
+  const [createdData, setCreatedData] = useState("");
+  const [createdAt, setCreatedAt] = useState("");
+  const [updatedData, setUpdatedData] = useState("");
+  const [updateAt, setUpdateAt] = useState("");
+
   const toast = useRef<Toast>(null);
 
   const header = mode === "view" ? "ROLE DETAILS" : "ADD NEW ROLE";
@@ -30,9 +36,13 @@ export default function RoleDetail({
     if (id && open) {
       loadDataById(id)
         .then((data) => {
-          setName(data.name || "");
-          setDescription(data.description || "");
-          setStatus(data.status ?? true);
+          setName(data.entity.name || "");
+          setDescription(data.entity.description || "");
+          setStatus(data.entity.status ?? true);
+          setCreatedAt(data.entity.createdAt || "");
+          setUpdateAt(data.entity.updatedAt || "");
+          setCreatedData(data.createdName || "");
+          setUpdatedData(data.updatedName || "");
         })
         .catch(() =>
           toast.current?.show({
@@ -94,6 +104,48 @@ export default function RoleDetail({
                 value={status ? "Active" : "Inactive"}
                 severity={status ? "success" : "danger"}
               />
+            </span>
+          </div>
+
+          <div></div>
+
+          <div className="grid grid-cols-3 gap-2 items-center mb-2">
+            <label htmlFor="createdName" className="font-bold col-span-1">
+              Created By:
+            </label>
+            <span id="createdName" className="col-span-2">
+              {createdData || "-"}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 items-center mb-2">
+            <label htmlFor="updatedName" className="font-bold col-span-1">
+              Updated By:
+            </label>
+            <span id="updatedName" className="col-span-2">
+              {updatedData || "-"}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 items-center mb-2">
+            <label htmlFor="createdAt" className="font-bold col-span-1">
+              Created At:
+            </label>
+            <span id="createdAt" className="col-span-2">
+              {createdAt
+                ? format(new Date(createdAt), "yyyy-MM-dd HH:mm:ss")
+                : "-"}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2 items-center mb-2">
+            <label htmlFor="updatedAt" className="font-bold col-span-1">
+              Updated At:
+            </label>
+            <span id="updatedAt" className="col-span-2">
+              {updateAt
+                ? format(new Date(updateAt), "yyyy-MM-dd HH:mm:ss")
+                : "-"}
             </span>
           </div>
         </div>

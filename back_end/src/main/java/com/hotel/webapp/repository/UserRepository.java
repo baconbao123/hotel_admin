@@ -26,8 +26,10 @@ public interface UserRepository extends BaseRepository<User, Integer> {
 
   @Query("select u.id, u.fullName, u.email, u.phoneNumber, u.avatarUrl, u.status, " +
         "a.streetNumber, a.streetId, a.wardCode, w.name, a.districtCode, d.name, a.provinceCode, p.name, s.name, " +
-        "a.note " +
+        "a.note, u1.fullName, u2.fullName, u.createdAt, u.updatedAt " +
         "from User u " +
+        "left join User u1 on u.createdBy = u1.id " +
+        "left join User u2 on u.updatedBy = u2.id " +
         "join Address a on u.addressId = a.id " +
         "join Provinces p on a.provinceCode = p.code " +
         "join Wards w on a.wardCode = w.code " +

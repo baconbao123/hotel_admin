@@ -106,8 +106,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
 
   @Override
   public User update(Integer id, UserDTO update) {
-    var user = getById(id);
-
+    var user = findById(id);
 
     AddressDTO addressDTO = new AddressDTO(update.getProvinceCode(), update.getDistrictCode(), update.getWardCode(),
           update.getStreetId(), update.getStreetNumber(), update.getNote());
@@ -123,8 +122,10 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
                .avatarUrl(user.getAvatarUrl())
                .phoneNumber(update.getPhoneNumber())
                .addressId(user.getAddressId())
-               .createdAt(LocalDateTime.now())
-               .createdBy(authService.getAuthLogin())
+               .createdBy(user.getCreatedBy())
+               .createdAt(user.getCreatedAt())
+               .updatedBy(authService.getAuthLogin())
+               .updatedAt(LocalDateTime.now())
                .status(update.getStatus())
                .build();
 
@@ -177,7 +178,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
 
   @Override
   protected void validateDelete(Integer id) {
-    User user = getById(id);
+    User user = findById(id);
     if (user.getEmail().equalsIgnoreCase("sa@gmail.com")) {
       throw new AppException(ErrorCode.DONT_DELETE_SA);
     }
@@ -185,6 +186,11 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
 
   public UserRes findUserById(Integer id) {
     List<Object[]> userObjList = repository.getUserById(id);
+
+//    for (int i = 0; i < userObjList.size(); i++) {
+//      Object[] userObj = userObjList.get(i);
+//      log.error("userObj[{}] contents: {}", i, Arrays.toString(userObj));
+//    }
 
     if (userObjList.isEmpty()) throw new AppException(ErrorCode.NOT_FOUND, "User");
 
@@ -219,7 +225,12 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
           (String) userObj[13], // provinceName
           (String) userObj[14], // note
           (String) userObj[15], // streetName
-          roleRes);
+          roleRes,
+          (String) userObj[16], // createdName
+          (String) userObj[17], // updatedName
+          (LocalDateTime) userObj[18], // createdAt
+          (LocalDateTime) userObj[19] // updatedAt
+    );
   }
 
 

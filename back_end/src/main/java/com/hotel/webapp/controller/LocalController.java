@@ -2,6 +2,7 @@ package com.hotel.webapp.controller;
 
 import com.hotel.webapp.dto.request.StreetsDTO;
 import com.hotel.webapp.dto.response.ApiResponse;
+import com.hotel.webapp.dto.response.CommonRes;
 import com.hotel.webapp.dto.response.LocalResponse;
 import com.hotel.webapp.entity.Streets;
 import com.hotel.webapp.service.admin.LocalServiceImpl;
@@ -68,9 +69,9 @@ public class LocalController {
   }
 
   @GetMapping("/{id}")
-  public ApiResponse<Streets> findStreetById(@PathVariable Integer id) {
-    return ApiResponse.<Streets>builder()
-                      .result(localService.getById(id))
+  public ApiResponse<CommonRes<Streets>> findStreetById(@PathVariable Integer id) {
+    return ApiResponse.<CommonRes<Streets>>builder()
+                      .result(localService.getEById(id))
                       .build();
   }
 

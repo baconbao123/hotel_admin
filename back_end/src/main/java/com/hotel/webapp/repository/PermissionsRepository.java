@@ -17,37 +17,39 @@ public interface PermissionsRepository extends BaseRepository<Permissions, Integ
         "FETCH FIRST 1 ROWS ONLY")
   Optional<Permissions> findByRoleId(Integer id);
 
-  List<Permissions> findByMapResourcesActionId(int mapResourcesActionId);
-
   List<Permissions> findAllByRoleId(@Param("roleId") Integer roleId);
 
-  //  @Query(value = "SELECT p.id AS permission_id, mra.id AS map_rs_action_id, r.id AS role_id, r.name AS role_name, " +
-//        "COALESCE(re.id, NULL) AS resource_id, COALESCE(re.name, NULL) AS resource_name, " +
-//        "COALESCE(a.id, NULL) AS action_id, COALESCE(a.name, NULL) AS action_name " +
-//        "FROM Role r " +
-//        "LEFT JOIN Permissions p ON r.id = p.roleId AND p.deletedAt IS NULL " +
-//        "LEFT JOIN MapResourcesAction mra ON p.mapResourcesActionId = mra.id " +
-//        "LEFT JOIN Resources re ON mra.resourceId = re.id " +
-//        "LEFT JOIN Actions a ON mra.actionId = a.id " +
-//        "WHERE r.deletedAt IS NULL " +
-//        "AND (:roleName IS NULL OR r.name LIKE '%' || :roleName || '%') " +
-//        "ORDER BY r.id ASC")
-//  Page<Object[]> getAllPermissions(@Param("roleName") String roleName, Pageable pageable);
-  @Query(value = "SELECT p.id AS permission_id, mra.id AS map_rs_action_id, r.id AS role_id, r.name AS role_name, " +
-        "COALESCE(re.id, NULL) AS resource_id, COALESCE(re.name, NULL) AS resource_name, " +
-        "COALESCE(a.id, NULL) AS action_id, COALESCE(a.name, NULL) AS action_name " +
+  @Query("SELECT DISTINCT r.id, r.name " +
         "FROM Role r " +
-        "LEFT JOIN Permissions p ON r.id = p.roleId AND p.deletedAt IS NULL " +
+        "WHERE r.deletedAt IS NULL " +
+        "AND (:roleName IS NULL OR :roleName = '' OR r.name LIKE CONCAT('%', :roleName, '%')) " +
+        "ORDER BY r.id DESC")
+  Page<Object[]> getPaginatedRoles(@Param("roleName") String roleName, Pageable pageable);
+
+  @Query("SELECT p.mapResourcesActionId AS map_rs_action_id, r.id AS role_id, r.name AS role_name, " +
+        "COALESCE(mra.resourceId, NULL) AS resource_id, COALESCE(re.name, NULL) AS resource_name, " +
+        "COALESCE(mra.actionId, NULL) AS action_id, COALESCE(ac.name, NULL) AS action_name " +
+        "FROM Role r " +
+        "LEFT JOIN Permissions p ON p.roleId = r.id AND p.deletedAt IS NULL " +
         "LEFT JOIN MapResourcesAction mra ON p.mapResourcesActionId = mra.id " +
         "LEFT JOIN Resources re ON mra.resourceId = re.id " +
-        "LEFT JOIN Actions a ON mra.actionId = a.id " +
-        "WHERE r.deletedAt IS NULL " +
-        "ORDER BY r.id ASC")
-  Page<Object[]> getAllPermissions(Pageable pageable);
+        "LEFT JOIN Actions ac ON mra.actionId = ac.id " +
+        "WHERE r.deletedAt IS NULL AND r.id IN :roleIds " +
+        "ORDER BY r.id DESC")
+  List<Object[]> getPermissionsForRoles(@Param("roleIds") List<Integer> roleIds);
 
-  @Query("SELECT p.id AS permissionId, mra.id AS mapRsActionId, re.id AS resourceId, re.name AS resourceName, " +
+  @Query("SELECT COUNT(DISTINCT r.id) " +
+        "FROM Role r " +
+        "WHERE r.deletedAt IS NULL " +
+        "AND (:roleName IS NULL OR :roleName = '' OR r.name LIKE CONCAT('%', :roleName, '%'))")
+  long countDistinctRoles(@Param("roleName") String roleName);
+
+  @Query("SELECT u1.fullName, p.createdAt, u2.fullName, p.updatedAt, " +
+        "mra.id AS mapRsActionId, re.id AS resourceId, re.name AS resourceName, " +
         "a.id AS actionId, a.name AS actionName, r.id AS roleId, r.name AS roleName " +
         "FROM Permissions p " +
+        "LEFT JOIN User u1 on p.createdBy = u1.id " +
+        "LEFT JOIN User u2 on p.updatedBy = u2.id " +
         "LEFT JOIN MapResourcesAction mra ON mra.id = p.mapResourcesActionId " +
         "LEFT JOIN Resources re ON mra.resourceId = re.id " +
         "LEFT JOIN Actions a ON mra.actionId = a.id " +

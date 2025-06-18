@@ -18,7 +18,6 @@ interface Resource {
 interface Props {
   readonly id?: string;
   readonly open: boolean;
-  readonly mode?: "edit" | "view";
   readonly permissionData?: any;
   readonly onClose: () => void;
   readonly loadDataTable: () => Promise<void>;
@@ -27,7 +26,6 @@ interface Props {
 export default function PermissionForm({
   id,
   open = false,
-  mode = "edit",
   permissionData,
   onClose,
   loadDataTable,
@@ -41,14 +39,7 @@ export default function PermissionForm({
   const toast = useRef<Toast>(null);
 
   const getHeader = (): string => {
-    switch (mode) {
-      case "view":
-        return "PERMISSION DETAILS";
-      case "edit":
-        return "EDIT PERMISSION";
-      default:
-        return "EDIT PERMISSION";
-    }
+    return "EDIT PERMISSION";
   };
 
   const footer = (
@@ -59,15 +50,13 @@ export default function PermissionForm({
         className="p-button-text"
         disabled={submitting}
       />
-      {mode !== "view" && (
-        <Button
-          label="Save"
-          type="submit"
-          form="permission-form"
-          className="p-button-text"
-          loading={submitting}
-        />
-      )}
+      <Button
+        label="Save"
+        type="submit"
+        form="permission-form"
+        className="p-button-text"
+        loading={submitting}
+      />
     </div>
   );
 
@@ -107,7 +96,7 @@ export default function PermissionForm({
     };
 
     try {
-      if (id && mode === "edit") {
+      if (id) {
         await $axios.put("/permission", mappingDTO);
         toast.current?.show({
           severity: "success",
@@ -135,11 +124,9 @@ export default function PermissionForm({
     const fetchData = async () => {
       try {
         const response = await $axios("/permission/resource-actions");
-        const data = response.data.result || [];
+        const data: Resource[] = response.data.result || [];
         const uniqueResources = Array.from(
-          new Map(
-            data.map((item: Resource) => [item.resourceId, item])
-          ).values()
+          new Map(data.map((item) => [item.resourceId, item])).values()
         );
         setResourceData(uniqueResources);
         setActionData(data);
@@ -156,13 +143,10 @@ export default function PermissionForm({
   }, []);
 
   useEffect(() => {
-    if (
-      id &&
-      open &&
-      mode === "edit" &&
-      permissionData &&
-      actionData.length > 0
-    ) {
+    if (id && open && permissionData && actionData.length > 0) {
+      console.log("permissionData in PermissionForm:", permissionData); // Debug
+      console.log("actionData in PermissionForm:", actionData); // Debug
+
       const newSelectedActions: { [key: number]: number[] } = {};
 
       if (permissionData && permissionData.roleRes) {
@@ -170,7 +154,9 @@ export default function PermissionForm({
           if (role.permissions && role.permissions.length > 0) {
             role.permissions.forEach((perm: Resource) => {
               const matchingAction = actionData.find(
-                (action) => action.id === perm.id
+                (action) =>
+                  action.resourceId === perm.resourceId &&
+                  action.actionId === perm.actionId
               );
 
               if (matchingAction) {
@@ -188,7 +174,7 @@ export default function PermissionForm({
                 }
               } else {
                 console.warn(
-                  `No matching action found for mapResourceActionId: ${perm.id}`
+                  `No matching action found for resourceId: ${perm.resourceId}, actionId: ${perm.actionId}`
                 );
               }
             });
@@ -197,6 +183,10 @@ export default function PermissionForm({
           }
         });
 
+        console.log(
+          "newSelectedActions in PermissionForm:",
+          newSelectedActions
+        ); // Debug
         setSelectedActions(newSelectedActions);
       } else {
         toast.current?.show({
@@ -205,11 +195,12 @@ export default function PermissionForm({
           detail: "Invalid permission data structure",
           life: 3000,
         });
+        setSelectedActions({});
       }
     } else {
       setSelectedActions({});
     }
-  }, [id, open, mode, permissionData, actionData]);
+  }, [id, open, permissionData, actionData]);
 
   const onActionChange = (
     resourceId: number,
@@ -291,7 +282,6 @@ export default function PermissionForm({
                               e.target.checked
                             )
                           }
-                          disabled={mode === "view"}
                         />
                         <label
                           htmlFor={`action-${rowData.id}-${action.id}`}
@@ -320,7 +310,6 @@ export default function PermissionForm({
                   <Checkbox
                     checked={isAllChecked}
                     onChange={(e) => onAllChange(resourceId, e.target.checked)}
-                    disabled={mode === "view"}
                   />
                 );
               }}

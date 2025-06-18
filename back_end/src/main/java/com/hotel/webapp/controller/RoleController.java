@@ -2,6 +2,7 @@ package com.hotel.webapp.controller;
 
 import com.hotel.webapp.dto.request.RoleDTO;
 import com.hotel.webapp.dto.response.ApiResponse;
+import com.hotel.webapp.dto.response.CommonRes;
 import com.hotel.webapp.entity.Role;
 import com.hotel.webapp.service.admin.RoleServiceImpl;
 import com.hotel.webapp.validation.Permission;
@@ -55,9 +56,9 @@ public class RoleController {
 
   @GetMapping("/{id}")
   @Permission(name = "view")
-  public ApiResponse<Role> findById(@PathVariable int id) {
-    return ApiResponse.<Role>builder()
-                      .result(roleService.getById(id))
+  public ApiResponse<CommonRes<Role>> findById(@PathVariable int id) {
+    return ApiResponse.<CommonRes<Role>>builder()
+                      .result(roleService.getEById(id))
                       .build();
   }
 

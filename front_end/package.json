@@ -16,6 +16,7 @@
     "axios": "^1.8.4",
     "bootstrap": "^5.3.3",
     "cookie": "^0.6.0",
+    "date-fns": "^4.1.0",
     "isbot": "^5.1.17",
     "js-cookie": "^3.0.5",
     "lodash": "^4.17.21",
