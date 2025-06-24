@@ -37,9 +37,10 @@ export const navigation: MenuItem[] = [
   },
   {
     name: "Hotel",
-    href: "/hotels",
+    href: "",
     icon: BuildingOffice2Icon,
     children: [
+      { name: "Hotel Management", href: "hotels" },
       { name: "All Bookings", href: "/bookings" },
       { name: "New Booking", href: "/bookings/new" },
       { name: "Calendar View", href: "/bookings/calendar" },

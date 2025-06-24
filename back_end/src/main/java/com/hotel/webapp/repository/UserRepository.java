@@ -17,8 +17,6 @@ public interface UserRepository extends BaseRepository<User, Integer> {
 
   boolean existsByEmailAndIdNot(String email, int id);
 
-  boolean existsByIdAndStatusIsTrueAndDeletedAtIsNull(Integer id);
-
   // ----------------------
   boolean existsByIdAndDeletedAtIsNull(Integer id);
 
@@ -41,6 +39,6 @@ public interface UserRepository extends BaseRepository<User, Integer> {
   @Query("select r.id, r.name " +
         "from Role r " +
         "left join MapUserRoles mur on mur.roleId = r.id and mur.userId = :userId " +
-        "where mur.userId = :userId and mur.deletedAt is null")
+        "where mur.userId = :userId and mur.deletedAt is null and r.deletedAt is null")
   List<Object[]> getRolesByUserId(Integer userId);
 }

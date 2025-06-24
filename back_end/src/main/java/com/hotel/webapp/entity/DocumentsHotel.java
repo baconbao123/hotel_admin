@@ -21,7 +21,7 @@ public class DocumentsHotel implements AuditEntity {
   @Column(nullable = false)
   String name;
   @Column(nullable = false)
-  String colName;
+  Integer hotelId;
   @Column(nullable = false)
   Integer typeId;
   @Column(nullable = false)

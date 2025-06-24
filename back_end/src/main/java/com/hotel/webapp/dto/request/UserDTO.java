@@ -2,9 +2,7 @@ package com.hotel.webapp.dto.request;
 
 import com.hotel.webapp.validation.FieldNotEmpty;
 import com.hotel.webapp.validation.Trim;
-import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.Pattern;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,7 +22,7 @@ public class UserDTO {
   @Trim
   @FieldNotEmpty(field = "Otp")
   String email;
-//  @Pattern(regexp = "^\\d{10}$")
+  //  @Pattern(regexp = "^\\d{10}$")
   @Trim
   @FieldNotEmpty(field = "Phone number")
   String phoneNumber;

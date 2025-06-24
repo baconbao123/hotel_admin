@@ -35,7 +35,6 @@ public class UserController {
   @Permission(name = "create")
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ApiResponse<User> create(@Valid @ModelAttribute UserDTO userDTO) throws IOException {
-    log.error("Received UserDTO: " + userDTO);
     return ApiResponse.<User>builder()
                       .result(userService.create(userDTO))
                       .build();

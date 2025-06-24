@@ -2,7 +2,7 @@ package com.hotel.webapp.controller;
 
 import com.hotel.webapp.dto.request.FacilitiesDTO;
 import com.hotel.webapp.dto.response.ApiResponse;
-import com.hotel.webapp.dto.response.CommonRes;
+import com.hotel.webapp.dto.response.FacilitiesRes;
 import com.hotel.webapp.entity.Facilities;
 import com.hotel.webapp.entity.FacilityType;
 import com.hotel.webapp.service.admin.FacilitiesServiceImpl;
@@ -45,22 +45,22 @@ public class HotelFacilitiesController {
 
   @GetMapping
   @Permission(name = "view")
-  public ApiResponse<Page<Facilities>> getAll(
+  public ApiResponse<Page<FacilitiesRes>> getAll(
         @RequestParam(required = false) Map<String, String> filters,
         @RequestParam(required = false) Map<String, String> sort,
         @RequestParam int size,
         @RequestParam int page
   ) {
-    return ApiResponse.<Page<Facilities>>builder()
-                      .result(facilitiesService.getAll(filters, sort, size, page))
+    return ApiResponse.<Page<FacilitiesRes>>builder()
+                      .result(facilitiesService.findFacilities(filters, sort, size, page))
                       .build();
   }
 
   @GetMapping("/{id}")
   @Permission(name = "view")
-  public ApiResponse<CommonRes<Facilities>> getByFacilitiesId(@PathVariable Integer id) {
-    return ApiResponse.<CommonRes<Facilities>>builder()
-                      .result(facilitiesService.getEById(id))
+  public ApiResponse<FacilitiesRes.FacilityRes> getByFacilitiesId(@PathVariable Integer id) {
+    return ApiResponse.<FacilitiesRes.FacilityRes>builder()
+                      .result(facilitiesService.getByIdRes(id))
                       .build();
   }
 

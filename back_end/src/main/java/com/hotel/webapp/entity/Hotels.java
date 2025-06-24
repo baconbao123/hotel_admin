@@ -20,6 +20,7 @@ public class Hotels implements AuditEntity {
   Integer id;
   Integer ownerId;
   String name;
+  @Lob
   String description;
   Integer avatarId;
   Integer addressId;

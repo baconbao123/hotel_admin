@@ -129,39 +129,75 @@ export default function RoleForm({
         className="p-fluid"
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          <div>
-            <label htmlFor="name">
-              Name <span className="text-red-500">*</span>
-            </label>
-            <InputText
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              disabled={submitting}
-            />
-            {getError("name") && (
-              <small className="p-error text-red-500">{getError("name")}</small>
-            )}
-          </div>
-          <div>
-            <label htmlFor="description">Description</label>
-            <InputText
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              disabled={submitting}
-            />
-          </div>
-          <div className="flex align-items-center gap-4">
-            <label htmlFor="status">Status</label>
-            <InputSwitch
-              id="status"
-              className="w-50"
-              checked={status}
-              onChange={(e) => setStatus(e.value)}
-              disabled={submitting}
-            />
+        <div className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Name */}
+            <div>
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Name <span className="text-red-500">*</span>
+              </label>
+              <InputText
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={submitting}
+                placeholder="Enter name"
+                className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                  getError("name") ? "p-invalid" : ""
+                }`}
+              />
+              {getError("name") && (
+                <small className="text-red-600 text-xs mt-1 block">
+                  {getError("name")}
+                </small>
+              )}
+            </div>
+
+            {/* Description */}
+            <div>
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Description
+              </label>
+              <InputText
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                disabled={submitting}
+                placeholder="Enter description"
+                className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                  getError("description") ? "p-invalid" : ""
+                }`}
+              />
+              {getError("description") && (
+                <small className="text-red-600 text-xs mt-1 block">
+                  {getError("description")}
+                </small>
+              )}
+            </div>
+
+            {/* Status */}
+            <div className="flex items-center gap-4 mt-4">
+              <label
+                htmlFor="status"
+                className="text-sm font-medium text-gray-700"
+              >
+                Status
+              </label>
+              <InputSwitch
+                id="status"
+                checked={status}
+                onChange={(e) => setStatus(e.value)}
+                disabled={submitting}
+                tooltip="Enable/disable hotel visibility"
+                tooltipOptions={{ position: "top" }}
+              />
+            </div>
           </div>
         </div>
       </Dialog>

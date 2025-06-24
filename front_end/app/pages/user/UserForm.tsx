@@ -88,7 +88,6 @@ export default function UserForm({
           );
           setDistrictData(res.data.result);
 
-          // Nếu đang chỉnh sửa/xem và có userData, chọn quận
           if (userData?.districtCode) {
             const selectedDistrict =
               res.data.result.find(
@@ -99,7 +98,6 @@ export default function UserForm({
             setSelectedDistrict(null);
           }
 
-          // Reset các state phụ thuộc
           setWardData([]);
           setSelectedWard(null);
           setStreetData([]);
@@ -195,7 +193,6 @@ export default function UserForm({
           );
           setStreetData(res.data.result);
 
-          // Nếu đang chỉnh sửa/xem và có userData, chọn đường
           if (userData?.streetId) {
             const selectedStreet =
               res.data.result.find(
@@ -398,13 +395,14 @@ export default function UserForm({
         onHide={onClose}
         header={header}
         footer={
-          <div className="flex justify-center gap-2">
+          <div className="flex justify-end gap-3 p-4">
             <Button
               label="Close"
               onClick={onClose}
               severity="secondary"
+              outlined
               disabled={submitting}
-              style={{ padding: "8px 40px" }}
+              className="px-6 py-2 rounded-lg"
             />
             <Button
               label="Save"
@@ -412,239 +410,320 @@ export default function UserForm({
               severity="success"
               disabled={submitting}
               loading={submitting}
-              style={{ padding: "8px 40px" }}
+              className="px-6 py-2 rounded-lg"
             />
           </div>
         }
-        style={{ width: "50%" }}
+        style={{ width: "50rem", maxWidth: "95vw" }}
         modal
-        className="dialog p-fluid"
-        breakpoints={{ "960px": "75vw", "641px": "90vw" }}
+        className="p-fluid rounded-lg shadow-lg bg-white"
+        breakpoints={{ "960px": "85vw", "641px": "95vw" }}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label htmlFor="avatar">Avatar</label>
-            <ImageUploader
-              onFileChange={(files) => setSelectedFile(files ? files[0] : null)}
-              maxFileSize={2}
-              maxCount={1}
-              initialImageUrl={
-                avatarUrl
-                  ? `${
-                      import.meta.env.VITE_REACT_APP_BACK_END_LINK_UPLOAD_USER
-                    }/${avatarUrl}`
-                  : undefined
-              }
-              disabled={submitting}
-            />
-            {getError("avatar") && (
-              <small className="p-error text-red-500">
-                {getError("avatar")}
-              </small>
-            )}
-          </div>
+        <div className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+            <div className="col-span-12">
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                User Information
+              </h3>
+            </div>
 
-          <div className="col-span-1 md:col-span-2">
-            <div className="h-4"></div>
-          </div>
+            {/* Avatar */}
+            <div className="col-span-12 md:col-span-4">
+              <label
+                htmlFor="avatar"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Avatar
+              </label>
+              <ImageUploader
+                onFileChange={(files) =>
+                  setSelectedFile(files ? files[0] : null)
+                }
+                maxFileSize={2}
+                maxCount={1}
+                initialImageUrls={
+                  avatarUrl
+                    ? [
+                        `${
+                          import.meta.env.VITE_REACT_APP_BACK_END_LINK_UPLOAD_USER
+                        }/${avatarUrl}`,
+                      ]
+                    : []
+                }
+                disabled={submitting}
+              />
+              {getError("avatar") && (
+                <small className="text-red-500 text-xs mt-1">
+                  {getError("avatar")}
+                </small>
+              )}
+            </div>
+            <div className="col-span-12 md:col-span-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label
+                    htmlFor="fullName"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Full Name <span className="text-red-500">*</span>
+                  </label>
+                  <InputText
+                    id="fullName"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    disabled={submitting}
+                    className={`w-full p-2 border rounded-lg ${
+                      getError("fullName") ? "p-invalid" : ""
+                    }`}
+                  />
+                  {getError("fullName") && (
+                    <small className="text-red-500 text-xs mt-1">
+                      {getError("fullName")}
+                    </small>
+                  )}
+                </div>
+                <div>
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Email <span className="text-red-500">*</span>
+                  </label>
+                  <InputText
+                    id="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    disabled={submitting}
+                    className={`w-full p-2 border rounded-lg ${
+                      getError("email") ? "p-invalid" : ""
+                    }`}
+                  />
+                  {getError("email") && (
+                    <small className="text-red-500 text-xs mt-1">
+                      {getError("email")}
+                    </small>
+                  )}
+                </div>
+                <div>
+                  <label
+                    htmlFor="phoneNumber"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Phone Number
+                  </label>
+                  <InputText
+                    id="phoneNumber"
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    disabled={submitting}
+                    className={`w-full p-2 border rounded-lg ${
+                      getError("phoneNumber") ? "p-invalid" : ""
+                    }`}
+                  />
+                  {getError("phoneNumber") && (
+                    <small className="text-red-500 text-xs mt-1">
+                      {getError("phoneNumber")}
+                    </small>
+                  )}
+                </div>
+                <div>
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Password <span className="text-red-500">*</span>
+                  </label>
+                  <InputText
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    type="password"
+                    disabled={submitting}
+                    className={`w-full p-2 border rounded-lg ${
+                      getError("password") ? "p-invalid" : ""
+                    }`}
+                  />
+                  {getError("password") && (
+                    <small className="text-red-500 text-xs mt-1">
+                      {getError("password")}
+                    </small>
+                  )}
+                </div>
+                <div className="md:col-span-2">
+                  <label
+                    htmlFor="roles"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Roles
+                  </label>
+                  <MultiSelect
+                    id="roles"
+                    value={selectedRoles}
+                    onChange={(e) => setSelectedRoles(e.value)}
+                    options={roleData}
+                    optionLabel="name"
+                    display="chip"
+                    placeholder="Select Roles"
+                    maxSelectedLabels={3}
+                    className={`w-full ${getError("roles") ? "p-invalid" : ""}`}
+                    disabled={submitting}
+                  />
+                  {getError("roles") && (
+                    <small className="text-red-500 text-xs mt-1">
+                      {getError("roles")}
+                    </small>
+                  )}
+                </div>
+              </div>
+            </div>
 
-          <div>
-            <label htmlFor="fullName">
-              Full Name <span className="text-red-500">*</span>
-            </label>
-            <InputText
-              id="fullName"
-              value={fullName}
-              onChange={(e) => setFullName(e.target.value)}
-              disabled={submitting}
-            />
-            {getError("fullName") && (
-              <small className="p-error text-red-500">
-                {getError("fullName")}
-              </small>
-            )}
-          </div>
-          <div>
-            <label htmlFor="email">
-              Email <span className="text-red-500">*</span>
-            </label>
-            <InputText
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              disabled={submitting}
-            />
-            {getError("email") && (
-              <small className="p-error text-red-500">
-                {getError("email")}
-              </small>
-            )}
-          </div>
-          <div>
-            <label htmlFor="phoneNumber">Phone Number</label>
-            <InputText
-              id="phoneNumber"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-              disabled={submitting}
-            />
-            {getError("phoneNumber") && (
-              <small className="p-error text-red-500">
-                {getError("phoneNumber")}
-              </small>
-            )}
-          </div>
-          <div>
-            <label htmlFor="password">
-              Password <span className="text-red-500">*</span>
-            </label>
-            <InputText
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              type="password"
-              disabled={submitting}
-            />
-            {getError("password") && (
-              <small className="p-error text-red-500">
-                {getError("password")}
-              </small>
-            )}
-          </div>
-          <div>
-            <label htmlFor="roles">Roles</label>
-            <MultiSelect
-              id="roles"
-              value={selectedRoles}
-              onChange={(e) => setSelectedRoles(e.value)}
-              options={roleData}
-              optionLabel="name"
-              display="chip"
-              placeholder="Select Roles"
-              maxSelectedLabels={3}
-              className="w-full"
-              disabled={submitting}
-            />
-            {getError("roles") && (
-              <small className="p-error text-red-500">
-                {getError("roles")}
-              </small>
-            )}
-          </div>
+            {/* Address */}
+            <div className="col-span-12 mt-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">
+                Address Information
+              </h3>
+            </div>
+            <div className="col-span-12 grid grid-cols-1 md:grid-cols-12 gap-4">
+              <div className="col-span-12 md:col-span-3">
+                <label
+                  htmlFor="province"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Province <span className="text-red-500">*</span>
+                </label>
+                <Dropdown
+                  id="province"
+                  value={selectedProvince}
+                  onChange={(e) => setSelectedProvince(e.value)}
+                  options={provinceData}
+                  optionLabel="name"
+                  placeholder="Select a Province"
+                  className={`w-full ${
+                    getError("province") ? "p-invalid" : ""
+                  }`}
+                  disabled={submitting}
+                />
+                {getError("province") && (
+                  <small className="text-red-500 text-xs mt-1">
+                    {getError("province")}
+                  </small>
+                )}
+              </div>
+              <div className="col-span-12 md:col-span-3">
+                <label
+                  htmlFor="district"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  District <span className="text-red-500">*</span>
+                </label>
+                <Dropdown
+                  id="district"
+                  value={selectedDistrict}
+                  onChange={(e) => setSelectedDistrict(e.value)}
+                  options={districtData}
+                  optionLabel="name"
+                  placeholder="Select a District"
+                  className={`w-full ${
+                    getError("district") ? "p-invalid" : ""
+                  }`}
+                  disabled={submitting || !selectedProvince}
+                />
+                {getError("district") && (
+                  <small className="text-red-500 text-xs mt-1">
+                    {getError("district")}
+                  </small>
+                )}
+              </div>
+              <div className="col-span-12 md:col-span-3">
+                <label
+                  htmlFor="ward"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Ward <span className="text-red-500">*</span>
+                </label>
+                <Dropdown
+                  id="ward"
+                  value={selectedWard}
+                  onChange={(e) => setSelectedWard(e.value)}
+                  options={wardData}
+                  optionLabel="name"
+                  placeholder="Select a Ward"
+                  className={`w-full ${getError("ward") ? "p-invalid" : ""}`}
+                  disabled={submitting || !selectedDistrict}
+                />
+                {getError("ward") && (
+                  <small className="text-red-500 text-xs mt-1">
+                    {getError("ward")}
+                  </small>
+                )}
+              </div>
+              <div className="col-span-12 md:col-span-3">
+                <label
+                  htmlFor="street"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Street <span className="text-red-500">*</span>
+                </label>
+                <Dropdown
+                  id="street"
+                  value={selectedStreet}
+                  onChange={(e) => setSelectedStreet(e.value)}
+                  options={streetData}
+                  optionLabel="name"
+                  placeholder="Select a Street"
+                  className={`w-full ${getError("street") ? "p-invalid" : ""}`}
+                  disabled={submitting || !selectedWard}
+                />
+                {getError("street") && (
+                  <small className="text-red-500 text-xs mt-1">
+                    {getError("street")}
+                  </small>
+                )}
+              </div>
+              <div className="col-span-12 md:col-span-12">
+                <label
+                  htmlFor="streetNumber"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Street Number <span className="text-red-500">*</span>
+                </label>
+                <InputText
+                  id="streetNumber"
+                  value={streetNumber}
+                  onChange={(e) => setStreetNumber(e.target.value)}
+                  disabled={submitting}
+                  className={`w-full p-2 border rounded-lg ${
+                    getError("streetNumber") ? "p-invalid" : ""
+                  }`}
+                />
+                {getError("streetNumber") && (
+                  <small className="text-red-500 text-xs mt-1">
+                    {getError("streetNumber")}
+                  </small>
+                )}
+              </div>
+            </div>
 
-          <div className="col-span-1 md:col-span-2"></div>
-
-          <div>
-            <label htmlFor="province">
-              Province <span className="text-red-500">*</span>
-            </label>
-            <Dropdown
-              id="province"
-              value={selectedProvince}
-              onChange={(e) => setSelectedProvince(e.value)}
-              options={provinceData}
-              optionLabel="name"
-              placeholder="Select a Province"
-              className="w-full"
-              disabled={submitting}
-            />
-            {getError("province") && (
-              <small className="p-error text-red-500">
-                {getError("province")}
-              </small>
-            )}
-          </div>
-          <div>
-            <label htmlFor="district">
-              District <span className="text-red-500">*</span>
-            </label>
-            <Dropdown
-              id="district"
-              value={selectedDistrict}
-              onChange={(e) => setSelectedDistrict(e.value)}
-              options={districtData}
-              optionLabel="name"
-              placeholder="Select a District"
-              className="w-full"
-              disabled={submitting || !selectedProvince}
-            />
-            {getError("district") && (
-              <small className="p-error text-red-500">
-                {getError("district")}
-              </small>
-            )}
-          </div>
-          <div>
-            <label htmlFor="ward">
-              Ward <span className="text-red-500">*</span>
-            </label>
-            <Dropdown
-              id="ward"
-              value={selectedWard}
-              onChange={(e) => setSelectedWard(e.value)}
-              options={wardData}
-              optionLabel="name"
-              placeholder="Select a Ward"
-              className="w-full"
-              disabled={submitting || !selectedDistrict}
-            />
-            {getError("ward") && (
-              <small className="p-error text-red-500">{getError("ward")}</small>
-            )}
-          </div>
-          <div>
-            <label htmlFor="street">
-              Street <span className="text-red-500">*</span>
-            </label>
-            <Dropdown
-              id="street"
-              value={selectedStreet}
-              onChange={(e) => setSelectedStreet(e.value)}
-              options={streetData}
-              optionLabel="name"
-              placeholder="Select a Street"
-              className="w-full"
-              disabled={submitting || !selectedWard}
-            />
-            {getError("street") && (
-              <small className="p-error text-red-500">
-                {getError("street")}
-              </small>
-            )}
-          </div>
-          <div>
-            <label htmlFor="streetNumber">
-              Street Number <span className="text-red-500">*</span>
-            </label>
-            <InputText
-              id="streetNumber"
-              value={streetNumber}
-              onChange={(e) => setStreetNumber(e.target.value)}
-              disabled={submitting}
-            />
-            {getError("streetNumber") && (
-              <small className="p-error text-red-500">
-                {getError("streetNumber")}
-              </small>
-            )}
-          </div>
-
-          <div className="flex items-center gap-4">
-            <label htmlFor="status">
-              Status <span className="text-red-500">*</span>
-            </label>
-            <InputSwitch
-              id="status"
-              className="w-50"
-              checked={status}
-              onChange={(e) => setStatus(e.value)}
-              disabled={submitting}
-            />
-            {getError("status") && (
-              <small className="p-error text-red-500">
-                {getError("status")}
-              </small>
-            )}
+            {/* Trạng thái */}
+            <div className="col-span-12 flex items-center gap-4 mt-4">
+              <label
+                htmlFor="status"
+                className="text-sm font-medium text-gray-700"
+              >
+                Status <span className="text-red-500">*</span>
+              </label>
+              <InputSwitch
+                id="status"
+                checked={status}
+                onChange={(e) => setStatus(e.value)}
+                disabled={submitting}
+              />
+              {getError("status") && (
+                <small className="text-red-500 text-xs mt-1">
+                  {getError("status")}
+                </small>
+              )}
+            </div>
           </div>
         </div>
       </Dialog>

@@ -144,8 +144,8 @@ export default function PermissionList() {
                     <InputText
                       placeholder="Name"
                       className="w-full"
-                      value={filters.name || ""}
-                      onChange={(e) => handleSearch("name", e.target.value)}
+                      value={filters.roleName || ""}
+                      onChange={(e) => handleSearch("roleName", e.target.value)}
                     />
                   </>
                 ) : (
