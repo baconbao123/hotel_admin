@@ -9,6 +9,12 @@
     "typecheck": "react-router typegen && tsc"
   },
   "dependencies": {
+    "@fullcalendar/core": "^6.1.17",
+    "@fullcalendar/daygrid": "^6.1.17",
+    "@fullcalendar/interaction": "^6.1.17",
+    "@fullcalendar/react": "^6.1.17",
+    "@fullcalendar/timegrid": "^6.1.17",
+    "@fullcalendar/web-component": "^6.1.17",
     "@heroicons/react": "^2.2.0",
     "@react-router/node": "^7.5.0",
     "@react-router/serve": "^7.5.0",
