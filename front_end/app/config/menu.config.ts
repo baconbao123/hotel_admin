@@ -6,6 +6,7 @@ import {
   RectangleGroupIcon,
   IdentificationIcon,
   MapIcon,
+  TagIcon,
 } from "@heroicons/react/24/outline";
 import type { MenuItem } from "../types/menu.types";
 
@@ -35,6 +36,11 @@ export const navigation: MenuItem[] = [
     href: "/streets",
     icon: MapIcon,
   },
+   {
+    name: "Hotel facilities",
+    href: "/facilities",
+    icon: TagIcon,
+  },
   {
     name: "Hotel",
     href: "/hotels",
@@ -50,4 +56,5 @@ export const navigation: MenuItem[] = [
     href: "/setting",
     icon: CogIcon,
   },
+ 
 ];
