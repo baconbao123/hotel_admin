@@ -113,7 +113,7 @@ export default function FacilityList() {
             <div className="col-span-4 2xl:col-span-1">
               <div className="flex flex-wrap gap-2 justify-end">
                 <Button
-                  label="Add new facility"
+                  label="Add new"
                   onClick={() => {
                     setSelectedId(undefined);
                     setFormMode("create");
@@ -155,7 +155,7 @@ export default function FacilityList() {
               />
             }
           >
-            <Column sortable field="id" header="Id" className="w-200" />
+            <Column sortable field="id" header="Id" className="w-50" />
             <Column sortable field="name" header="Name" className="w-200" />
             <Column
               field="icon"
