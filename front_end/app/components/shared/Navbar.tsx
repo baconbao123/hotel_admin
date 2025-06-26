@@ -10,8 +10,6 @@ import { useLogout } from "@/hooks/use-logout";
 import { Link } from "react-router";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { Modal } from './Modal';
-import { Dialog } from "primereact/dialog";
-import { Button } from "primereact/button";
 import Cookies from "js-cookie";
 
 export default function Navbar() {

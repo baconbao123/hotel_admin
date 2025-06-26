@@ -16,6 +16,7 @@ export default [
       route("permission", "./pages/permission/PermissionList.tsx"),
       route("streets", "./pages/street/StreetList.tsx"),
       route("hotels", "./pages/hotel/HotelList.tsx"),
+      route("facilities", "./pages/facilities/FacilityList.tsx"),
     ]),
   ]),
   layout("./layouts/authLayout.tsx", [

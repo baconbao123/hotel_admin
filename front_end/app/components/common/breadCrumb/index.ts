@@ -107,6 +107,25 @@ const data: BreadCrumbGroup[] = [
       },
     ],
   },
+  {
+    name: "Facilities",
+    data: [
+      {
+        icon: "pi pi-home",
+        label: " Home page",
+        className: "text-gray-700",
+        template: "",
+        link: "/",
+      },
+      {
+        icon: "pi pi-tag",
+        label: "Facilities List",
+        className: "text-gray-700",
+        template: "",
+        link: "/facilities",
+      },
+    ],
+  },
 ];
 export type { BreadCrumbGroup, BreadCrumbItem };
 export default data;
