@@ -31,9 +31,9 @@ public class SystemSeeder {
   //
   // create update delete
 
-  List<String> DEFAULT_RESOURCE = List.of("Hotel", "User", "Permissions", "Resources", "Actions");
+  List<String> DEFAULT_RESOURCE = List.of("Hotel", "User", "Permissions", "Role", "Street", "Dashboard");
 
-  List<String> DEFAULT_ACTION = List.of("view", "create", "update", "delete", "export");
+  List<String> DEFAULT_ACTION = List.of("view", "create", "update", "delete");
 
   List<String> DEFAULT_DOCUMENT_TYPE = List.of("Booking Confirmation", "Guest Registration", "Guest Folio");
 

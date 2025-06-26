@@ -64,13 +64,13 @@ public class HotelFacilitiesController {
                       .build();
   }
 
-  @GetMapping("/facilities-type")
-  @Permission(name = "view")
-  public ApiResponse<List<FacilityType>> getByFacilitiesId() {
-    return ApiResponse.<List<FacilityType>>builder()
-                      .result(facilitiesService.findAllFacilityType())
-                      .build();
-  }
+//  @GetMapping("/facilities-type")
+//  @Permission(name = "view")
+//  public ApiResponse<List<FacilityType>> getByFacilitiesId() {
+//    return ApiResponse.<List<FacilityType>>builder()
+//                      .result(facilitiesService.findAllFacilityType())
+//                      .build();
+//  }
 
   @DeleteMapping("/{id}")
   @Permission(name = "delete")

@@ -11,7 +11,7 @@ import org.mapstruct.MappingTarget;
 public interface HotelMapper extends BaseMapper<Hotels, HotelDTO> {
   @Override
   @Mapping(target = "ownerId", ignore = true)
-  @Mapping(target = "avatarId", ignore = true)
+  @Mapping(target = "avatar", ignore = true)
   @Mapping(target = "addressId", ignore = true)
   @Mapping(target = "policyId", ignore = true)
   @Mapping(target = "approveId", ignore = true)
@@ -20,7 +20,7 @@ public interface HotelMapper extends BaseMapper<Hotels, HotelDTO> {
 
   @Override
   @Mapping(target = "ownerId", ignore = true)
-  @Mapping(target = "avatarId", ignore = true)
+  @Mapping(target = "avatar", ignore = true)
   @Mapping(target = "addressId", ignore = true)
   @Mapping(target = "policyId", ignore = true)
   @Mapping(target = "approveId", ignore = true)

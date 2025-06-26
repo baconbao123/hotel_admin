@@ -5,6 +5,7 @@ import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { Dropdown } from "primereact/dropdown";
 import $axios from "@/axios";
+import { useProvinces } from "@/hooks/useCommonData";
 
 interface Props {
   id?: string;
@@ -37,7 +38,6 @@ export default function StreetForm({
   const [curb, setCurb] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [streetData, setStreetData] = useState<any>(null);
-  const [provinceData, setProvinceData] = useState<LocalResponse[]>([]);
   const [districtData, setDistrictData] = useState<LocalResponse[]>([]);
   const [wardData, setWardData] = useState<LocalResponse[]>([]);
   const [selectedProvince, setSelectedProvince] =
@@ -49,23 +49,7 @@ export default function StreetForm({
   const toast = useRef<Toast>(null);
   const header = mode === "edit" ? "EDIT STREET" : "ADD NEW STREET";
 
-  // Fetch provinces on component mount
-  useEffect(() => {
-    const fetchProvinces = async () => {
-      try {
-        const res = await $axios.get("/local/get-province");
-        setProvinceData(res.data.result || []);
-      } catch (error: any) {
-        toast.current?.show({
-          severity: "error",
-          summary: "Error",
-          detail: error.response?.data?.message || "Failed to load provinces",
-          life: 3000,
-        });
-      }
-    };
-    fetchProvinces();
-  }, []);
+  const { provinces } = useProvinces();
 
   // Fetch districts when province is selected
   useEffect(() => {
@@ -150,7 +134,7 @@ export default function StreetForm({
           setCurb(entity.curbWith || "");
           setWidth(entity.width || "");
 
-          if (entity.wardCode && provinceData.length > 0) {
+          if (entity.wardCode) {
             try {
               const wardRes = await $axios.get(
                 `/local/get-ward-info?wardCode=${entity.wardCode}`
@@ -166,7 +150,7 @@ export default function StreetForm({
                 }));
 
                 const province =
-                  provinceData.find((p) => p.code === provinceCode) || null;
+                  provinces.find((p) => p.code === provinceCode) || null;
                 setSelectedProvince(province);
 
                 if (province) {
@@ -220,7 +204,7 @@ export default function StreetForm({
       setDistrictData([]);
       setWardData([]);
     }
-  }, [id, open, mode, loadDataById, provinceData]);
+  }, [id, open, mode, loadDataById]);
 
   const submit = async () => {
     setSubmitting(true);
@@ -342,7 +326,7 @@ export default function StreetForm({
                 htmlFor="width"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Width 
+                Width
               </label>
               <InputText
                 id="width"
@@ -408,7 +392,7 @@ export default function StreetForm({
                     id="province"
                     value={selectedProvince}
                     onChange={(e) => setSelectedProvince(e.value)}
-                    options={provinceData}
+                    options={provinces}
                     optionLabel="name"
                     placeholder="Select a Province"
                     className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${

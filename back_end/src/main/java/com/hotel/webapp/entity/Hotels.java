@@ -22,7 +22,7 @@ public class Hotels implements AuditEntity {
   String name;
   @Lob
   String description;
-  Integer avatarId;
+  String avatar;
   Integer addressId;
   Integer policyId;
   Boolean status;

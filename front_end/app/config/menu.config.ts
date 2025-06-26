@@ -7,48 +7,50 @@ import {
   IdentificationIcon,
   MapIcon,
 } from "@heroicons/react/24/outline";
-import type { MenuItem } from "../types/menu.types";
 
 export const navigation: MenuItem[] = [
   {
     name: "Dashboard",
     href: "/",
     icon: HomeIcon,
+    resourceName: "Dashboard",
   },
   {
-    name: "Users management",
+    name: "Users Management",
     href: "/user",
     icon: UserIcon,
+    resourceName: "User",
   },
   {
-    name: "Role management",
+    name: "Role Management",
     href: "/role",
     icon: IdentificationIcon,
+    resourceName: "Role",
   },
   {
-    name: "Permission management",
+    name: "Permission Management",
     href: "/permission",
     icon: RectangleGroupIcon,
+    resourceName: "Permissions",
   },
   {
-    name: "Street management",
+    name: "Street Management",
     href: "/streets",
     icon: MapIcon,
+    resourceName: "Street",
   },
   {
-    name: "Hotel",
-    href: "",
+    name: "Hotel Management",
+    href: "/hotels",
     icon: BuildingOffice2Icon,
-    children: [
-      { name: "Hotel Management", href: "hotels" },
-      { name: "All Bookings", href: "/bookings" },
-      { name: "New Booking", href: "/bookings/new" },
-      { name: "Calendar View", href: "/bookings/calendar" },
-    ],
-  },
-  {
-    name: "Setting",
-    href: "/setting",
-    icon: CogIcon,
+    resourceName: "Hotel",
   },
 ];
+
+export interface MenuItem {
+  name: string;
+  href: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  resourceName: string;
+  children?: MenuItem[];
+}

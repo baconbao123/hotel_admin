@@ -21,7 +21,6 @@ public class HotelsRes {
 
   @Getter
   @Setter
-
   @AllArgsConstructor
   @FieldDefaults(level = AccessLevel.PRIVATE)
   public static class HotelRes {
@@ -37,7 +36,6 @@ public class HotelsRes {
 
     // avatar ---
     String avatarUrl;
-    String avatarType;
 
     // address ---
     String streetNumber;
@@ -73,7 +71,6 @@ public class HotelsRes {
     public static class ImagesRes {
       Integer id;
       String imagesUrl;
-      String imgType;
     }
 
     @Getter

@@ -1,9 +1,11 @@
-import { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { InputSwitch } from "primereact/inputswitch";
+import { useAppDispatch } from "@/store"; // Import useAppDispatch from your store
+import { fetchCommonData } from "@/store/slices/commonDataSlice"; // Adjust path if needed
 
 interface Props {
   id?: string;
@@ -31,6 +33,7 @@ export default function RoleForm({
   const [status, setStatus] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const toast = useRef<Toast>(null);
+  const dispatch = useAppDispatch();
 
   const header = mode === "edit" ? "EDIT ROLE" : "ADD NEW ROLE";
 
@@ -46,6 +49,9 @@ export default function RoleForm({
           detail: "Role updated",
           life: 3000,
         });
+        await dispatch(
+          fetchCommonData({ types: ["roles"], forceRefresh: true })
+        );
       } else {
         await createItem(roleDTO);
         toast.current?.show({
@@ -54,6 +60,10 @@ export default function RoleForm({
           detail: "Role created",
           life: 3000,
         });
+
+        await dispatch(
+          fetchCommonData({ types: ["roles"], forceRefresh: true })
+        );
       }
       onClose();
     } catch (err: any) {
@@ -194,7 +204,7 @@ export default function RoleForm({
                 checked={status}
                 onChange={(e) => setStatus(e.value)}
                 disabled={submitting}
-                tooltip="Enable/disable hotel visibility"
+                tooltip="Enable/disable role visibility"
                 tooltipOptions={{ position: "top" }}
               />
             </div>

@@ -1,3 +1,5 @@
+// user list
+
 import { useState, useRef, useEffect } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -8,13 +10,14 @@ import { Image } from "antd";
 import { Toast } from "primereact/toast";
 import BreadCrumbComponent from "@/components/common/breadCrumb/BreadCrumbComponent";
 import useCrud from "@/hooks/crudHook";
-import UserForm from "./UserForm";
 import Swal from "sweetalert2";
 import { Tag } from "primereact/tag";
 import UserDetail from "./UserDetail";
 import { Skeleton } from "primereact/skeleton";
 import { SkeletonTemplate } from "@/components/common/skeleton";
 import noImg from "@/asset/images/no-img.png";
+import UserForm from "./UserForm";
+
 
 export default function UserList() {
   const [selectedUserId, setSelectedUserId] = useState<string | undefined>(

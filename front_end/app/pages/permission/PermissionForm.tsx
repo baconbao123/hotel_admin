@@ -6,6 +6,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import $axios from "@/axios";
 import { Checkbox } from "antd";
+import { useResourceActions } from "@/hooks/useCommonData";
 
 interface Resource {
   id: number;
@@ -41,6 +42,31 @@ export default function PermissionForm({
   const getHeader = (): string => {
     return "EDIT PERMISSION";
   };
+
+  const {
+    resourceActions,
+    loading: resourceLoading,
+    error: resourceError,
+  } = useResourceActions();
+
+  useEffect(() => {
+    if (!resourceLoading && resourceActions) {
+      setActionData(resourceActions);
+
+      const uniqueResources: any = [
+        ...new Map(
+          resourceActions.map((item: Resource) => [
+            item.resourceId,
+            {
+              resourceId: item.resourceId,
+              resourceName: item.resourceName,
+            },
+          ])
+        ).values(),
+      ];
+      setResourceData(uniqueResources);
+    }
+  }, [resourceActions, resourceLoading]);
 
   const submit = async () => {
     setSubmitting(true);
@@ -100,28 +126,6 @@ export default function PermissionForm({
       setSubmitting(false);
     }
   };
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await $axios("/permission/resource-actions");
-        const data: Resource[] = response.data.result || [];
-        const uniqueResources = Array.from(
-          new Map(data.map((item) => [item.resourceId, item])).values()
-        );
-        setResourceData(uniqueResources);
-        setActionData(data);
-      } catch (error) {
-        toast.current?.show({
-          severity: "error",
-          summary: "Error",
-          detail: "Failed to load resources or actions",
-          life: 3000,
-        });
-      }
-    };
-    fetchData();
-  }, []);
 
   useEffect(() => {
     if (id && open && permissionData && actionData.length > 0) {

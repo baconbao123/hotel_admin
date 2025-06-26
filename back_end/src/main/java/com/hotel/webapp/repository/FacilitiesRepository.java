@@ -19,5 +19,6 @@ public interface FacilitiesRepository extends BaseRepository<Facilities, Integer
         "where f.id = :id and f.deletedAt is null")
   List<Object[]> findFacilityResById(Integer id);
 
-
+  @Query("select f from Facilities f where f.deletedAt is null")
+  List<Facilities> findAllFacilities();
 }

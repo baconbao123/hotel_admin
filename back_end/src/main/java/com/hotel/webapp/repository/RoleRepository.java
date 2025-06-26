@@ -18,4 +18,8 @@ public interface RoleRepository extends BaseRepository<Role, Integer> {
 
   @Query("select r from Role r where r.deletedAt is null")
   List<Role> findAllByDeletedAtIsNull();
+
+  @Query("select r from Role r where r.id = :roleId and r.deletedAt is null")
+  Optional<Role> findRolesByDeletedAtIsNull(Integer roleId);
+
 }

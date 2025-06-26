@@ -25,13 +25,13 @@ import java.util.Map;
 public class LocalController {
   LocalServiceImpl localService;
 
-  @GetMapping("/get-province")
-  public ApiResponse<List<LocalResponse>> getProvince() {
-    return ApiResponse.<List<LocalResponse>>builder()
-                      .result(localService.getProvinces())
-                      .build();
-  }
-
+//  @GetMapping("/get-province")
+//  public ApiResponse<List<LocalResponse>> getProvince() {
+//    return ApiResponse.<List<LocalResponse>>builder()
+//                      .result(localService.getProvinces())
+//                      .build();
+//  }
+//
   @GetMapping("/get-district")
   public ApiResponse<List<LocalResponse>> getDistrict(
         @RequestParam @NotBlank(message = "PROVINCE_CODE_REQUIRED") String provinceCode) {
