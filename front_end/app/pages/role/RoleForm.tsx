@@ -108,7 +108,7 @@ export default function RoleForm({
   }, [id, open, loadDataById]);
 
   return (
-    <div>
+    <div className="z-50">
       <Toast ref={toast} />
       <Dialog
         visible={open}

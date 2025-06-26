@@ -226,11 +226,9 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
       user.setPassword(user.getPassword());
     }
 
-    if ("false".equals(update.getKeepAvatar())) {
-      if (update.getAvatarUrl() != null && !update.getAvatarUrl().isEmpty()) {
-        String fileName = storageFileService.uploadUserImg(update.getAvatarUrl());
-        user.setAvatarUrl(fileName);
-      }
+    if (update.getAvatarUrl() != null && !update.getAvatarUrl().isEmpty()) {
+      String fileName = storageFileService.uploadUserImg(update.getAvatarUrl());
+      user.setAvatarUrl(fileName);
     } else {
       user.setAvatarUrl(user.getAvatarUrl());
     }

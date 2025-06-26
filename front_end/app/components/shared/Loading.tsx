@@ -18,7 +18,7 @@ const Loading: React.FC<LoadingProps> = ({
   };
 
   const spinner = (
-    <div className="relative">
+    <div className="relative z-index-50">
      <svg xmlns="http://www.w3.org/2000/svg" className="lds-bluecat" width="140px" height="140px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
       <g transform="rotate(0.97464 50 50)">
         <animateTransform attributeName="transform" type="rotate" values="360 50 50;0 50 50" keyTimes="0;1" dur="1.5s" repeatCount="indefinite" calcMode="spline" keySplines="0.5 0 0.5 1" begin="-0.15000000000000002s"/>

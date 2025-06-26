@@ -54,7 +54,6 @@ public class UserDTO {
     String password;
 
     MultipartFile avatarUrl;
-    String keepAvatar;
   }
 }
 

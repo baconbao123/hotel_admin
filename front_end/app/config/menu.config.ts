@@ -42,7 +42,7 @@ export const navigation: MenuItem[] = [
   },
   {
     name: "Hotel facilities",
-    href: "/facilities",
+    href: "/facilties",
     resourceName: "Facilities",
     icon: TagIcon,
   },
