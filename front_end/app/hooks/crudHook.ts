@@ -7,10 +7,12 @@ interface ErrorResponse {
   message: string;
 }
 
-export default function useCrud(baseUrl: string) {
+export default function useCrud(
+  baseUrl: string
+) {
   const [data, setData] = useState<any[]>([]);
-  const [tableLoading, setTableLoading] = useState(true); 
-  const [actionLoading, setActionLoading] = useState(false); 
+  const [tableLoading, setTableLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<Object | null>(null);
   const [openForm, setOpenForm] = useState(false);
   const [openFormDetail, setOpenFormDetail] = useState(false);
@@ -43,7 +45,9 @@ export default function useCrud(baseUrl: string) {
     currentFilters: Record<string, string>,
     sortFieldParam = sortField,
     sortOrderParam = sortOrder,
-    showLoading = true
+    showLoading = true,
+    pageParam = page,
+    pageSizeParam = pageSize
   ) => {
     if (showLoading) setTableLoading(true);
     try {
@@ -56,8 +60,8 @@ export default function useCrud(baseUrl: string) {
           `sort[${sortFieldParam}]`,
           sortOrderParam === 1 ? "desc" : "asc"
         );
-      query.append("page", page.toString());
-      query.append("size", pageSize.toString());
+      query.append("page", pageParam.toString());
+      query.append("size", pageSizeParam.toString());
 
       const res = await $axios.get(`${baseUrl}?${query}`);
       const apiResponse = new ApiResponse(res.data);
@@ -88,7 +92,7 @@ export default function useCrud(baseUrl: string) {
   const updatePageData = (newPage: number, newPageSize: number) => {
     setPage(newPage);
     setPageSize(newPageSize);
-    loadData(filters, sortField, sortOrder, false);
+    loadData(filters, sortField, sortOrder, false, newPage, newPageSize);
   };
 
   const handleSort = (field: string, order: number) => {
@@ -139,9 +143,9 @@ export default function useCrud(baseUrl: string) {
       const config =
         item instanceof FormData
           ? { headers: { "Content-Type": "multipart/form-data" } }
-          : { headers: { "Content-Type": "application/json" } };;
+          : { headers: { "Content-Type": "application/json" } };
       const res = await $axios.post(baseUrl, item, config);
-      await loadData(filters, sortField, sortOrder, true); // Tải lại table
+      await loadData(filters, sortField, sortOrder, true);
       setError(null);
       return res.data;
     } catch (err: any) {
@@ -160,7 +164,7 @@ export default function useCrud(baseUrl: string) {
           ? { headers: { "Content-Type": "multipart/form-data" } }
           : { headers: { "Content-Type": "application/json" } };
       const res = await $axios.put(`${baseUrl}/${id}`, item, config);
-      await loadData(filters, sortField, sortOrder, true); // Tải lại table
+      await loadData(filters, sortField, sortOrder, true);
       setError(null);
       return res.data;
     } catch (err: any) {
@@ -175,7 +179,7 @@ export default function useCrud(baseUrl: string) {
     setActionLoading(true);
     try {
       const res = await $axios.delete(`${baseUrl}/${id}`);
-      await loadData(filters, sortField, sortOrder, true); 
+      await loadData(filters, sortField, sortOrder, true);
       setError(null);
       return res.data;
     } catch (err: any) {
@@ -189,9 +193,10 @@ export default function useCrud(baseUrl: string) {
   const closeForm = () => {
     setOpenForm(false);
     setError(null);
-  }
+  };
 
   return {
+    setData,
     data,
     tableLoading,
     actionLoading,
@@ -215,6 +220,6 @@ export default function useCrud(baseUrl: string) {
     filters,
     sortField,
     sortOrder,
-    closeForm
+    closeForm,
   };
 }

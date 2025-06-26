@@ -5,7 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { Tag } from "primereact/tag";
 import { Image } from "antd";
 import noImg from "@/asset/images/no-img.png";
-import "./UserFrom.scss";
+import "./UserForm.scss";
+import { format } from "date-fns";
 
 interface Props {
   id?: string;
@@ -33,6 +34,10 @@ export default function UserDetail({
   const [district, setDistrict] = useState<string>("");
   const [ward, setWard] = useState<string>("");
   const [roleData, setRoleData] = useState<any[]>([]);
+  const [createdData, setCreatedData] = useState("");
+  const [createdAt, setCreatedAt] = useState("");
+  const [updatedData, setUpdatedData] = useState("");
+  const [updateAt, setUpdateAt] = useState("");
 
   const toast = useRef<Toast>(null);
 
@@ -53,6 +58,10 @@ export default function UserDetail({
           setDistrict(data.districtName || "");
           setWard(data.wardName || "");
           setRoleData(data.roles);
+          setCreatedAt(data.createdAt || "");
+          setUpdateAt(data.updatedAt || "");
+          setCreatedData(data.createdName || "");
+          setUpdatedData(data.updatedName || "");
         })
         .catch((error: any) => {
           toast.current?.show({
@@ -110,7 +119,7 @@ export default function UserDetail({
             </span>
           </div>
 
-          <div className="col-span-1 md:col-span-2"></div>
+          <div></div>
 
           <div className="flex flex-col gap-3">
             <div className="grid grid-cols-3 gap-2 items-center">
@@ -166,6 +175,26 @@ export default function UserDetail({
                 />
               </span>
             </div>
+
+            <div className="grid grid-cols-3 gap-2 items-center">
+              <label htmlFor="createdName" className="font-bold col-span-1">
+                Created By:
+              </label>
+              <span id="createdName" className="col-span-2">
+                {createdData || "-"}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 items-center">
+              <label htmlFor="createdAt" className="font-bold col-span-1">
+                Created At:
+              </label>
+              <span id="createdAt" className="col-span-2">
+                {createdAt
+                  ? format(new Date(createdAt), "yyyy-MM-dd HH:mm:ss")
+                  : "-"}
+              </span>
+            </div>
           </div>
 
           {/* Address */}
@@ -212,6 +241,26 @@ export default function UserDetail({
               </label>
               <span id="streetNumber" className="col-span-2">
                 {streetNumber || "-"}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 items-center">
+              <label htmlFor="updatedName" className="font-bold col-span-1">
+                Updated By:
+              </label>
+              <span id="updatedName" className="col-span-2">
+                {updatedData || "-"}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 items-center">
+              <label htmlFor="updatedAt" className="font-bold col-span-1">
+                Updated At:
+              </label>
+              <span id="updatedAt" className="col-span-2">
+                {updateAt
+                  ? format(new Date(updateAt), "yyyy-MM-dd HH:mm:ss")
+                  : "-"}
               </span>
             </div>
           </div>

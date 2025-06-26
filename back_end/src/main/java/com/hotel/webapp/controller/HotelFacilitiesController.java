@@ -1,13 +1,11 @@
 package com.hotel.webapp.controller;
 
 import com.hotel.webapp.dto.request.FacilitiesDTO;
-import com.hotel.webapp.dto.request.MapHotelFacilityDTO;
 import com.hotel.webapp.dto.response.ApiResponse;
+import com.hotel.webapp.dto.response.FacilitiesRes;
 import com.hotel.webapp.entity.Facilities;
-import com.hotel.webapp.entity.Hotels;
-import com.hotel.webapp.entity.MapHotelFacility;
+import com.hotel.webapp.entity.FacilityType;
 import com.hotel.webapp.service.admin.FacilitiesServiceImpl;
-import com.hotel.webapp.service.admin.MapHotelFacilityServiceImpl;
 import com.hotel.webapp.validation.Permission;
 import com.hotel.webapp.validation.Resource;
 import jakarta.validation.Valid;
@@ -22,12 +20,11 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/hotel-facilities")
-@Resource(name = "hotel-facilities")
+@Resource(name = "Facilities")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class HotelFacilitiesController {
   FacilitiesServiceImpl facilitiesService;
-  MapHotelFacilityServiceImpl mapHotelFacilityService;
 
   // facilities
   @PostMapping
@@ -38,7 +35,7 @@ public class HotelFacilitiesController {
                       .build();
   }
 
-  @PutMapping("/{id}")
+  @PutMapping(value = "/{id}")
   @Permission(name = "update")
   public ApiResponse<Facilities> updateFacility(@PathVariable Integer id, @Valid @RequestBody FacilitiesDTO dto) {
     return ApiResponse.<Facilities>builder()
@@ -48,24 +45,32 @@ public class HotelFacilitiesController {
 
   @GetMapping
   @Permission(name = "view")
-  public ApiResponse<Page<Facilities>> getAll(
+  public ApiResponse<Page<FacilitiesRes>> getAll(
         @RequestParam(required = false) Map<String, String> filters,
         @RequestParam(required = false) Map<String, String> sort,
         @RequestParam int size,
         @RequestParam int page
   ) {
-    return ApiResponse.<Page<Facilities>>builder()
-                      .result(facilitiesService.getAll(filters, sort, size, page))
+    return ApiResponse.<Page<FacilitiesRes>>builder()
+                      .result(facilitiesService.findFacilities(filters, sort, size, page))
                       .build();
   }
 
   @GetMapping("/{id}")
   @Permission(name = "view")
-  public ApiResponse<Facilities> getByFacilitiesId(@PathVariable Integer id) {
-    return ApiResponse.<Facilities>builder()
-                      .result(facilitiesService.getById(id))
+  public ApiResponse<FacilitiesRes.FacilityRes> getByFacilitiesId(@PathVariable Integer id) {
+    return ApiResponse.<FacilitiesRes.FacilityRes>builder()
+                      .result(facilitiesService.getByIdRes(id))
                       .build();
   }
+
+//  @GetMapping("/facilities-type")
+//  @Permission(name = "view")
+//  public ApiResponse<List<FacilityType>> getByFacilitiesId() {
+//    return ApiResponse.<List<FacilityType>>builder()
+//                      .result(facilitiesService.findAllFacilityType())
+//                      .build();
+//  }
 
   @DeleteMapping("/{id}")
   @Permission(name = "delete")
@@ -73,24 +78,6 @@ public class HotelFacilitiesController {
     facilitiesService.delete(id);
     return ApiResponse.<Void>builder()
                       .message("Deleted facilities with id " + id + " successfully")
-                      .build();
-  }
-
-  // map-facility-hotel
-  @PostMapping("/map-hotel-facility")
-  @Permission(name = "create")
-  public ApiResponse<List<MapHotelFacility>> mapHotelFacility(@RequestBody MapHotelFacilityDTO dto) {
-    return ApiResponse.<List<MapHotelFacility>>builder()
-                      .result(mapHotelFacilityService.createCollectionBulk(dto))
-                      .build();
-  }
-
-  @PutMapping("/update-map-hotel-facility/{id}")
-  @Permission(name = "update")
-  public ApiResponse<List<MapHotelFacility>> updateMapHotelFacility(@PathVariable int id,
-        @RequestBody MapHotelFacilityDTO dto) {
-    return ApiResponse.<List<MapHotelFacility>>builder()
-                      .result(mapHotelFacilityService.updateCollectionBulk(id, dto))
                       .build();
   }
 }

@@ -31,6 +31,7 @@ public class ApplicationInitConfig {
       User user = userRepository.findByEmail("sa@gmail.com")
                                 .orElseGet(() -> {
                                   User newUser = User.builder()
+                                                     .fullName("sa")
                                                      .email("sa@gmail.com")
                                                      .password(passwordEncoder.encode("123"))
                                                      .createdAt(LocalDateTime.now())

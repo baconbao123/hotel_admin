@@ -4,6 +4,7 @@ import com.hotel.webapp.dto.request.MappingDTO;
 import com.hotel.webapp.dto.response.ApiResponse;
 import com.hotel.webapp.dto.response.PermissionRes;
 import com.hotel.webapp.entity.Permissions;
+import com.hotel.webapp.entity.Resources;
 import com.hotel.webapp.service.admin.PermissionServiceImpl;
 import com.hotel.webapp.validation.Permission;
 import com.hotel.webapp.validation.Resource;
@@ -12,9 +13,6 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,7 +20,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/permission")
-@Resource(name = "permission")
+@Resource(name = "Permissions")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PermissionController {
@@ -41,9 +39,9 @@ public class PermissionController {
   public ApiResponse<Page<PermissionRes>> getAllPermissions(
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size,
-//        @RequestParam(required = false) String name,
-        @RequestParam(required = false) Map<String, String> sort) {
-    Page<PermissionRes> permissions = permissionService.getAllPermissions(page, size,  sort);
+        @RequestParam(required = false) Map<String, String> sort,
+        @RequestParam(required = false) Map<String, String> filters) {
+    Page<PermissionRes> permissions = permissionService.getAllPermissions(page, size, sort, filters);
     return ApiResponse.<Page<PermissionRes>>builder()
                       .result(permissions)
                       .build();
@@ -57,11 +55,11 @@ public class PermissionController {
                       .build();
   }
 
-  @GetMapping("/resource-actions")
+  @GetMapping("/resources")
   @Permission(name = "view")
-  public ApiResponse<List<PermissionRes.DataResponse>> findActions() {
-    return ApiResponse.<List<PermissionRes.DataResponse>>builder()
-                      .result(permissionService.getMapResourcesActions())
+  public ApiResponse<List<Resources>> getResourceByUser() {
+    return ApiResponse.<List<Resources>>builder()
+                      .result(permissionService.getUserResource())
                       .build();
   }
 }

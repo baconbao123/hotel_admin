@@ -20,4 +20,15 @@ public class LocalResponse {
     Integer id;
     String name;
   }
+
+  @Getter
+  @Setter
+  @AllArgsConstructor
+  @FieldDefaults(level = AccessLevel.PRIVATE)
+  public static class WardInfoResponse {
+    String provinceCode;
+    String districtCode;
+    String wardCode;
+    String name;
+  }
 }

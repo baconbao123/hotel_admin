@@ -2,7 +2,9 @@ package com.hotel.webapp.controller;
 
 import com.hotel.webapp.dto.request.HotelDTO;
 import com.hotel.webapp.dto.response.ApiResponse;
-import com.hotel.webapp.entity.Hotels;
+import com.hotel.webapp.dto.response.CommonRes;
+import com.hotel.webapp.dto.response.HotelsRes;
+import com.hotel.webapp.entity.*;
 import com.hotel.webapp.service.admin.HotelServiceImpl;
 import com.hotel.webapp.validation.Permission;
 import com.hotel.webapp.validation.Resource;
@@ -11,8 +13,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -23,17 +27,33 @@ import java.util.Map;
 public class HotelController {
   HotelServiceImpl hotelService;
 
-  @PostMapping
+//  @Permission(name = "create")
+//  @PostMapping(consumes = {"multipart/form-data"})
+//  public ApiResponse<Hotels> create(
+//        @Valid @ModelAttribute HotelDTO hotelDTO
+//        @RequestPart(name = "avatarUrl", required = false) HotelDTO.AvatarReq avatarUrl,
+//        @RequestPart(name = "imageReqs", required = false) HotelDTO.ImageReqs imageReqs,
+//        @RequestPart(name = "documentReqs", required = false) List<HotelDTO.DocumentReq> documentReqs
+//  ) {
+//    return ApiResponse.<Hotels>builder()
+//                      .result(hotelService.create(hotelDTO, avatarUrl, imageReqs, documentReqs))
+//                      .result(hotelService.create(hotelDTO))
+//                      .build();
+//  }
+
   @Permission(name = "create")
-  public ApiResponse<Hotels> createHotel(@Valid @RequestBody HotelDTO hotelDTO) {
+  @PostMapping(consumes = {"multipart/form-data"})
+  public ApiResponse<Hotels> create(
+        @Valid @ModelAttribute HotelDTO hotelDTO
+  ) {
     return ApiResponse.<Hotels>builder()
                       .result(hotelService.create(hotelDTO))
                       .build();
   }
 
-  @PutMapping("/{id}")
   @Permission(name = "update")
-  public ApiResponse<Hotels> updateHotel(@PathVariable int id, @Valid @RequestBody HotelDTO hotelDTO) {
+  @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+  public ApiResponse<Hotels> update(@PathVariable int id, @Valid @ModelAttribute HotelDTO hotelDTO) {
     return ApiResponse.<Hotels>builder()
                       .result(hotelService.update(id, hotelDTO))
                       .build();
@@ -50,22 +70,46 @@ public class HotelController {
 
   @GetMapping("/{id}")
   @Permission(name = "view")
-  public ApiResponse<Hotels> getById(@PathVariable Integer id) {
-    return ApiResponse.<Hotels>builder()
-                      .result(hotelService.getById(id))
+  public ApiResponse<HotelsRes.HotelRes> getById(@PathVariable Integer id) {
+    return ApiResponse.<HotelsRes.HotelRes>builder()
+                      .result(hotelService.findHotel(id))
                       .build();
   }
 
   @GetMapping
   @Permission(name = "view")
-  public ApiResponse<Page<Hotels>> getAll(
+  public ApiResponse<Page<HotelsRes>> getAll(
         @RequestParam(required = false) Map<String, String> filters,
         @RequestParam(required = false) Map<String, String> sort,
         @RequestParam int size,
         @RequestParam int page
   ) {
-    return ApiResponse.<Page<Hotels>>builder()
-                      .result(hotelService.getAll(filters, sort, size, page))
+    return ApiResponse.<Page<HotelsRes>>builder()
+                      .result(hotelService.findHotels(filters, sort, size, page))
                       .build();
   }
+
+//  @GetMapping("hotel-types")
+//  @Permission(name = "view")
+//  public ApiResponse<List<TypeHotel>> typeHotels() {
+//    return ApiResponse.<List<TypeHotel>>builder()
+//                      .result(hotelService.findTypeHotels())
+//                      .build();
+//  }
+
+//  @GetMapping("hotel-document-types")
+//  @Permission(name = "view")
+//  public ApiResponse<List<DocumentType>> hotelDocumentTypes() {
+//    return ApiResponse.<List<DocumentType>>builder()
+//                      .result(hotelService.findDocumentHotels())
+//                      .build();
+//  }
+
+//  @GetMapping("hotel-facilities")
+//  @Permission(name = "view")
+//  public ApiResponse<List<Facilities>> hotelFacilities() {
+//    return ApiResponse.<List<Facilities>>builder()
+//                      .result(hotelService.findFacilities())
+//                      .build();
+//  }
 }

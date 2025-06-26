@@ -1,10 +1,7 @@
 package com.hotel.webapp.entity;
 
 import com.hotel.webapp.base.AuditEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -23,11 +20,14 @@ public class Hotels implements AuditEntity {
   Integer id;
   Integer ownerId;
   String name;
+  @Lob
   String description;
-  Integer avatarId;
+  String avatar;
   Integer addressId;
   Integer policyId;
   Boolean status;
+  Integer approveId;
+  String reason;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;
   Integer createdBy;

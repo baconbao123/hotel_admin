@@ -8,14 +8,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface FacilityTypeRepository extends BaseRepository<FacilityType, Integer> {
-  boolean existsByIdAndDeletedAtIsNull(Integer id);
-
-  boolean existsByColNameAndDeletedAtIsNull(String colName);
-
   // seeder
   Optional<FacilityType> findByNameAndDeletedAtIsNull(String name);
 
@@ -23,4 +20,8 @@ public interface FacilityTypeRepository extends BaseRepository<FacilityType, Int
   @Transactional
   @Query("insert into FacilityType(name, colName, createdAt, createdBy) values (:name, :colName, :createdAt, :createdBy)")
   void insertType(String name, String colName, LocalDateTime createdAt, Integer createdBy);
+
+  // facilities type
+  @Query("select f from FacilityType f where f.deletedAt is null ")
+  List<FacilityType> findAllFacilityType();
 }

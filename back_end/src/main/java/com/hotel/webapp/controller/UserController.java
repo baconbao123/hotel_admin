@@ -3,9 +3,7 @@ package com.hotel.webapp.controller;
 import com.hotel.webapp.dto.request.UserDTO;
 import com.hotel.webapp.dto.response.ApiResponse;
 import com.hotel.webapp.dto.response.UserRes;
-import com.hotel.webapp.entity.Role;
 import com.hotel.webapp.entity.User;
-import com.hotel.webapp.service.admin.RoleServiceImpl;
 import com.hotel.webapp.service.admin.UserServiceImpl;
 import com.hotel.webapp.validation.Permission;
 import com.hotel.webapp.validation.Resource;
@@ -19,7 +17,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -30,12 +27,10 @@ import java.util.Map;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
   UserServiceImpl userService;
-  RoleServiceImpl roleService;
 
   @Permission(name = "create")
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ApiResponse<User> create(@Valid @ModelAttribute UserDTO userDTO) throws IOException {
-    log.error("Received UserDTO: " + userDTO);
     return ApiResponse.<User>builder()
                       .result(userService.create(userDTO))
                       .build();
@@ -79,11 +74,20 @@ public class UserController {
                       .build();
   }
 
-  @GetMapping("/get-roles")
+  @GetMapping("/profile")
   @Permission(name = "view")
-  public ApiResponse<List<Role>> getAll() {
-    return ApiResponse.<List<Role>>builder()
-                      .result(roleService.getRoles())
+  public ApiResponse<User> getProfile(@RequestParam("id") Integer id) {
+    return ApiResponse.<User>builder()
+                      .result(userService.findById(id))
+                      .build();
+  }
+
+  @PutMapping("/profile")
+  @Permission(name = "view")
+  public ApiResponse<User> updateProfile(@RequestParam("id") Integer id,
+        @Valid @ModelAttribute UserDTO.ProfileDTO profileDTO) throws IOException {
+    return ApiResponse.<User>builder()
+                      .result(userService.updateProfile(id, profileDTO))
                       .build();
   }
 

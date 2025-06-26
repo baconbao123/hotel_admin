@@ -1,6 +1,7 @@
 package com.hotel.webapp.repository;
 
 import com.hotel.webapp.base.BaseRepository;
+import com.hotel.webapp.entity.MapHotelType;
 import com.hotel.webapp.entity.TypeHotel;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.Modifying;
@@ -8,14 +9,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface TypeHotelRepository extends BaseRepository<TypeHotel, Integer> {
-  boolean existsByIdAndDeletedAtIsNull(Integer id);
-
-  boolean existsByColNameAndDeletedAtIsNull(String colName);
-
   // seeder
   @Modifying
   @Transactional
@@ -24,5 +22,8 @@ public interface TypeHotelRepository extends BaseRepository<TypeHotel, Integer> 
 
   Optional<TypeHotel> findByNameAndDeletedAtIsNull(String name);
 
+  // type hotel
+  @Query("select t from TypeHotel t where t.deletedAt is null")
+  List<TypeHotel> findAllAndDeletedAtIsNull();
 
 }

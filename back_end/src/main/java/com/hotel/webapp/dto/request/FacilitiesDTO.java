@@ -14,8 +14,7 @@ public class FacilitiesDTO {
   @Trim
   @FieldNotEmpty(field = "name")
   String name;
+  String icon;
   @FieldNotEmpty(field = "type")
-  String colName;
-  @FieldNotEmpty(field = "number")
-  Integer number;
+  Integer type;
 }

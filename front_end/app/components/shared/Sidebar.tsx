@@ -1,24 +1,37 @@
-import { useState , useEffect} from "react";
-import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "@heroicons/react/24/outline";
-import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
-import {
-  Link,
-  Navigate,
-  redirect,
-  useLocation,
-  useNavigate,
-} from "react-router";
+// src/components/Sidebar.tsx
+import { useState, useEffect } from "react";
+import { ArrowRightIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
+import { Link, useLocation, useNavigate } from "react-router";
 import { navigation } from "../../config/menu.config";
 import logo from "../../asset/images/logo.png";
+import Cookies from "js-cookie";
+import { fetchUserResources } from "../service/api";
 
 export default function Sidebar() {
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const [collapsed, setCollapsed] = useState(false);
+  const [userResources, setUserResources] = useState<string[]>([]);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Fetch user resources on mount
+  useEffect(() => {
+    const loadResources = async () => {
+      try {
+        const resources = await fetchUserResources();
+        setUserResources(resources);
+      } catch (error) {
+        // Axios interceptors handle errors (e.g., redirect to /login on 401)
+        console.error("Failed to fetch resources:", error);
+      }
+    };
+    loadResources();
+  }, []);
+
+  // Filter navigation based on user resources
+  const filteredNavigation = navigation.filter((item) =>
+    userResources.includes(item.resourceName)
+  );
 
   const toggleMenu = (menuName: string) => {
     setExpandedMenus((current) =>
@@ -30,25 +43,14 @@ export default function Sidebar() {
 
   const handleCollapse = () => setCollapsed((c) => !c);
 
-  // Helper to check if a menu or submenu is active
   const isActive = (href: string) => location.pathname === href;
 
-  const navigate = useNavigate();
   const handleLogout = () => {
+    Cookies.remove("token");
+    Cookies.remove("refreshToken");
     navigate("/login");
   };
- useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setCollapsed(true);
-      } else {
-        setCollapsed(false);
-      }
-    };
-    handleResize(); // Gọi lần đầu
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+
   return (
     <div
       className={`flex flex-col bg-white border-r border-gray-200 min-h-screen transition-all duration-200 overflow-hidden ${
@@ -72,9 +74,9 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-2 py-4 ">
+      <nav className="flex-1 px-2 py-4">
         <ul className="space-y-1">
-          {navigation.map((item) => {
+          {filteredNavigation.map((item) => {
             const active = isActive(item.href);
             return (
               <li key={item.name}>
@@ -94,7 +96,7 @@ export default function Sidebar() {
                     >
                       {item.icon && (
                         <item.icon
-                          className={`w-5 h-5  ${
+                          className={`w-5 h-5 ${
                             active ? "text-blue-400" : "text-gray-400"
                           }`}
                         />
@@ -151,8 +153,7 @@ export default function Sidebar() {
                                 isActive(child.href)
                                   ? "bg-blue-100 text-blue-700 font-semibold"
                                   : "text-gray-500 hover:bg-gray-100"
-                              }
-                            `}
+                              }`}
                             >
                               <span className="truncate">{child.name}</span>
                             </Link>
@@ -167,6 +168,7 @@ export default function Sidebar() {
         </ul>
       </nav>
 
+      {/* Collapse Button */}
       <button
         onClick={handleCollapse}
         className="text-gray-500 hover:text-blue-400 p-1 rounded transition justify-end flex m-5"

@@ -62,10 +62,67 @@ const data: BreadCrumbGroup[] = [
       },
       {
         icon: "pi pi-sitemap",
-        label: "Permission management",
+        label: "Permission Management",
         className: "text-gray-700",
         template: "",
         link: "/permission",
+      },
+    ],
+  },
+  {
+    name: "StreetList",
+    data: [
+      {
+        icon: "pi pi-home",
+        label: " Home page",
+        className: "text-gray-700",
+        template: "",
+        link: "/",
+      },
+      {
+        icon: "pi pi-map",
+        label: "Street Management",
+        className: "text-gray-700",
+        template: "",
+        link: "/streets",
+      },
+    ],
+  },
+  {
+    name: "HotelList",
+    data: [
+      {
+        icon: "pi pi-home",
+        label: " Home page",
+        className: "text-gray-700",
+        template: "",
+        link: "/",
+      },
+      {
+        icon: "pi pi-building",
+        label: "Hotel Management",
+        className: "text-gray-700",
+        template: "",
+        link: "/hotels",
+      },
+    ],
+  },
+  {
+    name: "Facilities",
+    data: [
+      {
+        icon: "pi pi-home",
+        label: " Home page",
+        className: "text-gray-700",
+        template: "",
+        link: "/",
+      },
+      {
+        icon: "pi pi-tag",
+        label: "Facilities List",
+        className: "text-gray-700",
+        template: "",
+        link: "/facilities",
       },
     ],
   },

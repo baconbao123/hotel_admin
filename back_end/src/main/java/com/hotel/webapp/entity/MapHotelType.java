@@ -21,7 +21,7 @@ public class MapHotelType implements AuditEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer id;
-  String colName;
+  Integer typeId;
   Integer hotelId;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;

@@ -8,6 +8,7 @@ app:
       user: upload/user
       hotel: upload/hotel
       document: upload/document
+      icon: upload/icons
     download:
       user: user
 

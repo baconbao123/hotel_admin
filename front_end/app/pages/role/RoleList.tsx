@@ -44,7 +44,7 @@ export default function RoleList() {
     filters,
     sortField,
     sortOrder,
-    closeForm
+    closeForm,
   } = useCrud("/role");
 
   useEffect(() => {
@@ -118,10 +118,9 @@ export default function RoleList() {
                       onChange={(e) => handleSearch("name", e.target.value)}
                     />
                   </>
-                  
                 ) : (
                   <>
-                  <Skeleton height="100%" />
+                    <Skeleton height="100%" />
                   </>
                 )}
               </div>
@@ -136,14 +135,13 @@ export default function RoleList() {
                     setOpenForm(true);
                   }}
                 />
-                {/* <Button label="Export excel" /> */}
               </div>
             </div>
           </div>
         </div>
 
         {tableLoading ? (
-          SkeletonTemplate("",5)
+          SkeletonTemplate("Role Management", 5)
         ) : (
           <DataTable
             value={data}
@@ -158,8 +156,8 @@ export default function RoleList() {
             sortOrder={sortOrder as 1 | -1 | 0 | undefined}
             showGridlines
             rowHover
-            scrollable  
-            scrollHeight="570px" 
+            scrollable
+            scrollHeight="570px"
             lazy
             paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="From {first} to {last} of {totalRecords}"
@@ -173,7 +171,7 @@ export default function RoleList() {
             }
           >
             <Column sortable field="id" header="Id" className="w-20" />
-            <Column sortable field="name" header="Name"  className="w-200"/>
+            <Column sortable field="name" header="Name" className="w-200" />
             <Column
               field="description"
               header="Description"
@@ -239,7 +237,7 @@ export default function RoleList() {
         open={openForm}
         mode={formMode}
         onClose={() => {
-          closeForm()
+          closeForm();
           setFormMode("create");
         }}
         loadDataById={loadById}
@@ -247,7 +245,6 @@ export default function RoleList() {
         updateItem={updateItem}
         error={error}
       />
-  
 
       <RoleDetail
         id={selectedId}
