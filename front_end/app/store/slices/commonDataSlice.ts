@@ -95,7 +95,6 @@ export const fetchCommonData: FetchCommonDataThunk = createAsyncThunk(
     }
   }
 );
-
 const commonDataSlice = createSlice({
   name: "commonData",
   initialState,

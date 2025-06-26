@@ -16,6 +16,7 @@ import {
   useHotelTypes,
   useProvinces,
 } from "@/hooks/useCommonData";
+import type { RcFile } from "antd/es/upload";
 
 interface Props {
   id?: string;
@@ -43,8 +44,8 @@ export default function HotelForm({
   updateItem,
   error,
 }: Props) {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [selectedImgsFile, setSelectedImgsFile] = useState<File[]>([]);
+  const [selectedFile, setSelectedFile] = useState<RcFile | null>(null);
+  const [selectedImgsFile, setSelectedImgsFile] = useState<RcFile[]>([]);
   const [note, setNote] = useState("");
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
@@ -86,6 +87,10 @@ export default function HotelForm({
   const { hotelDocuments } = useHotelDocuments();
   const { hotelFacilities } = useHotelFacilities();
   const { provinces } = useProvinces();
+
+  const handleRemoveExistingImage = (index: number) => {
+    setExistingImages((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const addDocument = () => {
     setDocuments([
@@ -346,34 +351,47 @@ export default function HotelForm({
             setPolicyDescription("");
           }
 
-          // Set avatar and images
+          // Set avatar
           if (result.avatarUrl) {
             setAvatarUrl(result.avatarUrl);
             setKeepAvatar("true");
+            console.log(
+              "Avatar URL:",
+              `${import.meta.env.VITE_REACT_APP_BACK_END_UPLOAD_HOTEL}/${
+                result.avatarUrl
+              }`
+            );
           } else {
             setAvatarUrl(null);
             setKeepAvatar("false");
+            console.log("No avatar URL provided");
           }
-          if (result.images && result.images.length > 0) {
-            const images = result.images.filter(
-              (img: any) => img.imagesUrl && typeof img.imagesUrl === "string"
-            );
-            setExistingImages(images);
-          } else {
-            setExistingImages([]);
-          }
+
+          // Set gallery images
+          const images = result.images
+            ? result.images
+                .filter((img: any) => {
+                  if (!img?.imagesUrl || typeof img.imagesUrl !== "string") {
+                    console.warn("Invalid image data:", img);
+                    return false;
+                  }
+                  return true;
+                })
+                .map((img: any) => ({
+                  id: img.id,
+                  imagesUrl: img.imagesUrl,
+                }))
+            : [];
+          setExistingImages(images);
 
           // Set address fields
           try {
-            // Set Province
             const province =
               provinces?.find(
                 (p: LocalResponse) => p.code === result.provinceCode
               ) || null;
             setSelectedProvince(province);
-            console.log("Selected Province:", province);
 
-            // Fetch and set Districts
             let districts: LocalResponse[] = [];
             let district: LocalResponse | null = null;
             if (province) {
@@ -387,14 +405,11 @@ export default function HotelForm({
                   (d: LocalResponse) => d.code === result.districtCode
                 ) || null;
               setSelectedDistrict(district);
-              console.log("Districts fetched:", districts);
-              console.log("District to select:", district);
             } else {
               setDistrictData([]);
               setSelectedDistrict(null);
             }
 
-            // Fetch and set Wards
             let wards: LocalResponse[] = [];
             let ward: LocalResponse | null = null;
             if (district) {
@@ -407,14 +422,11 @@ export default function HotelForm({
                 wards.find((w: LocalResponse) => w.code === result.wardCode) ||
                 null;
               setSelectedWard(ward);
-              console.log("Wards fetched:", wards);
-              console.log("Ward to select:", ward);
             } else {
               setWardData([]);
               setSelectedWard(null);
             }
 
-            // Fetch and set Streets
             let streets: any[] = [];
             let street: any = null;
             if (ward) {
@@ -426,8 +438,6 @@ export default function HotelForm({
               street =
                 streets.find((s: any) => s.id === result.streetId) || null;
               setSelectedStreet(street);
-              console.log("Streets fetched:", streets);
-              console.log("Street to select:", street);
             } else {
               setStreetData([]);
               setSelectedStreet(null);
@@ -656,12 +666,6 @@ export default function HotelForm({
                       Upload 1 image
                     </label>
                     <ImageUploader
-                      onFileChange={(file) => {
-                        setSelectedFile(file);
-                        setKeepAvatar("false");
-                      }}
-                      maxFileSize={2}
-                      disabled={submitting}
                       initialImageUrl={
                         avatarUrl
                           ? `${
@@ -670,6 +674,9 @@ export default function HotelForm({
                             }/${avatarUrl}`
                           : undefined
                       }
+                      onFileChange={(file) => setSelectedFile(file)}
+                      maxFileSize={2}
+                      disabled={submitting}
                     />
                     {getError("avatar") && (
                       <small className="text-red-500 text-xs mt-1">
@@ -691,9 +698,14 @@ export default function HotelForm({
                       Images (Up to 3)
                     </label>
                     <GalleryUploader
-                      onFileChange={(files) => {
+                      onFilesChange={(files) => {
+                        console.log(
+                          "HotelForm: Updated selectedImgsFile =",
+                          files
+                        );
                         setSelectedImgsFile(files);
                       }}
+                      onRemoveExistingImage={handleRemoveExistingImage}
                       maxFileSize={6}
                       disabled={submitting}
                       initialImageUrls={existingImages.map(

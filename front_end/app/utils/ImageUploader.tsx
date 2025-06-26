@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Upload, Image } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import type { GetProp, UploadFile, UploadProps } from "antd";
@@ -6,13 +6,13 @@ import { Toast as PrimeToast } from "primereact/toast";
 import "antd/dist/reset.css";
 
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
-type RcFile = import("antd/es/upload").RcFile; // Import RcFile type explicitly
+type RcFile = import("antd/es/upload").RcFile;
 
 interface ImageUploaderProp {
-  initialImageUrl?: string; // URL ảnh ban đầu (từ server hoặc local)
-  onFileChange: (file: RcFile | null) => void; // Updated to use RcFile
-  maxFileSize?: number; // Kích thước file tối đa (MB), mặc định 2MB
-  disabled?: boolean; // Trạng thái vô hiệu hóa
+  initialImageUrl?: string;
+  onFileChange: (file: RcFile | null) => void;
+  maxFileSize?: number;
+  disabled?: boolean;
 }
 
 const getBase64 = (file: FileType): Promise<string> =>
@@ -31,21 +31,26 @@ const ImageUploader: React.FC<ImageUploaderProp> = ({
 }) => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
-  const [fileList, setFileList] = useState<UploadFile[]>(
-    initialImageUrl
-      ? [
-          {
-            uid: "-1",
-            name: "avatar",
-            status: "done",
-            url: initialImageUrl,
-          },
-        ]
-      : []
-  );
-  const toast = useRef<PrimeToast>(null); // Initialize Toast ref
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const toast = useRef<PrimeToast>(null);
 
-  // Xử lý preview ảnh
+  // Sync fileList with initialImageUrl
+  useEffect(() => {
+    console.log("ImageUploader: initialImageUrl =", initialImageUrl);
+    if (initialImageUrl) {
+      setFileList([
+        {
+          uid: "-1",
+          name: "avatar",
+          status: "done",
+          url: initialImageUrl,
+        },
+      ]);
+    } else {
+      setFileList([]);
+    }
+  }, [initialImageUrl]);
+
   const handlePreview = async (file: UploadFile) => {
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj as FileType);
@@ -54,13 +59,12 @@ const ImageUploader: React.FC<ImageUploaderProp> = ({
     setPreviewOpen(true);
   };
 
-  // Xử lý khi file thay đổi
   const handleFileChange: UploadProps["onChange"] = ({
     fileList: newFileList,
   }) => {
     setFileList(newFileList);
     if (newFileList.length > 0 && newFileList[0].originFileObj) {
-      const file = newFileList[0].originFileObj as RcFile; // Use RcFile
+      const file = newFileList[0].originFileObj as RcFile;
       onFileChange(file);
       getBase64(file).then((base64) => {
         setFileList([
@@ -78,7 +82,6 @@ const ImageUploader: React.FC<ImageUploaderProp> = ({
     }
   };
 
-  // Kiểm tra file trước khi upload
   const beforeUpload = (file: FileType) => {
     const isImage = file.type.startsWith("image/");
     if (!isImage) {

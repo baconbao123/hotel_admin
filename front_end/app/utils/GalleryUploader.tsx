@@ -1,9 +1,22 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { Upload, Image } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { Image, Upload, message } from "antd";
-import type { UploadFile, UploadProps } from "antd";
+import type { GetProp, UploadFile, UploadProps } from "antd";
+import { Toast as PrimeToast } from "primereact/toast";
+import "antd/dist/reset.css";
+import { v4 as uuidv4 } from "uuid";
 
-type FileType = Parameters<NonNullable<UploadProps["beforeUpload"]>>[0];
+type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
+type RcFile = import("antd/es/upload").RcFile;
+
+interface GalleryUploaderProps {
+  initialImageUrls?: string[];
+  onFilesChange: (files: RcFile[]) => void;
+  onRemoveExistingImage?: (index: number) => void;
+  maxFileSize?: number;
+  disabled?: boolean;
+  maxCount?: number;
+}
 
 const getBase64 = (file: FileType): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -13,124 +26,187 @@ const getBase64 = (file: FileType): Promise<string> =>
     reader.onerror = (error) => reject(error);
   });
 
-interface GalleryUploaderProps {
-  onFileChange?: (files: File[]) => void;
-  maxFileSize?: number;
-  disabled?: boolean;
-  initialImageUrls?: string[];
-  maxCount?: number;
-}
-
 const GalleryUploader: React.FC<GalleryUploaderProps> = ({
-  onFileChange,
-  maxFileSize = 6,
+  initialImageUrls,
+  onFilesChange,
+  onRemoveExistingImage,
+  maxFileSize = 2,
   disabled = false,
-  initialImageUrls = [],
-  maxCount = 3,
+  maxCount = 5,
 }) => {
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [previewImage, setPreviewImage] = useState(""); // Now used in Image component
+  const [previewImage, setPreviewImage] = useState("");
   const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const toast = useRef<PrimeToast>(null);
 
-  // Sync fileList with initialImageUrls on every change
+  // Sync fileList with initialImageUrls
   useEffect(() => {
-    const initialFiles: UploadFile[] = initialImageUrls.map((url, index) => ({
-      uid: `existing-${index}`,
-      name: `image-${index + 1}`,
-      status: "done",
-      url: url,
-    }));
-    setFileList(initialFiles);
-  }, [initialImageUrls]);
+    console.log("GalleryUploader: initialImageUrls =", initialImageUrls);
 
-  // Handle image preview
+    // Chỉ cập nhật fileList từ initialImageUrls nếu fileList trống hoặc initialImageUrls thay đổi
+    if (initialImageUrls && initialImageUrls.length > 0) {
+      const existingFiles = initialImageUrls.map((url, index) => ({
+        uid: `existing-${index}`,
+        name: `image-${index}`,
+        status: "done" as const,
+        url,
+      }));
+
+      // Giữ lại các file mới (không phải existing) từ fileList hiện tại
+      const newFiles = fileList.filter(
+        (file) => !file.uid.startsWith("existing-")
+      );
+
+      // Kết hợp existingFiles và newFiles, đảm bảo không vượt maxCount
+      const updatedFileList = [...existingFiles, ...newFiles].slice(
+        0,
+        maxCount
+      );
+      setFileList(updatedFileList);
+
+      console.log("GalleryUploader: Updated fileList =", updatedFileList);
+    } else {
+      // Nếu không có initialImageUrls, chỉ giữ các file mới
+      const newFiles = fileList.filter(
+        (file) => !file.uid.startsWith("existing-")
+      );
+      setFileList(newFiles);
+    }
+  }, [initialImageUrls, maxCount]);
+
   const handlePreview = async (file: UploadFile) => {
-    if (!file.url && !file.preview && file.originFileObj) {
+    if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj as FileType);
     }
     setPreviewImage(file.url || (file.preview as string));
     setPreviewOpen(true);
   };
 
-  // Handle file selection and generate previews
-  const handleChange: UploadProps["onChange"] = async ({
+  const handleFileChange: UploadProps["onChange"] = ({
     fileList: newFileList,
+    file,
   }) => {
-    const validFiles = newFileList
-      .filter((file) => file.status !== "removed")
-      .slice(0, maxCount);
+    console.log("GalleryUploader: New fileList =", newFileList);
+    console.log("GalleryUploader: Changed file =", file);
 
-    const updatedFileList = await Promise.all(
-      validFiles.map(async (file) => {
-        if (file.originFileObj && !file.thumbUrl && !file.preview) {
-          const preview = await getBase64(file.originFileObj as FileType);
+    // Process the new fileList with unique uids for new uploads
+    const updatedFileList = newFileList
+      .map((f) => {
+        if (!f.uid || f.uid.startsWith("upload-")) {
           return {
-            ...file,
-            uid: file.uid || `new-${Date.now()}-${Math.random()}`,
-            name: file.name || `image-${Date.now()}`,
-            status: "done",
-            thumbUrl: preview,
-            preview,
+            ...f,
+            uid: `upload-${uuidv4()}`, // Unique uid for new uploads
+            status: f.status || "uploading", // Default to uploading if not set
           };
         }
-        return file;
+        return f;
       })
-    );
+      .slice(0, maxCount);
 
     setFileList(updatedFileList);
-    const files = updatedFileList
-      .filter((file) => file.originFileObj && file.status === "done")
-      .map((file) => file.originFileObj as File);
-    onFileChange?.(files);
 
-    if (updatedFileList.some((file) => file.status === "error")) {
-      message.error("One or more images failed to process");
-    }
+    // Extract files for onFilesChange
+    const files = updatedFileList
+      .filter((f) => f.originFileObj && f.status !== "removed")
+      .map((f) => f.originFileObj as RcFile);
+    console.log("GalleryUploader: Files to onFilesChange =", files);
+    onFilesChange(files);
   };
 
-  // Validate files before adding to fileList
+  const handleRemove = (file: UploadFile) => {
+    console.log("GalleryUploader: Removing file =", file);
+    const index = parseInt(file.uid.replace("existing-", ""), 10);
+    if (file.uid.startsWith("existing-") && !isNaN(index)) {
+      onRemoveExistingImage?.(index);
+    }
+    const newFileList = fileList.filter((f) => f.uid !== file.uid);
+    setFileList(newFileList);
+    const files = newFileList
+      .filter((f) => f.originFileObj && f.status !== "removed")
+      .map((f) => f.originFileObj as RcFile);
+    console.log("GalleryUploader: Files after remove =", files);
+    onFilesChange(files);
+    return true;
+  };
+
   const beforeUpload = (file: FileType) => {
+    console.log("GalleryUploader: Before upload, file =", file);
+    console.log("GalleryUploader: Current fileList =", fileList);
     const isImage = file.type.startsWith("image/");
     if (!isImage) {
-      message.error("You can only upload image files!");
-      return false;
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: "You can only upload image files!",
+        life: 3000,
+      });
+      return Upload.LIST_IGNORE;
     }
-    const isLtMaxSize = file.size / 1024 / 1024 <= maxFileSize;
+    const isLtMaxSize = file.size / 1024 / 1024 < maxFileSize;
     if (!isLtMaxSize) {
-      message.error(`Image must be smaller than ${maxFileSize}MB!`);
-      return false;
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: `Image must be smaller than ${maxFileSize}MB!`,
+        life: 3000,
+      });
+      return Upload.LIST_IGNORE;
     }
-    return false; // Handle upload manually via onChange
+    const existingImagesCount = fileList.filter((f) =>
+      f.uid.startsWith("existing-")
+    ).length;
+    const newImagesCount = fileList.filter(
+      (f) => f.originFileObj && !f.uid.startsWith("existing-")
+    ).length;
+    if (existingImagesCount + newImagesCount >= maxCount) {
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: `You can only have up to ${maxCount} images!`,
+        life: 3000,
+      });
+      return Upload.LIST_IGNORE;
+    }
+    return false; // Let onChange handle the file addition
   };
 
   const uploadButton = (
-    <button
-      style={{ border: 0, background: "none" }}
-      type="button"
-      disabled={disabled}
-    >
+    <button style={{ border: 0, background: "none" }} type="button">
       <PlusOutlined />
-      <div style={{ marginTop: 8 }}>Upload Images</div>
+      <div style={{ marginTop: 8 }}>Upload</div>
     </button>
   );
 
   return (
     <>
+      <style>
+        {`
+          .ant-upload-list-picture-card .ant-upload-list-item {
+            border: 1px solid #d9d9d9 !important;
+          }
+          .ant-upload-list-picture-card .ant-upload-list-item-uploading {
+            border: 1px solid #d9d9d9 !important;
+          }
+        `}
+      </style>
+      <PrimeToast ref={toast} />
       <Upload
         listType="picture-card"
         fileList={fileList}
         onPreview={handlePreview}
-        onChange={handleChange}
+        onChange={handleFileChange}
         beforeUpload={beforeUpload}
         accept="image/*"
-        maxCount={maxCount}
         disabled={disabled}
         multiple
+        maxCount={maxCount}
+        onRemove={handleRemove}
         showUploadList={{
-          showRemoveIcon: !disabled,
+          showPreviewIcon: true,
+          showRemoveIcon: true,
         }}
       >
-        {fileList.length >= maxCount ? null : uploadButton}
+        {fileList.length < maxCount && uploadButton}
       </Upload>
       {previewImage && (
         <Image
@@ -139,9 +215,9 @@ const GalleryUploader: React.FC<GalleryUploaderProps> = ({
             visible: previewOpen,
             onVisibleChange: (visible) => setPreviewOpen(visible),
             afterOpenChange: (visible) => !visible && setPreviewImage(""),
-            zIndex: 10000,
           }}
           src={previewImage}
+          onError={() => console.error("Failed to load image:", previewImage)}
         />
       )}
     </>

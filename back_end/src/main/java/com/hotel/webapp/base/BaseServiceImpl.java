@@ -72,13 +72,13 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
       predicates.add(cb.isNull(root.get("deletedAt")));
 
       // Loại trừ email sa@gmail.com nếu field email tồn tại
-//      boolean hasEmailField = true;
-//      try {
-//        root.get("email");
-//        predicates.add(cb.notEqual(root.get("email"), "sa@gmail.com"));
-//      } catch (IllegalArgumentException e) {
-//        hasEmailField = false;
-//      }
+      boolean hasEmailField = true;
+      try {
+        root.get("email");
+        predicates.add(cb.notEqual(root.get("email"), "sa@gmail.com"));
+      } catch (IllegalArgumentException e) {
+        hasEmailField = false;
+      }
 
       if (filters == null) return cb.conjunction();
 
@@ -91,9 +91,9 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
         }
 
         // Bỏ qua filter email nếu là sa@gmail.com
-//        if (field.equals("email") && hasEmailField && value.toString().trim().equalsIgnoreCase("sa@gmail.com")) {
-//          continue;
-//        }
+        if (field.equals("email") && hasEmailField && value.toString().trim().equalsIgnoreCase("sa@gmail.com")) {
+          continue;
+        }
 
         try {
           String searchValue = convertDateToString(value).toLowerCase();
