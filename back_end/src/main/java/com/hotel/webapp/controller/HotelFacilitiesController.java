@@ -20,7 +20,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/hotel-facilities")
-@Resource(name = "hotel-facilities")
+@Resource(name = "Facilities")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class HotelFacilitiesController {

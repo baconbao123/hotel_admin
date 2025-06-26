@@ -168,17 +168,6 @@ export default function Sidebar() {
         </ul>
       </nav>
 
-      {/* Logout Button */}
-      <div className="p-4">
-        <button
-          onClick={handleLogout}
-          className="flex items-center w-full px-3 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition"
-        >
-          <ArrowRightIcon className="w-5 h-5" />
-          {!collapsed && <span className="ml-3">Logout</span>}
-        </button>
-      </div>
-
       {/* Collapse Button */}
       <button
         onClick={handleCollapse}

@@ -32,6 +32,7 @@ export const useProvinces = () => {
   return { provinces, loading, error };
 };
 
+///
 export const useFacilityTypes = () => {
   const dispatch = useDispatch<AppDispatch>();
   const facilityTypes = useSelector(

@@ -226,9 +226,9 @@ export default function UserList() {
             ></Column>
             <Column
               header="Actions"
-              style={{ width: "15%" }}
+              className="w-60"
               body={(rowData: any) => (
-                <div className="flex gap-2 ">
+                <div className="flex gap-2 justify-center">
                   <Button
                     icon="pi pi-eye"
                     rounded

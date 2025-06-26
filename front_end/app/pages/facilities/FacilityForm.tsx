@@ -5,6 +5,7 @@ import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { Dropdown } from "primereact/dropdown";
 import $axios from "@/axios";
+import { useFacilityTypes } from "@/hooks/useCommonData";
 
 interface Props {
   id?: string;
@@ -30,28 +31,11 @@ export default function FacilityForm({
   const [name, setName] = useState("");
   const [icon, setIcon] = useState("");
   const [type, setType] = useState<any>(null);
-  const [typeData, setTypeData] = useState<any[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const toast = useRef<Toast>(null);
   const header = mode === "edit" ? "EDIT FACILITY" : "ADD NEW FACILITY";
 
-  // Load type list
-  useEffect(() => {
-    const fetchTypes = async () => {
-      try {
-        const res = await $axios.get("/hotel-facilities/facilities-type");
-        setTypeData(res.data.result || []);
-      } catch (err: any) {
-        toast.current?.show({
-          severity: "error",
-          summary: "Error",
-          detail: err.response?.data?.message || "Failed to load types",
-          life: 3000,
-        });
-      }
-    };
-    fetchTypes();
-  }, []);
+  const { facilityTypes } = useFacilityTypes();
 
   // Load facility details
   useEffect(() => {
@@ -63,7 +47,7 @@ export default function FacilityForm({
           setIcon(data.entity.icon || "");
 
           // So sánh type từ API (số) với id của danh sách dropdown
-          const matched = typeData.find(
+          const matched = facilityTypes.find(
             (t) =>
               t.id ===
               (typeof data.entity.type === "object"
@@ -86,10 +70,10 @@ export default function FacilityForm({
       }
     };
 
-    if (typeData.length > 0 && open) {
+    if (facilityTypes.length > 0 && open) {
       fetchFacility();
     }
-  }, [id, open, typeData, loadDataById]);
+  }, [id, open, facilityTypes, loadDataById]);
 
   const submit = async () => {
     setSubmitting(true);
@@ -187,7 +171,7 @@ export default function FacilityForm({
               id="type"
               value={type}
               onChange={(e) => setType(e.value)}
-              options={typeData}
+              options={facilityTypes}
               optionLabel="name"
               placeholder="Select a type"
               className="w-full"

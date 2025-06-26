@@ -42,6 +42,7 @@ const ProtectedRoute = () => {
     "/permission": "Permissions",
     "/streets": "Street",
     "/hotels": "Hotel",
+    "/facilties": "Facilities",
   };
 
   const requiredResource = routeResourceMap[location.pathname];

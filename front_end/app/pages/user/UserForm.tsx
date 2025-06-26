@@ -6,9 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import ImageUploader from "@/utils/ImageUploader";
 import { InputSwitch } from "primereact/inputswitch";
 import { MultiSelect } from "primereact/multiselect";
-import "./UserForm.scss";
 import { useRoles } from "@/hooks/useCommonData";
-
+import "./UserForm.scss";
 interface Props {
   id?: string;
   open: boolean;
@@ -156,7 +155,7 @@ export default function UserForm({
         onHide={onClose}
         header={header}
         footer={
-          <div className="flex justify-end gap-3 p-4">
+          <div className="flex justify-center gap-2">
             <Button
               label="Close"
               onClick={onClose}

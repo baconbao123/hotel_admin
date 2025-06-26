@@ -228,7 +228,7 @@ export default function RoleList() {
             <Column
               frozen={true}
               header={() => <div className="flex justify-center">Actions</div>}
-              className="w-60"
+              className="w-70"
               body={(row: any) => (
                 <div className="flex gap-2 justify-center">
                   <Button
