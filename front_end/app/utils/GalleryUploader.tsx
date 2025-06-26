@@ -39,11 +39,9 @@ const GalleryUploader: React.FC<GalleryUploaderProps> = ({
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   const toast = useRef<PrimeToast>(null);
 
-  // Sync fileList with initialImageUrls
   useEffect(() => {
     console.log("GalleryUploader: initialImageUrls =", initialImageUrls);
 
-    // Chỉ cập nhật fileList từ initialImageUrls nếu fileList trống hoặc initialImageUrls thay đổi
     if (initialImageUrls && initialImageUrls.length > 0) {
       const existingFiles = initialImageUrls.map((url, index) => ({
         uid: `existing-${index}`,
@@ -52,12 +50,10 @@ const GalleryUploader: React.FC<GalleryUploaderProps> = ({
         url,
       }));
 
-      // Giữ lại các file mới (không phải existing) từ fileList hiện tại
       const newFiles = fileList.filter(
         (file) => !file.uid.startsWith("existing-")
       );
 
-      // Kết hợp existingFiles và newFiles, đảm bảo không vượt maxCount
       const updatedFileList = [...existingFiles, ...newFiles].slice(
         0,
         maxCount
@@ -66,7 +62,6 @@ const GalleryUploader: React.FC<GalleryUploaderProps> = ({
 
       console.log("GalleryUploader: Updated fileList =", updatedFileList);
     } else {
-      // Nếu không có initialImageUrls, chỉ giữ các file mới
       const newFiles = fileList.filter(
         (file) => !file.uid.startsWith("existing-")
       );
@@ -89,14 +84,13 @@ const GalleryUploader: React.FC<GalleryUploaderProps> = ({
     console.log("GalleryUploader: New fileList =", newFileList);
     console.log("GalleryUploader: Changed file =", file);
 
-    // Process the new fileList with unique uids for new uploads
     const updatedFileList = newFileList
       .map((f) => {
         if (!f.uid || f.uid.startsWith("upload-")) {
           return {
             ...f,
-            uid: `upload-${uuidv4()}`, // Unique uid for new uploads
-            status: f.status || "uploading", // Default to uploading if not set
+            uid: `upload-${uuidv4()}`,
+            status: f.status || "uploading", 
           };
         }
         return f;

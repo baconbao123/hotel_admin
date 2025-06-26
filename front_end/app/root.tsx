@@ -3,7 +3,7 @@ import "@/asset/images/styles/main.scss";
 import { LoadingProvider } from "./contexts/LoadingContext";
 import { Provider } from "react-redux";
 import { store } from "./store";
-import { fetchCommonData } from "./store/slices/commonDataSlice";
+
 import {
   Links,
   Meta,

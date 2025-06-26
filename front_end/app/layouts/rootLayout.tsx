@@ -2,13 +2,12 @@ import { Outlet } from "react-router";
 import { useEffect } from "react";
 import Sidebar from "../components/shared/Sidebar";
 import Navbar from "../components/shared/Navbar";
-import { useAppDispatch } from "@/store"; // Import useAppDispatch từ store
-import { fetchCommonData } from "@/store/slices/commonDataSlice"; // Import fetchCommonData
+import { useAppDispatch } from "@/store";
+import { fetchCommonData } from "@/store/slices/commonDataSlice";
 
 export default function RootLayout() {
   const dispatch = useAppDispatch();
 
-  // Fetch common data ngay khi layout mount
   useEffect(() => {
     console.log("Fetching common data in RootLayout...");
     dispatch(

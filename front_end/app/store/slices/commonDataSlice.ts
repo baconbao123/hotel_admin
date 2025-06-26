@@ -19,7 +19,6 @@ interface CommonData {
 
 type FetchCommonDataReturn = Record<string, any>;
 
-// Define the argument type of the thunk
 interface FetchCommonDataArgs {
   types: string[];
   forceRefresh?: boolean;
@@ -28,9 +27,9 @@ interface FetchCommonDataArgs {
 
 // Define the thunk type
 type FetchCommonDataThunk = AsyncThunk<
-  FetchCommonDataReturn, // Return type
-  FetchCommonDataArgs, // Argument type
-  { state: RootState } // ThunkAPI config (includes RootState)
+  FetchCommonDataReturn, 
+  FetchCommonDataArgs, 
+  { state: RootState } 
 >;
 
 interface CommonDataState {
@@ -53,7 +52,6 @@ const initialState: CommonDataState = {
   error: {},
 };
 
-// Thunk để fetch dữ liệu chung
 export const fetchCommonData: FetchCommonDataThunk = createAsyncThunk(
   "commonData/fetchCommonData",
   async (
