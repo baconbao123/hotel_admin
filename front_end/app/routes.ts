@@ -8,7 +8,8 @@ import {
 export default [
   layout("./layouts/rootLayout.tsx", [
     route("", "./routes/protectedRoute.tsx", [
-      index("./pages/dashboard/DashboardPage.tsx"),
+      route("/", "./pages/welcome/WelcomePage.tsx"),
+      route("dashboard", "./pages/dashboard/DashboardPage.tsx"),
       route("profile", "./pages/profile/ProfilePage.tsx"),
       route("setting", "./pages/settings/SettingPage.tsx"),
       route("user", "./pages/user/UserList.tsx"),

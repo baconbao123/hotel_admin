@@ -1,19 +1,9 @@
-// import {
-//   Links,
-//   Meta,
-//   Outlet,
-//   Scripts,
-//   ScrollRestoration,
-//   useRouteError,
-// } from "react-router-dom";
-import { Tooltip } from "primereact/tooltip";
 import "./app.css";
 import "@/asset/images/styles/main.scss";
 import { LoadingProvider } from "./contexts/LoadingContext";
 import { Provider } from "react-redux";
-import { store, useAppDispatch } from "./store";
-import { useEffect } from "react";
-import { fetchCommonData } from "./store/slices/commonDataSlice";
+import { store } from "./store";
+
 import {
   Links,
   Meta,

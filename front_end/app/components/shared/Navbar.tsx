@@ -27,66 +27,66 @@ export default function Navbar() {
     id: number;
   } | null>(null);
 
-  useEffect(() => {
-    // Lấy token từ Cookies và decode để lấy userId
-    const token = Cookies.get("token");
-    let userId: number | null = null;
-    if (token) {
-      try {
-        // Decode JWT để lấy userId
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        userId =
-          payload.userId ||
-          payload.userID ||
-          payload.userid ||
-          payload.user_id ||
-          payload.id;
-        if (
-          !userId &&
-          typeof payload === "object" &&
-          payload["userId"] !== undefined
-        )
-          userId = payload["userId"];
-      } catch (err) {
-        userId = null;
-      }
-    }
+  // useEffect(() => {
+  //   // Lấy token từ Cookies và decode để lấy userId
+  //   const token = Cookies.get("token");
+  //   let userId: number | null = null;
+  //   if (token) {
+  //     try {
+  //       // Decode JWT để lấy userId
+  //       const payload = JSON.parse(atob(token.split(".")[1]));
+  //       userId =
+  //         payload.userId ||
+  //         payload.userID ||
+  //         payload.userid ||
+  //         payload.user_id ||
+  //         payload.id;
+  //       if (
+  //         !userId &&
+  //         typeof payload === "object" &&
+  //         payload["userId"] !== undefined
+  //       )
+  //         userId = payload["userId"];
+  //     } catch (err) {
+  //       userId = null;
+  //     }
+  //   }
 
-    if (!userId) return;
+  //   if (!userId) return;
 
-    $axios
-      .get(`/user/2`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res: any) => {
-        // Nếu $axios đã parse sẵn json thì dùng res.data, còn nếu là fetch thì dùng res.json().
-        const res1 = res.data || res;
-        console.log("User API data:", res1.result);
-        const data = res1.result || res1;
-        setUserInfo({
-          name: data.fullName ?? "Austin Robertson",
-          email: data.email ?? "administrator@hotel.com",
-          role: data.roles[0].roleName ?? "Administrator",
-          avatar:
-            data.avatarUrl ??
-            "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-          id: data.id ?? userId,
-        });
-      })
-      .catch((err: any) => {
-        console.log("User API error:", err);
-        setUserInfo({
-          name: "Austin Robertson",
-          email: "administrator@hotel.com",
-          role: "Administrator",
-          avatar:
-            "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-          id: userId!,
-        });
-      });
-  }, []);
+  //   $axios
+  //     .get(`/user/2`, {
+  //       headers: {
+  //         Authorization: `Bearer ${token}`,
+  //       },
+  //     })
+  //     .then((res: any) => {
+  //       // Nếu $axios đã parse sẵn json thì dùng res.data, còn nếu là fetch thì dùng res.json().
+  //       const res1 = res.data || res;
+  //       console.log("User API data:", res1.result);
+  //       const data = res1.result || res1;
+  //       setUserInfo({
+  //         name: data.fullName ?? "Austin Robertson",
+  //         email: data.email ?? "administrator@hotel.com",
+  //         role: data.roles[0].roleName ?? "Administrator",
+  //         avatar:
+  //           data.avatarUrl ??
+  //           "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+  //         id: data.id ?? userId,
+  //       });
+  //     })
+  //     .catch((err: any) => {
+  //       console.log("User API error:", err);
+  //       setUserInfo({
+  //         name: "Austin Robertson",
+  //         email: "administrator@hotel.com",
+  //         role: "Administrator",
+  //         avatar:
+  //           "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+  //         id: userId!,
+  //       });
+  //     });
+  // }, []);
 
   const handleLogoutClick = () => {
     setIsProfileOpen(false);
