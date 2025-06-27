@@ -199,7 +199,7 @@ export default function UserForm({
                 initialImageUrl={
                   avatarUrl
                     ? `${
-                        import.meta.env.VITE_REACT_APP_BACK_END_UPLOAD_HOTEL
+                        import.meta.env.VITE_REACT_APP_BACK_END_LINK_UPLOAD_USER
                       }/${avatarUrl}`
                     : undefined
                 }

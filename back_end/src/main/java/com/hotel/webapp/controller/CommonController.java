@@ -2,6 +2,7 @@ package com.hotel.webapp.controller;
 
 import com.hotel.webapp.dto.response.ApiResponse;
 import com.hotel.webapp.dto.response.AttributeDataResponse;
+import com.hotel.webapp.entity.Resources;
 import com.hotel.webapp.service.admin.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -80,4 +81,6 @@ public class CommonController {
                       .result(builder.build())
                       .build();
   }
+
+
 }

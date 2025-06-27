@@ -46,7 +46,6 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
 
   @Override
   public User create(UserDTO create) {
-
     // valid
     if (create.getPassword() == null) {
       throw new AppException(ErrorCode.COMMON_400, "Password is required");
@@ -58,7 +57,6 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
                    .fullName(create.getFullName())
                    .email(create.getEmail())
                    .phoneNumber(create.getPhoneNumber())
-                   .password(passwordEncoder.encode(create.getPassword()))
                    .createdAt(LocalDateTime.now())
                    .createdBy(authService.getAuthLogin())
                    .status(create.getStatus())
@@ -71,6 +69,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
       user.setAvatarUrl("");
     }
 
+    user.setPassword(passwordEncoder.encode(create.getPassword()));
+    
     repository.save(user);
 
     if (create.getRolesIds() != null) {
@@ -125,6 +125,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
     } else {
       user.setAvatarUrl(user.getAvatarUrl());
     }
+
+
 
     user = repository.save(user);
 

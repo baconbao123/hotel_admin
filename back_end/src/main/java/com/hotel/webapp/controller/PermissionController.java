@@ -56,7 +56,6 @@ public class PermissionController {
   }
 
   @GetMapping("/resources")
-  @Permission(name = "view")
   public ApiResponse<List<Resources>> getResourceByUser() {
     return ApiResponse.<List<Resources>>builder()
                       .result(permissionService.getUserResource())

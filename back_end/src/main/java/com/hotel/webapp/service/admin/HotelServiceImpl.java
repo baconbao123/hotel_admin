@@ -437,22 +437,25 @@ public class HotelServiceImpl extends BaseServiceImpl<Hotels, Integer, HotelDTO,
     }
 
     // Facilities
-    List<MapHotelFacility> findFacilitiesExisted = mapHotelFacilityRepository.findAllByHotelIdAndDeletedAtIsNull(
-          hotelCrr.getId());
-    for (MapHotelFacility mapHotelFacilities : findFacilitiesExisted) {
-      mapHotelFacilities.setDeletedAt(LocalDateTime.now());
-      mapHotelFacilities.setUpdatedBy(getAuthId());
-      mapHotelFacilityRepository.save(mapHotelFacilities);
+    if (update.getFacilities() != null) {
+      List<MapHotelFacility> findFacilitiesExisted = mapHotelFacilityRepository.findAllByHotelIdAndDeletedAtIsNull(
+            hotelCrr.getId());
+      for (MapHotelFacility mapHotelFacilities : findFacilitiesExisted) {
+        mapHotelFacilities.setDeletedAt(LocalDateTime.now());
+        mapHotelFacilities.setUpdatedBy(getAuthId());
+        mapHotelFacilityRepository.save(mapHotelFacilities);
+      }
+
+      for (Integer facilityId : update.getFacilities()) {
+        MapHotelFacility mapHotelFacility = new MapHotelFacility();
+        mapHotelFacility.setHotelId(hotelCrr.getId());
+        mapHotelFacility.setFacilityId(facilityId);
+        mapHotelFacility.setCreatedAt(LocalDateTime.now());
+        mapHotelFacility.setCreatedBy(getAuthId());
+        mapHotelFacilityRepository.save(mapHotelFacility);
+      }
     }
 
-    for (Integer facilityId : update.getFacilities()) {
-      MapHotelFacility mapHotelFacility = new MapHotelFacility();
-      mapHotelFacility.setHotelId(hotelCrr.getId());
-      mapHotelFacility.setFacilityId(facilityId);
-      mapHotelFacility.setCreatedAt(LocalDateTime.now());
-      mapHotelFacility.setCreatedBy(getAuthId());
-      mapHotelFacilityRepository.save(mapHotelFacility);
-    }
 
     // Hotel images
     List<HotelImages> existingImages = hotelImagesRepository.findAllByHotelIdAndDeletedAtIsNull(hotelCrr.getId());

@@ -12,7 +12,7 @@ import {
 export const navigation: MenuItem[] = [
   {
     name: "Dashboard",
-    href: "/",
+    href: "/dashboard",
     icon: HomeIcon,
     resourceName: "Dashboard",
   },
@@ -42,7 +42,7 @@ export const navigation: MenuItem[] = [
   },
   {
     name: "Hotel facilities",
-    href: "/facilties",
+    href: "/facilities",
     resourceName: "Facilities",
     icon: TagIcon,
   },

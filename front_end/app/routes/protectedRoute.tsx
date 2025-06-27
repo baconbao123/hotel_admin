@@ -36,13 +36,13 @@ const ProtectedRoute = () => {
   }
 
   const routeResourceMap: { [key: string]: string } = {
-    "/": "Dashboard",
+    "/dashboard": "Dashboard",
     "/user": "User",
     "/role": "Role",
     "/permission": "Permissions",
     "/streets": "Street",
     "/hotels": "Hotel",
-    "/facilties": "Facilities"
+    "/facilities": "Facilities"
   };
 
   const requiredResource = routeResourceMap[location.pathname];

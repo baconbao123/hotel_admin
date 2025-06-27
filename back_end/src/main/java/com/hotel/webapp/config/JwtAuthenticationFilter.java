@@ -34,7 +34,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   ApplicationContext applicationContext;
 
   @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
         throws ServletException, IOException {
     AntPathMatcher pathMatcher = new AntPathMatcher();
     String contextPath = request.getContextPath();
@@ -53,6 +53,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       return;
     }
 
+    boolean isAuthenticatedPublic = Arrays.stream(SecurityConfig.AUTHENTICATED_PUBLIC_URLS)
+                                          .anyMatch(url -> pathMatcher.match(url, finalPath));
+
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     if (auth == null || !auth.isAuthenticated()) {
       response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
@@ -70,6 +73,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     // Bypass permission check for super admin
     if ("sa@gmail.com".equals(email)) {
+      filterChain.doFilter(request, response);
+      return;
+    }
+
+    if (isAuthenticatedPublic) {
       filterChain.doFilter(request, response);
       return;
     }
