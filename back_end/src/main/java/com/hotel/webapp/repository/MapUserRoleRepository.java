@@ -15,13 +15,12 @@ public interface MapUserRoleRepository extends BaseRepository<MapUserRoles, Inte
   Optional<MapUserRoles> findByRoleIdAndUserId(int roleId, int userId);
 
   //  find all
-  List<MapUserRoles> findAllByUserId(int userId);
+  List<MapUserRoles> findAllByUserIdAndDeletedAtIsNull(int userId);
 
   List<MapUserRoles> findAllByRoleId(int roleId);
 
   List<MapUserRoles> findAllByUserIdInAndDeletedAtIsNull(Collection<Integer> userId);
 
-  List<Integer> findAllByUserIdAndDeletedAtIsNull(int userId);
 
   // find role ids
   List<Integer> findRoleIdsByUserIdAndDeletedAtIsNull(Integer userId);

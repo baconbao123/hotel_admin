@@ -4,5 +4,4 @@ import com.hotel.webapp.base.BaseRepository;
 import com.hotel.webapp.entity.HotelPolicy;
 
 public interface HotelPolicyRepository extends BaseRepository<HotelPolicy, Integer> {
-  boolean existsByIdAndDeletedAtIsNull(Integer id);
 }

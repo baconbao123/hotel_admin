@@ -6,6 +6,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import $axios from "@/axios";
 import { Checkbox } from "antd";
+import { useResourceActions } from "@/hooks/useCommonData";
 
 interface Resource {
   id: number;
@@ -42,26 +43,32 @@ export default function PermissionForm({
     return "EDIT PERMISSION";
   };
 
-  const footer = (
-    <div className="flex justify-end gap-2">
-      <Button
-        label="Close"
-        onClick={onClose}
-        className="p-button-text"
-        disabled={submitting}
-      />
-      <Button
-        label="Save"
-        type="submit"
-        form="permission-form"
-        className="p-button-text"
-        loading={submitting}
-      />
-    </div>
-  );
+  const {
+    resourceActions,
+    loading: resourceLoading,
+    error: resourceError,
+  } = useResourceActions();
 
-  const submitData = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    if (!resourceLoading && resourceActions) {
+      setActionData(resourceActions);
+
+      const uniqueResources: any = [
+        ...new Map(
+          resourceActions.map((item: Resource) => [
+            item.resourceId,
+            {
+              resourceId: item.resourceId,
+              resourceName: item.resourceName,
+            },
+          ])
+        ).values(),
+      ];
+      setResourceData(uniqueResources);
+    }
+  }, [resourceActions, resourceLoading]);
+
+  const submit = async () => {
     setSubmitting(true);
 
     const mapResourceActionIds: number[] = [];
@@ -121,32 +128,7 @@ export default function PermissionForm({
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await $axios("/permission/resource-actions");
-        const data: Resource[] = response.data.result || [];
-        const uniqueResources = Array.from(
-          new Map(data.map((item) => [item.resourceId, item])).values()
-        );
-        setResourceData(uniqueResources);
-        setActionData(data);
-      } catch (error) {
-        toast.current?.show({
-          severity: "error",
-          summary: "Error",
-          detail: "Failed to load resources or actions",
-          life: 3000,
-        });
-      }
-    };
-    fetchData();
-  }, []);
-
-  useEffect(() => {
     if (id && open && permissionData && actionData.length > 0) {
-      console.log("permissionData in PermissionForm:", permissionData); // Debug
-      console.log("actionData in PermissionForm:", actionData); // Debug
-
       const newSelectedActions: { [key: number]: number[] } = {};
 
       if (permissionData && permissionData.roleRes) {
@@ -173,20 +155,11 @@ export default function PermissionForm({
                   );
                 }
               } else {
-                console.warn(
-                  `No matching action found for resourceId: ${perm.resourceId}, actionId: ${perm.actionId}`
-                );
               }
             });
           } else {
-            console.warn("No permissions found for role:", role);
           }
         });
-
-        console.log(
-          "newSelectedActions in PermissionForm:",
-          newSelectedActions
-        ); // Debug
         setSelectedActions(newSelectedActions);
       } else {
         toast.current?.show({
@@ -240,82 +213,99 @@ export default function PermissionForm({
         visible={open}
         onHide={onClose}
         header={getHeader()}
-        footer={footer}
+        footer={() => {
+          return (
+            <div className="flex justify-center gap-2">
+              <Button
+                label="Close"
+                onClick={onClose}
+                severity="secondary"
+                outlined
+                disabled={submitting}
+                style={{ padding: "8px 40px" }}
+              />
+              <Button
+                label="Save"
+                onClick={submit}
+                severity="success"
+                disabled={submitting}
+                loading={submitting}
+                style={{ padding: "8px 40px" }}
+              />
+            </div>
+          );
+        }}
         style={{ width: "50%" }}
         modal
         className="p-fluid"
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
       >
-        <form id="permission-form" onSubmit={submitData}>
-          <DataTable value={resourceData} className="mt-4">
-            <Column
-              field="resourceName"
-              header="Resource"
-              body={(rowData) => rowData.resourceName}
-            />
-            <Column
-              header="Action"
-              body={(rowData) => (
-                <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-                  {actionData
-                    .filter(
-                      (action) => action.resourceId === rowData.resourceId
-                    )
-                    .map((action) => (
-                      <div
-                        key={action.id}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "5px",
-                        }}
+        <DataTable value={resourceData} className="mt-4 p-4">
+          <Column
+            field="resourceName"
+            header="Resource"
+            body={(rowData) => rowData.resourceName}
+          />
+          <Column
+            header="Action"
+            body={(rowData) => (
+              <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+                {actionData
+                  .filter((action) => action.resourceId === rowData.resourceId)
+                  .map((action) => (
+                    <div
+                      key={action.id}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "5px",
+                      }}
+                    >
+                      <Checkbox
+                        id={`action-${rowData.id}-${action.id}`}
+                        checked={(
+                          selectedActions[rowData.resourceId] || []
+                        ).includes(action.actionId)}
+                        onChange={(e) =>
+                          onActionChange(
+                            rowData.resourceId,
+                            action.actionId,
+                            e.target.checked
+                          )
+                        }
+                      />
+                      <label
+                        htmlFor={`action-${rowData.id}-${action.id}`}
+                        className="p-checkbox-label"
                       >
-                        <Checkbox
-                          id={`action-${rowData.id}-${action.id}`}
-                          checked={(
-                            selectedActions[rowData.resourceId] || []
-                          ).includes(action.actionId)}
-                          onChange={(e) =>
-                            onActionChange(
-                              rowData.resourceId,
-                              action.actionId,
-                              e.target.checked
-                            )
-                          }
-                        />
-                        <label
-                          htmlFor={`action-${rowData.id}-${action.id}`}
-                          className="p-checkbox-label"
-                        >
-                          {action.actionName}
-                        </label>
-                      </div>
-                    ))}
-                </div>
-              )}
-            />
-            <Column
-              header="All"
-              body={(rowData) => {
-                const resourceId = rowData.resourceId;
-                const allActionIds = actionData
-                  .filter((action) => action.resourceId === resourceId)
-                  .map((action) => action.actionId);
-                const isAllChecked =
-                  allActionIds.length > 0 &&
-                  allActionIds.every((actionId) =>
-                    (selectedActions[resourceId] || []).includes(actionId)
-                  );
-                return (
-                  <Checkbox
-                    checked={isAllChecked}
-                    onChange={(e) => onAllChange(resourceId, e.target.checked)}
-                  />
+                        {action.actionName}
+                      </label>
+                    </div>
+                  ))}
+              </div>
+            )}
+          />
+          <Column
+            header="All"
+            body={(rowData) => {
+              const resourceId = rowData.resourceId;
+              const allActionIds = actionData
+                .filter((action) => action.resourceId === resourceId)
+                .map((action) => action.actionId);
+              const isAllChecked =
+                allActionIds.length > 0 &&
+                allActionIds.every((actionId) =>
+                  (selectedActions[resourceId] || []).includes(actionId)
                 );
-              }}
-            />
-          </DataTable>
-        </form>
+              return (
+                <Checkbox
+                  checked={isAllChecked}
+                  onChange={(e) => onAllChange(resourceId, e.target.checked)}
+                />
+              );
+            }}
+          />
+        </DataTable>
       </Dialog>
     </div>
   );

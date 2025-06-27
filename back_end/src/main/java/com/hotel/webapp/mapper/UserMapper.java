@@ -12,12 +12,10 @@ public interface UserMapper extends BaseMapper<User, UserDTO> {
   @Override
   @Mapping(target = "avatarUrl", ignore = true)
   @Mapping(target = "password", ignore = true)
-  @Mapping(target = "addressId", ignore = true)
   User toCreate(UserDTO userDTO);
 
   @Override
   @Mapping(target = "avatarUrl", ignore = true)
   @Mapping(target = "password", ignore = true)
-  @Mapping(target = "addressId", ignore = true)
   void toUpdate(@MappingTarget User user, UserDTO userUpdate);
 }

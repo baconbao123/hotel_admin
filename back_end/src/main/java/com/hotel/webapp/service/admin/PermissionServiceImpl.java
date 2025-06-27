@@ -4,11 +4,14 @@ import com.hotel.webapp.base.BaseServiceImpl;
 import com.hotel.webapp.dto.request.MappingDTO;
 import com.hotel.webapp.dto.response.PermissionRes;
 import com.hotel.webapp.entity.Permissions;
+import com.hotel.webapp.entity.Resources;
+import com.hotel.webapp.entity.User;
 import com.hotel.webapp.exception.AppException;
 import com.hotel.webapp.exception.ErrorCode;
 import com.hotel.webapp.repository.MapResourceActionRepository;
 import com.hotel.webapp.repository.MapUserRoleRepository;
 import com.hotel.webapp.repository.PermissionsRepository;
+import com.hotel.webapp.repository.UserRepository;
 import com.hotel.webapp.service.admin.interfaces.AuthService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -26,17 +29,20 @@ import java.util.*;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer, MappingDTO, PermissionsRepository> {
   MapResourceActionRepository mapResourceActionRepository;
+  UserRepository userRepository;
   MapUserRoleRepository mapUserRoleRepository;
 
   public PermissionServiceImpl(
         AuthService authService,
         PermissionsRepository repository,
         MapResourceActionRepository mapResourceActionRepository,
-        MapUserRoleRepository mapUserRoleRepository
+        MapUserRoleRepository mapUserRoleRepository,
+        UserRepository userRepository
   ) {
     super(repository, authService);
     this.mapResourceActionRepository = mapResourceActionRepository;
     this.mapUserRoleRepository = mapUserRoleRepository;
+    this.userRepository = userRepository;
   }
 
   public List<Permissions> updatePermission(MappingDTO updateDto) {
@@ -217,6 +223,15 @@ public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer,
                         (String) result[4]   // a.name -> actionName
                   ))
                   .toList();
+  }
+
+  public List<Resources> getUserResource() {
+    Integer userId = getAuthId();
+    User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
+    if (user.getEmail().equals("sa@gmail.com")) {
+      return repository.getResources();
+    }
+    return repository.getResourceByUserId(userId);
   }
 
   @Override

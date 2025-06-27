@@ -34,12 +34,16 @@ const LoginPage = () => {
     }
   }, [navigate]);
 
+  
+
   const handleSubmit = async (e: any): Promise<void> => {
     e.preventDefault();
     setEmailError("");
     setPasswordError("");
     setLoginError("");
     setServerError(false);
+
+    
 
    
     if (!email) {
@@ -175,38 +179,6 @@ const LoginPage = () => {
               <p className="text-sm text-red-600">{loginError}</p>
             </div>
           )}
-
-          {/* <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-gray-500">
-                or sign in with other accounts?
-              </span>
-            </div>
-          </div>
-
-          <div className="flex justify-center space-x-4">
-            <button
-              type="button"
-              className="flex items-center justify-center px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              <img
-                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-                alt="Google"
-                className="w-5 h-5 mr-2"
-              />
-              <span className="text-sm font-medium text-gray-700">Sign in with Google</span>
-            </button>
-          </div>
-
-          <div className="text-center text-sm text-gray-600">
-            Don't have an account?{" "}
-            <a href="/signup" className="text-blue-600 hover:text-blue-800">
-              Click here to sign up.
-            </a>
-          </div> */}
         </form>
       </div>
     </div>

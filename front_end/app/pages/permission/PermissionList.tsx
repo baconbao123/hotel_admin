@@ -144,8 +144,8 @@ export default function PermissionList() {
                     <InputText
                       placeholder="Name"
                       className="w-full"
-                      value={filters.name || ""}
-                      onChange={(e) => handleSearch("name", e.target.value)}
+                      value={filters.roleName || ""}
+                      onChange={(e) => handleSearch("roleName", e.target.value)}
                     />
                   </>
                 ) : (
@@ -260,9 +260,9 @@ export default function PermissionList() {
             />
             <Column
               header="Actions"
-              style={{ width: "15%" }}
+              className="w-60"
               body={(rowData) => (
-                <div className="flex gap-2">
+                <div className="flex gap-2 justify-center">
                   <Button
                     icon="pi pi-eye"
                     rounded

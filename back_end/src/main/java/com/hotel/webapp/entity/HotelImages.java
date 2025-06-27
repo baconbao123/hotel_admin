@@ -22,7 +22,6 @@ public class HotelImages {
   Integer id;
   String name;
   Integer hotelId;
-  String type;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;
   Integer createdBy;

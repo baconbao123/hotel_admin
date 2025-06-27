@@ -5,6 +5,7 @@ import com.hotel.webapp.dto.request.IntrospectRequest;
 import com.hotel.webapp.dto.request.TokenRefreshReq;
 import com.hotel.webapp.dto.response.AuthResponse;
 import com.hotel.webapp.dto.response.IntrospectRes;
+import com.hotel.webapp.entity.Role;
 import com.hotel.webapp.entity.User;
 import com.hotel.webapp.exception.AppException;
 import com.hotel.webapp.exception.ErrorCode;
@@ -142,13 +143,14 @@ public class AuthServiceImpl implements AuthService {
   }
 
   private String generateToken(User user) {
-    var userRoles = userRoleRepository.findAllByUserId(user.getId());
+    var userRoles = userRoleRepository.findAllByUserIdAndDeletedAtIsNull(user.getId());
 
     List<String> roles = userRoles.stream()
-                                  .map(ur -> roleRepository.findById(ur.getRoleId())
-                                                           .orElseThrow(
-                                                                 () -> new AppException(ErrorCode.NOT_FOUND, "Role"))
-                                                           .getName()).toList();
+                                  .map(ur -> roleRepository.findRolesByDeletedAtIsNull(ur.getRoleId())
+                                                           .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
+                                                                 "Role not found")))
+                                  .map(Role::getName)
+                                  .toList();
 
     String roleString = String.join(",", roles);
     JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);

@@ -13,8 +13,6 @@ import java.util.Optional;
 
 @Repository
 public interface FacilityTypeRepository extends BaseRepository<FacilityType, Integer> {
-//  boolean existsByIdAndDeletedAtIsNull(Integer id);
-
   // seeder
   Optional<FacilityType> findByNameAndDeletedAtIsNull(String name);
 
