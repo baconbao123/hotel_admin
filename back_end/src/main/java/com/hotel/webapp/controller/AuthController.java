@@ -8,11 +8,14 @@ import com.hotel.webapp.service.admin.UserServiceImpl;
 import com.hotel.webapp.service.admin.interfaces.AuthService;
 import com.hotel.webapp.service.system.EmailService;
 import com.hotel.webapp.service.system.OtpService;
+import com.nimbusds.jose.JOSEException;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.web.bind.annotation.*;
+
+import java.text.ParseException;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -56,6 +59,40 @@ public class AuthController {
 
     return ApiResponse.builder()
                       .message("OTP Code has been sent to your email")
+                      .build();
+
+  }
+
+  @PostMapping("/change-password-profile")
+  public ApiResponse<Object> changeProfilePassword(@RequestParam String email,
+        @RequestParam("oldPassword") String oldPassword) {
+    if (!userService.matchPassword(email, oldPassword)) {
+      return ApiResponse.builder()
+                        .code(404)
+                        .message("Password don't match")
+                        .build();
+    }
+
+    String token = authService.generatePasswordResetToken(email);
+
+    String subject = "Reset Password";
+    String text = "http://localhost:5173/reset-password?token=" + token;
+    emailService.sendEmail(email, subject, text);
+
+    return ApiResponse.builder()
+                      .message("Reset password has been sent to your email")
+                      .build();
+
+  }
+
+  @PostMapping("/reset-password-profile")
+  public ApiResponse<Object> resetPassword(@RequestParam("token") String token,
+        @RequestParam("newPassword") String newPassword) throws ParseException, JOSEException {
+
+    authService.resetPassword(token, newPassword);
+
+    return ApiResponse.builder()
+                      .message("Successfully reset your password")
                       .build();
 
   }

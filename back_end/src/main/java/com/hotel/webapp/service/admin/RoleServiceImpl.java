@@ -74,34 +74,16 @@ public class RoleServiceImpl extends BaseServiceImpl<Role, Integer, RoleDTO, Rol
 
   @Override
   protected void beforeDelete(Integer id) {
-    updateMapURIfRoleDelete(id, getAuthId());
+    updatePermissionIfRoleDelete(id);
   }
 
-  private void updateMapURIfRoleDelete(int roleId, int authId) {
-    List<MapUserRoles> mapUserRolesList = mapUserRoleRepository.findAllByRoleId(roleId);
+  private void updatePermissionIfRoleDelete(Integer id) {
+    List<Permissions> crrRoleInPermission = permissionsRepository.findPermissionsByRoleId(id);
 
-    List<Integer> mapURIds = mapUserRolesList.stream()
-                                             .map(MapUserRoles::getId)
-                                             .toList();
-
-    updatePermissionIfUserDelete(mapURIds, authId);
-
-    for (MapUserRoles mapUserRoles : mapUserRolesList) {
-      mapUserRoles.setDeletedAt(LocalDateTime.now());
-      mapUserRoles.setUpdatedBy(authId);
-      mapUserRoleRepository.save(mapUserRoles);
-    }
-  }
-
-  private void updatePermissionIfUserDelete(Collection<Integer> mapUserRoleId, int authId) {
-//    List<Permissions> findAllPermissions = permissionsRepository.findAllByMapURId(mapUserRoleId);
-
-    List<Permissions> findAllPermissions = null;
-
-    for (Permissions permission : findAllPermissions) {
-      permission.setDeletedAt(LocalDateTime.now());
-      permission.setUpdatedBy(authId);
-      permissionsRepository.save(permission);
+    for(Permissions crrRole : crrRoleInPermission){
+      crrRole.setDeletedAt(LocalDateTime.now());
+      crrRole.setUpdatedBy(getAuthId());
+      permissionsRepository.save(crrRole);
     }
   }
 

@@ -1,31 +1,81 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   UserCircleIcon,
   EnvelopeIcon,
   ShieldCheckIcon,
+  PhoneIcon,
 } from "@heroicons/react/24/outline";
 import EditProfile from "./EditProfile";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
+import { Image } from "antd";
+import noImg from "@/asset/images/no-img.png";
+import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
+import { InputText } from "primereact/inputtext";
+import $axios from "@/axios";
 
 export default function ProfilePage() {
   const [editing, setEditing] = useState(false);
+  const [viewEditPassword, setViewEditPassword] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [crrPasswrod, setCrrPassword] = useState("");
+  const [mess, setMess] = useState("");
 
-  // Nếu đang trong chế độ chỉnh sửa, hiển thị EditProfile
+  const user = useSelector((state: RootState) => state.userData);
+
   if (editing) {
     return <EditProfile onBack={() => setEditing(false)} />;
   }
+
+  const handleChangePass = async () => {
+    try {
+      const res = await $axios.post(
+        `/auth/change-password-profile?email=${user.email}&oldPassword=${crrPasswrod}`
+      );
+
+      if (res.data.message) {
+        setMess(res.data.message);
+      }
+    } catch {}
+  };
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-10">
       <div className="bg-white shadow-md rounded-xl p-8">
         <div className="flex items-center space-x-6 mb-6">
-          <div className="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center">
-            <UserCircleIcon className="w-16 h-16 text-gray-400" />
-          </div>
+          {user.avatar && user.avatar.trim() !== "" ? (
+            <Image
+              width={50}
+              wrapperStyle={{ display: "none" }}
+              preview={{
+                visible: previewOpen,
+                onVisibleChange: (visible) => setPreviewOpen(visible),
+                afterOpenChange: (visible) => !visible,
+              }}
+              src={`${
+                import.meta.env.VITE_REACT_APP_BACK_END_LINK_UPLOAD_USER
+              }/${user.avatar}`}
+            />
+          ) : (
+            <Image
+              width={50}
+              preview={{
+                visible: previewOpen,
+                onVisibleChange: (visible) => setPreviewOpen(visible),
+                afterOpenChange: (visible) => !visible,
+              }}
+              src={noImg}
+            />
+          )}
+
           <div>
             <h2 className="text-2xl font-semibold text-gray-800">
-              Austin Robertson
+              {user.fullname}
             </h2>
-            <p className="text-sm text-gray-500">Administrator</p>
+            {user.role.map((r: any) => (
+              <p className="text-sm text-gray-500">{r.roleName}</p>
+            ))}
           </div>
         </div>
 
@@ -34,39 +84,84 @@ export default function ProfilePage() {
             <p className="text-sm text-gray-500">Email</p>
             <div className="flex items-center gap-2">
               <EnvelopeIcon className="w-5 h-5 text-gray-400" />
-              <p className="font-medium text-gray-800">administrator@hotel.com</p>
+              <p className="font-medium text-gray-800">{user.email}</p>
             </div>
           </div>
 
           <div className="space-y-1">
             <p className="text-sm text-gray-500">Role</p>
+            {user.role.map((r: any) => (
+              <div className="flex items-center gap-2">
+                <ShieldCheckIcon className="w-5 h-5 text-gray-400" />
+                <p className="font-medium text-gray-800">{r.roleName}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="space-y-1">
+            <p className="text-sm text-gray-500">Phone Number</p>
             <div className="flex items-center gap-2">
-              <ShieldCheckIcon className="w-5 h-5 text-gray-400" />
-              <p className="font-medium text-gray-800">Administrator</p>
+              <PhoneIcon className="w-5 h-5 text-gray-400" />
+              <p className="font-medium text-gray-800">{user.phoneNumber}</p>
             </div>
           </div>
-
-          <div className="space-y-1">
-            <p className="text-sm text-gray-500">Account Created</p>
-            <p className="font-medium text-gray-800">January 1, 2024</p>
-          </div>
-
-          <div className="space-y-1">
-            <p className="text-sm text-gray-500">Status</p>
-            <p className="inline-block px-3 py-1 text-sm bg-green-100 text-green-700 rounded-full font-medium">
-              Active
-            </p>
-          </div>
         </div>
 
-        <div className="mt-8 text-right">
-          <button
-            className="px-5 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-medium"
-            onClick={() => setEditing(true)}
-          >
+        <div className="mt-8  flex gap-2">
+          <Button severity="success" onClick={() => setViewEditPassword(true)}>
+            Password
+          </Button>
+          <Button severity="info" onClick={() => setEditing(true)}>
             Edit Profile
-          </button>
+          </Button>
         </div>
+
+        {viewEditPassword && (
+          <Dialog
+            header="Confirm Password"
+            visible={viewEditPassword}
+            style={{ width: "20vw" }}
+            footer={
+              <div className="flex justify-center gap-2">
+                <Button
+                  label="Close"
+                  onClick={() => setViewEditPassword(false)}
+                  severity="secondary"
+                  outlined
+                  className="px-6 py-2 rounded-lg"
+                />
+                <Button
+                  label="Submit"
+                  onClick={handleChangePass}
+                  severity="success"
+                  className="px-6 py-2 rounded-lg"
+                />
+              </div>
+            }
+            onHide={() => {
+              if (!viewEditPassword) return;
+              setViewEditPassword(false);
+            }}
+          >
+            <div>
+              <label
+                htmlFor="status"
+                className="text-sm font-medium text-gray-700 flex gap-5"
+              >
+                Current Password
+                <span className="text-red-500">*</span>
+              </label>
+              <InputText
+                id="confirmPassword"
+                value={crrPasswrod}
+                onChange={(e) => setCrrPassword(e.target.value)}
+                type="password"
+                className="w-95"
+              />
+            </div>
+            <div style={{color: "green"}}>{mess}</div>
+          </Dialog>
+        )}
       </div>
     </div>
   );

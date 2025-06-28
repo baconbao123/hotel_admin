@@ -56,9 +56,16 @@ public class PermissionController {
   }
 
   @GetMapping("/resources")
-  public ApiResponse<List<Resources>> getResourceByUser() {
-    return ApiResponse.<List<Resources>>builder()
-                      .result(permissionService.getUserResource())
-                      .build();
-  }
+    public ApiResponse<List<PermissionRes.ResourceActions>> getResourceByUser() {
+      return ApiResponse.<List<PermissionRes.ResourceActions>>builder()
+                        .result(permissionService.getUserResource())
+                        .build();
+    }
+
+//  @GetMapping("/resources")
+//  public ApiResponse<List<Resources>> getResourceByUser() {
+//    return ApiResponse.<List<Resources>>builder()
+//                      .result(permissionService.getUserResource())
+//                      .build();
+//  }
 }

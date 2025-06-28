@@ -74,20 +74,28 @@ public class UserController {
                       .build();
   }
 
-  @GetMapping("/profile")
-  @Permission(name = "view")
-  public ApiResponse<User> getProfile(@RequestParam("id") Integer id) {
-    return ApiResponse.<User>builder()
-                      .result(userService.findById(id))
-                      .build();
-  }
+//  @GetMapping("/profile")
+//  public ApiResponse<User> getProfile(@RequestParam("id") Integer id) {
+//    return ApiResponse.<User>builder()
+//                      .result(userService.findById(id))
+//                      .build();
+//  }
 
-  @PutMapping("/profile")
-  @Permission(name = "view")
+  @PutMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ApiResponse<User> updateProfile(@RequestParam("id") Integer id,
         @Valid @ModelAttribute UserDTO.ProfileDTO profileDTO) throws IOException {
     return ApiResponse.<User>builder()
                       .result(userService.updateProfile(id, profileDTO))
+                      .build();
+  }
+
+  @PutMapping("/change-password")
+  @Permission(name = "change_password")
+  public ApiResponse<Object> changePassword(@RequestParam("email") String email,
+        @RequestParam("password") String newPassword) {
+    userService.changePassword(email, newPassword);
+    return ApiResponse.builder()
+                      .result("Change password successfully")
                       .build();
   }
 

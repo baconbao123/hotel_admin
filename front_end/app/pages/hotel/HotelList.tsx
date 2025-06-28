@@ -18,6 +18,7 @@ import noImg from "@/asset/images/no-img.png";
 import UserForm from "../user/UserForm";
 import HotelForm from "./HotelForm";
 import HotelDetail from "./HotelDetail";
+import { useSelector } from "react-redux";
 
 export default function RoleList() {
   const [selectedId, setSelectedId] = useState<string>();
@@ -26,6 +27,10 @@ export default function RoleList() {
   );
   const [mounted, setMounted] = useState(false);
   const toast = useRef<Toast>(null);
+
+  const permissions = useSelector(
+    (state: any) => state.permissions.permissions
+  );
 
   const {
     data,
@@ -97,6 +102,11 @@ export default function RoleList() {
       />
     </div>
   );
+
+  const hasPermission = (actionName: string) => {
+    const resource = permissions.find((p: any) => p.resourceName === "Role");
+    return resource ? resource.actionNames.includes(actionName) : false;
+  };
 
   return (
     <div className="main-container">
@@ -229,43 +239,49 @@ export default function RoleList() {
               frozen={true}
               header={() => <div className="flex justify-center">Actions</div>}
               className="w-70"
-              body={(row: any) => (
+              body={(row) => (
                 <div className="flex gap-2 justify-center">
-                  <Button
-                    icon="pi pi-eye"
-                    rounded
-                    text
-                    severity="info"
-                    onClick={() => {
-                      setSelectedId(String(row.id));
-                      setFormMode("view");
-                      setOpenFormDetail(true);
-                    }}
-                    tooltip="View"
-                    tooltipOptions={{ position: "top" }}
-                  />
-                  <Button
-                    icon="pi pi-pencil"
-                    rounded
-                    text
-                    severity="success"
-                    onClick={() => {
-                      setSelectedId(String(row.id));
-                      setFormMode("edit");
-                      setOpenForm(true);
-                    }}
-                    tooltip="Edit"
-                    tooltipOptions={{ position: "top" }}
-                  />
-                  <Button
-                    icon="pi pi-trash"
-                    rounded
-                    text
-                    severity="danger"
-                    onClick={() => handleDelete(String(row.id))}
-                    tooltip="Delete"
-                    tooltipOptions={{ position: "top" }}
-                  />
+                  {hasPermission("view") && (
+                    <Button
+                      icon="pi pi-eye"
+                      rounded
+                      text
+                      severity="info"
+                      onClick={() => {
+                        setSelectedId(String(row.id));
+                        setFormMode("view");
+                        setOpenFormDetail(true);
+                      }}
+                      tooltip="View"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  )}
+                  {hasPermission("update") && (
+                    <Button
+                      icon="pi pi-pencil"
+                      rounded
+                      text
+                      severity="success"
+                      onClick={() => {
+                        setSelectedId(String(row.id));
+                        setFormMode("edit");
+                        setOpenForm(true);
+                      }}
+                      tooltip="Edit"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  )}
+                  {hasPermission("delete") && (
+                    <Button
+                      icon="pi pi-trash"
+                      rounded
+                      text
+                      severity="danger"
+                      onClick={() => handleDelete(String(row.id))}
+                      tooltip="Delete"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  )}
                 </div>
               )}
             />
