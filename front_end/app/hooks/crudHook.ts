@@ -7,7 +7,9 @@ interface ErrorResponse {
   message: string;
 }
 
-export default function useCrud(baseUrl: string) {
+export default function useCrud(
+  baseUrl: string
+) {
   const [data, setData] = useState<any[]>([]);
   const [tableLoading, setTableLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
@@ -143,7 +145,7 @@ export default function useCrud(baseUrl: string) {
           ? { headers: { "Content-Type": "multipart/form-data" } }
           : { headers: { "Content-Type": "application/json" } };
       const res = await $axios.post(baseUrl, item, config);
-      await loadData(filters, sortField, sortOrder, true); // Tải lại table
+      await loadData(filters, sortField, sortOrder, true);
       setError(null);
       return res.data;
     } catch (err: any) {
@@ -162,7 +164,7 @@ export default function useCrud(baseUrl: string) {
           ? { headers: { "Content-Type": "multipart/form-data" } }
           : { headers: { "Content-Type": "application/json" } };
       const res = await $axios.put(`${baseUrl}/${id}`, item, config);
-      await loadData(filters, sortField, sortOrder, true); // Tải lại table
+      await loadData(filters, sortField, sortOrder, true);
       setError(null);
       return res.data;
     } catch (err: any) {

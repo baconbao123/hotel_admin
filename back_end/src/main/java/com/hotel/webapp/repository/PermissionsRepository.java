@@ -2,6 +2,7 @@ package com.hotel.webapp.repository;
 
 import com.hotel.webapp.base.BaseRepository;
 import com.hotel.webapp.entity.Permissions;
+import com.hotel.webapp.entity.Resources;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -60,16 +61,40 @@ public interface PermissionsRepository extends BaseRepository<Permissions, Integ
   // check permission
   @Query("select count(p) > 0 from Permissions p " +
         "join Role r on p.roleId = r.id " +
-        "join MapResourcesAction mra on p.mapResourcesActionId = mra.id " +
-        "join MapUserRoles mur on r.id = mur.id " +
+        "join MapResourcesAction mra on p.mapResourcesActionId = mra.id and mra.deletedAt is null " +
+        "join MapUserRoles mur on r.id = mur.roleId and mur.deletedAt is null " +
         "join User u on mur.userId = u.id " +
         "join Resources res on mra.resourceId = res.id " +
         "join Actions a on mra.actionId = a.id " +
-        "where u.id= :userId and res.name = :resource and a.name = :action")
+        "where u.id = :userId and res.name = :resource and a.name = :action and p.deletedAt is null")
   boolean checkPermission(
         @Param("userId") Integer userId,
         @Param("resource") String resource,
         @Param("action") String action);
 
+  @Query("select re.name, a.name from Resources re " +
+        "join MapUserRoles mur on mur.userId = :userId and mur.deletedAt is null " +
+        "join Role r on mur.roleId = r.id " +
+        "join MapResourcesAction mra on mra.resourceId = re.id and mra.deletedAt is null " +
+        "join Actions a on mra.actionId = a.id and a.deletedAt is null " +
+        "join Permissions p on p.mapResourcesActionId = mra.id and p.roleId = r.id and p.deletedAt is null ")
+  List<Object[]> getResourceByUserId(Integer userId);
 
+  @Query("select re.name, a.name from Resources re " +
+        "join MapResourcesAction mra on mra.resourceId = re.id and mra.deletedAt is null " +
+        "join Actions a on a.id = mra.actionId")
+  List<Object[]> getResources();
+
+
+//  @Query("select re from Resources re " +
+//        "join MapUserRoles mur on mur.userId = :userId and mur.deletedAt is null " +
+//        "join Role r on mur.roleId = r.id " +
+//        "join MapResourcesAction mra on mra.resourceId = re.id and mra.deletedAt is null " +
+//        "join Permissions p on p.mapResourcesActionId = mra.id and p.roleId = r.id and p.deletedAt is null ")
+//  List<Resources> getResourceByUserId(Integer userId);
+//
+//  @Query("select re from Resources re")
+//  List<Resources> getResources();
+
+  List<Permissions> findPermissionsByRoleId(Integer roleId);
 }

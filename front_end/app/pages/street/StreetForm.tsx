@@ -5,6 +5,7 @@ import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { Dropdown } from "primereact/dropdown";
 import $axios from "@/axios";
+import { useProvinces } from "@/hooks/useCommonData";
 
 interface Props {
   id?: string;
@@ -37,7 +38,6 @@ export default function StreetForm({
   const [curb, setCurb] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [streetData, setStreetData] = useState<any>(null);
-  const [provinceData, setProvinceData] = useState<LocalResponse[]>([]);
   const [districtData, setDistrictData] = useState<LocalResponse[]>([]);
   const [wardData, setWardData] = useState<LocalResponse[]>([]);
   const [selectedProvince, setSelectedProvince] =
@@ -49,23 +49,7 @@ export default function StreetForm({
   const toast = useRef<Toast>(null);
   const header = mode === "edit" ? "EDIT STREET" : "ADD NEW STREET";
 
-  // Fetch provinces on component mount
-  useEffect(() => {
-    const fetchProvinces = async () => {
-      try {
-        const res = await $axios.get("/local/get-province");
-        setProvinceData(res.data.result || []);
-      } catch (error: any) {
-        toast.current?.show({
-          severity: "error",
-          summary: "Error",
-          detail: error.response?.data?.message || "Failed to load provinces",
-          life: 3000,
-        });
-      }
-    };
-    fetchProvinces();
-  }, []);
+  const { provinces } = useProvinces();
 
   // Fetch districts when province is selected
   useEffect(() => {
@@ -150,7 +134,7 @@ export default function StreetForm({
           setCurb(entity.curbWith || "");
           setWidth(entity.width || "");
 
-          if (entity.wardCode && provinceData.length > 0) {
+          if (entity.wardCode) {
             try {
               const wardRes = await $axios.get(
                 `/local/get-ward-info?wardCode=${entity.wardCode}`
@@ -166,7 +150,7 @@ export default function StreetForm({
                 }));
 
                 const province =
-                  provinceData.find((p) => p.code === provinceCode) || null;
+                  provinces.find((p) => p.code === provinceCode) || null;
                 setSelectedProvince(province);
 
                 if (province) {
@@ -220,7 +204,7 @@ export default function StreetForm({
       setDistrictData([]);
       setWardData([]);
     }
-  }, [id, open, mode, loadDataById, provinceData]);
+  }, [id, open, mode, loadDataById]);
 
   const submit = async () => {
     setSubmitting(true);
@@ -307,109 +291,187 @@ export default function StreetForm({
         className="p-fluid"
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          <div>
-            <label htmlFor="street">
-              Name <span className="text-red-500">*</span>
-            </label>
-            <InputText
-              id="street"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              disabled={mode === "view" || submitting}
-            />
-            {getError("name") && (
-              <small className="p-error text-red-500">{getError("name")}</small>
-            )}
-          </div>
+        <div className="p-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Name */}
+            <div>
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Name <span className="text-red-500">*</span>
+              </label>
+              <InputText
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={mode === "view" || submitting}
+                placeholder="Enter name"
+                className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                  getError("name") ? "p-invalid" : ""
+                }`}
+                tooltip="Enter the name"
+                tooltipOptions={{ position: "top" }}
+              />
+              {getError("name") && (
+                <small className="text-red-600 text-xs mt-1 block">
+                  {getError("name")}
+                </small>
+              )}
+            </div>
 
-          <div>
-            <label htmlFor="province">
-              Province <span className="text-red-500">*</span>
-            </label>
-            <Dropdown
-              id="province"
-              value={selectedProvince}
-              onChange={(e) => setSelectedProvince(e.value)}
-              options={provinceData}
-              optionLabel="name"
-              placeholder="Select a Province"
-              className="w-full"
-              disabled={mode === "view" || submitting}
-            />
-            {getError("province") && (
-              <small className="p-error text-red-500">
-                {getError("province")}
-              </small>
-            )}
-          </div>
+            {/* Width */}
+            <div>
+              <label
+                htmlFor="width"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Width
+              </label>
+              <InputText
+                id="width"
+                value={width}
+                onChange={(e) => setWidth(e.target.value)}
+                disabled={mode === "view" || submitting}
+                placeholder="Enter width"
+                className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                  getError("width") ? "p-invalid" : ""
+                }`}
+                tooltip="Enter the width of the entity"
+                tooltipOptions={{ position: "top" }}
+              />
+              {getError("width") && (
+                <small className="text-red-600 text-xs mt-1 block">
+                  {getError("width")}
+                </small>
+              )}
+            </div>
 
-          <div>
-            <label htmlFor="district">
-              District <span className="text-red-500">*</span>
-            </label>
-            <Dropdown
-              id="district"
-              value={selectedDistrict}
-              onChange={(e) => setSelectedDistrict(e.value)}
-              options={districtData}
-              optionLabel="name"
-              placeholder="Select a District"
-              className="w-full"
-              disabled={mode === "view" || submitting || !selectedProvince}
-            />
-            {getError("district") && (
-              <small className="p-error text-red-500">
-                {getError("district")}
-              </small>
-            )}
-          </div>
+            {/* Curb */}
+            <div>
+              <label
+                htmlFor="curb"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
+                Curb
+              </label>
+              <InputText
+                id="curb"
+                value={curb}
+                onChange={(e) => setCurb(e.target.value)}
+                disabled={mode === "view" || submitting}
+                placeholder="Enter curb"
+                className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                  getError("curb") ? "p-invalid" : ""
+                }`}
+                tooltip="Enter the curb"
+                tooltipOptions={{ position: "top" }}
+              />
+              {getError("curb") && (
+                <small className="text-red-600 text-xs mt-1 block">
+                  {getError("curb")}
+                </small>
+              )}
+            </div>
 
-          <div>
-            <label htmlFor="ward">
-              Ward <span className="text-red-500">*</span>
-            </label>
-            <Dropdown
-              id="ward"
-              value={selectedWard}
-              onChange={(e) => setSelectedWard(e.value)}
-              options={wardData}
-              optionLabel="name"
-              placeholder="Select a Ward"
-              className="w-full"
-              disabled={mode === "view" || submitting || !selectedDistrict}
-            />
-            {getError("ward") && (
-              <small className="p-error text-red-500">{getError("ward")}</small>
-            )}
-          </div>
+            {/* Address Information */}
+            <div className="col-span-1 md:col-span-2">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Address Information
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Province */}
+                <div>
+                  <label
+                    htmlFor="province"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Province <span className="text-red-500">*</span>
+                  </label>
+                  <Dropdown
+                    id="province"
+                    value={selectedProvince}
+                    onChange={(e) => setSelectedProvince(e.value)}
+                    options={provinces}
+                    optionLabel="name"
+                    placeholder="Select a Province"
+                    className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                      getError("province") ? "p-invalid" : ""
+                    }`}
+                    disabled={mode === "view" || submitting}
+                    tooltip="Select the province of the location"
+                    tooltipOptions={{ position: "top" }}
+                  />
+                  {getError("province") && (
+                    <small className="text-red-600 text-xs mt-1 block">
+                      {getError("province")}
+                    </small>
+                  )}
+                </div>
 
-          <div>
-            <label htmlFor="width">Width</label>
-            <InputText
-              id="width"
-              value={width}
-              onChange={(e) => setWidth(e.target.value)}
-              disabled={mode === "view" || submitting}
-            />
-            {getError("width") && (
-              <small className="p-error text-red-500">
-                {getError("width")}
-              </small>
-            )}
-          </div>
+                {/* District */}
+                <div>
+                  <label
+                    htmlFor="district"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    District <span className="text-red-500">*</span>
+                  </label>
+                  <Dropdown
+                    id="district"
+                    value={selectedDistrict}
+                    onChange={(e) => setSelectedDistrict(e.value)}
+                    options={districtData}
+                    optionLabel="name"
+                    placeholder="Select a District"
+                    className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                      getError("district") ? "p-invalid" : ""
+                    }`}
+                    disabled={
+                      mode === "view" || submitting || !selectedProvince
+                    }
+                    tooltip="Select the district of the location"
+                    tooltipOptions={{ position: "top" }}
+                  />
+                  {getError("district") && (
+                    <small className="text-red-600 text-xs mt-1 block">
+                      {getError("district")}
+                    </small>
+                  )}
+                </div>
 
-          <div>
-            <label htmlFor="curb">Curb</label>
-            <InputText
-              id="curb"
-              value={curb}
-              onChange={(e) => setCurb(e.target.value)}
-              disabled={mode === "view" || submitting}
-            />
-            {getError("curb") && (
-              <small className="p-error text-red-500">{getError("curb")}</small>
-            )}
+                {/* Ward */}
+                <div>
+                  <label
+                    htmlFor="ward"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Ward <span className="text-red-500">*</span>
+                  </label>
+                  <Dropdown
+                    id="ward"
+                    value={selectedWard}
+                    onChange={(e) => setSelectedWard(e.value)}
+                    options={wardData}
+                    optionLabel="name"
+                    placeholder="Select a Ward"
+                    className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                      getError("ward") ? "p-invalid" : ""
+                    }`}
+                    disabled={
+                      mode === "view" || submitting || !selectedDistrict
+                    }
+                    tooltip="Select the ward of the location"
+                    tooltipOptions={{ position: "top" }}
+                  />
+                  {getError("ward") && (
+                    <small className="text-red-600 text-xs mt-1 block">
+                      {getError("ward")}
+                    </small>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </Dialog>

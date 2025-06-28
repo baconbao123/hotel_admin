@@ -5,6 +5,7 @@ import com.hotel.webapp.dto.request.IntrospectRequest;
 import com.hotel.webapp.dto.request.TokenRefreshReq;
 import com.hotel.webapp.dto.response.AuthResponse;
 import com.hotel.webapp.dto.response.IntrospectRes;
+import com.hotel.webapp.entity.Role;
 import com.hotel.webapp.entity.User;
 import com.hotel.webapp.exception.AppException;
 import com.hotel.webapp.exception.ErrorCode;
@@ -142,13 +143,14 @@ public class AuthServiceImpl implements AuthService {
   }
 
   private String generateToken(User user) {
-    var userRoles = userRoleRepository.findAllByUserId(user.getId());
+    var userRoles = userRoleRepository.findAllByUserIdAndDeletedAtIsNull(user.getId());
 
     List<String> roles = userRoles.stream()
-                                  .map(ur -> roleRepository.findById(ur.getRoleId())
-                                                           .orElseThrow(
-                                                                 () -> new AppException(ErrorCode.NOT_FOUND, "Role"))
-                                                           .getName()).toList();
+                                  .map(ur -> roleRepository.findRolesByDeletedAtIsNull(ur.getRoleId())
+                                                           .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
+                                                                 "Role not found")))
+                                  .map(Role::getName)
+                                  .toList();
 
     String roleString = String.join(",", roles);
     JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
@@ -173,5 +175,40 @@ public class AuthServiceImpl implements AuthService {
       log.error("Cannot create token");
       throw new RuntimeException(e);
     }
+  }
+
+  public String generatePasswordResetToken(String email) {
+    JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
+
+    JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
+          .subject(email)
+          .issuer("Phoebe dev")
+          .issueTime(new Date())
+          .expirationTime(new Date(Instant.now().plus(30, ChronoUnit.MINUTES).toEpochMilli()))
+          .build();
+
+    Payload payload = new Payload(jwtClaimsSet.toJSONObject());
+
+    JWSObject jwsObject = new JWSObject(header, payload);
+
+    try {
+      jwsObject.sign(new MACSigner(SIGNER_KEY.getBytes()));
+      return jwsObject.serialize();
+    } catch (JOSEException e) {
+      log.error("Cannot create token");
+      throw new RuntimeException(e);
+    }
+  }
+
+  public void resetPassword(String token, String newPassword) throws ParseException, JOSEException {
+    SignedJWT verify = verifyToken(token);
+
+    String email = verify.getJWTClaimsSet().getSubject();
+
+    User user = userRepository.findByEmail(email)
+                              .orElseThrow(() -> new RuntimeException("User not found"));
+
+    user.setPassword(passwordEncoder.encode(newPassword));
+    userRepository.save(user);
   }
 }

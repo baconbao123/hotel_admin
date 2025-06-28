@@ -43,4 +43,13 @@ public class PermissionRes {
     Integer actionId;
     String actionName;
   }
+
+  @Getter
+  @Setter
+  @AllArgsConstructor
+  @FieldDefaults(level = AccessLevel.PRIVATE)
+  public static class ResourceActions {
+    String resourceName;
+    List<String> actionNames;
+  }
 }

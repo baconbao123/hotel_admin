@@ -1,24 +1,33 @@
-import { useState , useEffect} from "react";
-import {
-  ChevronDownIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon,
-} from "@heroicons/react/24/outline";
-import { ArrowRightOnRectangleIcon } from "@heroicons/react/24/outline";
-import {
-  Link,
-  Navigate,
-  redirect,
-  useLocation,
-  useNavigate,
-} from "react-router";
+import { useState, useMemo } from "react";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { Link, useLocation } from "react-router";
 import { navigation } from "../../config/menu.config";
 import logo from "../../asset/images/logo.png";
+import { useSelector } from "react-redux";
+import { selectHasPermission } from "@/store/slices/permissionSlice";
+import { Button } from "antd";
 
 export default function Sidebar() {
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
+
+  const permissions = useSelector(
+    (state: any) => state.permissions.permissions
+  );
+  const isLoading = useSelector((state: any) => state.permissions.loading);
+
+  const hasPermission = (resourceName: string, actionName?: string) => {
+    return selectHasPermission(
+      { permissions: { permissions } } as any,
+      resourceName,
+      actionName || "view"
+    );
+  };
+
+  const filteredNavigation = useMemo(() => {
+    return navigation.filter((item) => hasPermission(item.resourceName));
+  }, [permissions]);
 
   const toggleMenu = (menuName: string) => {
     setExpandedMenus((current) =>
@@ -30,28 +39,22 @@ export default function Sidebar() {
 
   const handleCollapse = () => setCollapsed((c) => !c);
 
-  // Helper to check if a menu or submenu is active
-  const isActive = (href: string) => location.pathname === href;
-
-  const navigate = useNavigate();
-  const handleLogout = () => {
-    navigate("/login");
+  const isActive = (href: string) => {
+    const currentPath = location.pathname;
+    return currentPath === href || currentPath.startsWith(`${href}/`);
   };
- useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 768) {
-        setCollapsed(true);
-      } else {
-        setCollapsed(false);
-      }
-    };
-    handleResize(); // Gọi lần đầu
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+
+  if (isLoading || !permissions || permissions.length === 0) {
+    return (
+      <div className="sidebar flex items-center justify-center h-full">
+        Loading...
+      </div>
+    );
+  }
+
   return (
     <div
-      className={`flex flex-col bg-white border-r border-gray-200 min-h-screen transition-all duration-200 overflow-hidden ${
+      className={`sidebar flex flex-col bg-white border-r border-gray-200 min-h-screen transition-all duration-200 overflow-hidden ${
         collapsed ? "w-20" : "w-70"
       }`}
     >
@@ -72,9 +75,9 @@ export default function Sidebar() {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-2 py-4 ">
+      <nav className="flex-1 px-2 py-4">
         <ul className="space-y-1">
-          {navigation.map((item) => {
+          {filteredNavigation.map((item) => {
             const active = isActive(item.href);
             return (
               <li key={item.name}>
@@ -94,7 +97,7 @@ export default function Sidebar() {
                     >
                       {item.icon && (
                         <item.icon
-                          className={`w-5 h-5  ${
+                          className={`w-5 h-5 ${
                             active ? "text-blue-400" : "text-gray-400"
                           }`}
                         />
@@ -147,12 +150,11 @@ export default function Sidebar() {
                             <Link
                               to={child.href}
                               className={`flex items-center px-3 py-2 rounded-lg text-sm transition 
-                              ${
-                                isActive(child.href)
-                                  ? "bg-blue-100 text-blue-700 font-semibold"
-                                  : "text-gray-500 hover:bg-gray-100"
-                              }
-                            `}
+                                ${
+                                  isActive(child.href)
+                                    ? "bg-blue-100 text-blue-700 font-semibold"
+                                    : "text-gray-500 hover:bg-gray-100"
+                                }`}
                             >
                               <span className="truncate">{child.name}</span>
                             </Link>
@@ -167,7 +169,8 @@ export default function Sidebar() {
         </ul>
       </nav>
 
-      <button
+      {/* Collapse Button */}
+      <Button
         onClick={handleCollapse}
         className="text-gray-500 hover:text-blue-400 p-1 rounded transition justify-end flex m-5"
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -203,7 +206,7 @@ export default function Sidebar() {
             />
           </svg>
         )}
-      </button>
+      </Button>
     </div>
   );
 }

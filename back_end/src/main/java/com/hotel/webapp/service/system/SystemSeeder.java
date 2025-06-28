@@ -31,9 +31,9 @@ public class SystemSeeder {
   //
   // create update delete
 
-  List<String> DEFAULT_RESOURCE = List.of("Hotel", "User", "Permissions", "Resources", "Actions");
+  List<String> DEFAULT_RESOURCE = List.of("Hotel", "User", "Permissions", "Role", "Street", "Dashboard", "Facilities");
 
-  List<String> DEFAULT_ACTION = List.of("view", "create", "update", "delete", "export");
+  List<String> DEFAULT_ACTION = List.of("view", "create", "update", "delete", "change_password");
 
   List<String> DEFAULT_DOCUMENT_TYPE = List.of("Booking Confirmation", "Guest Registration", "Guest Folio");
 
@@ -103,7 +103,11 @@ public class SystemSeeder {
     for (String resourceName : DEFAULT_RESOURCE) {
       int resourceId = resourceIds.get(resourceName);
 
-      for (String actionName : DEFAULT_ACTION) {
+      List<String> actions = resourceName.equals("User") ?
+            DEFAULT_ACTION : DEFAULT_ACTION.stream()
+                                           .filter(a -> !a.equals("change_password")).toList();
+
+      for (String actionName : actions) {
         int actionId = actionIds.get(actionName);
 
         int mappingId = mapResourceActionRepository.findIdByResourceIdAndActionId(resourceId, actionId)

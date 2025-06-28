@@ -8,12 +8,11 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface DocumentTypeRepository extends BaseRepository<DocumentType, Integer> {
-  boolean existsByIdAndDeletedAtIsNull(Integer id);
-
   // seeder
   Optional<DocumentType> findByNameAndDeletedAtIsNull(String name);
 
@@ -22,4 +21,8 @@ public interface DocumentTypeRepository extends BaseRepository<DocumentType, Int
   @Query("insert into DocumentType (name, colName, createdAt, createdBy) " +
         "values (:name, :colName, :createdAt, :createdBy)")
   void insertDocumentType(String name, String colName, LocalDateTime createdAt, Integer createdBy);
+
+  // hotel document
+  @Query("select t from DocumentType t where t.deletedAt is null")
+  List<DocumentType> findAllAndDeletedAtIsNull();
 }

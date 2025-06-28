@@ -1,9 +1,19 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { Upload, Image } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import { Image, Upload, message } from "antd";
 import type { GetProp, UploadFile, UploadProps } from "antd";
+import { Toast as PrimeToast } from "primereact/toast";
+import "antd/dist/reset.css";
 
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
+type RcFile = import("antd/es/upload").RcFile;
+
+interface ImageUploaderProp {
+  initialImageUrl?: string;
+  onFileChange: (file: RcFile | null) => void;
+  maxFileSize?: number;
+  disabled?: boolean;
+}
 
 const getBase64 = (file: FileType): Promise<string> =>
   new Promise((resolve, reject) => {
@@ -13,42 +23,39 @@ const getBase64 = (file: FileType): Promise<string> =>
     reader.onerror = (error) => reject(error);
   });
 
-interface ImageUploaderProps {
-  onFileChange?: (files: File[] | null) => void;
-  maxFileSize?: number;
-  disabled?: boolean;
-  defaultFileList?: UploadFile[];
-  maxCount?: number;
-  initialImageUrl?: string;
-}
-
-const ImageUploader: React.FC<ImageUploaderProps> = ({
-  onFileChange,
-  maxFileSize = 3,
-  disabled = false,
-  defaultFileList = [],
-  maxCount = 1,
+const ImageUploader: React.FC<ImageUploaderProp> = ({
   initialImageUrl,
+  onFileChange,
+  maxFileSize = 2,
+  disabled = false,
 }) => {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
-  const [fileList, setFileList] = useState<UploadFile[]>(defaultFileList);
+  const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const toast = useRef<PrimeToast>(null);
+  const hasUploadedFile = useRef(false); // Track if a file has been uploaded
 
+  // Sync fileList with initialImageUrl only when no file has been uploaded
   useEffect(() => {
-    if (initialImageUrl && maxCount === 1) {
-      const initialFile: UploadFile = {
-        uid: "-1",
-        name: "current-avatar",
-        status: "done",
-        url: initialImageUrl,
-      };
-      setFileList([initialFile]);
-    } else {
+    console.log("ImageUploader: initialImageUrl =", initialImageUrl);
+    if (initialImageUrl && !hasUploadedFile.current) {
+      setFileList([
+        {
+          uid: "-1",
+          name: "avatar",
+          status: "done",
+          url: initialImageUrl,
+        },
+      ]);
+      setPreviewImage(initialImageUrl);
+    } else if (!initialImageUrl && !hasUploadedFile.current) {
       setFileList([]);
+      setPreviewImage("");
     }
-  }, [initialImageUrl, maxCount]);
+  }, [initialImageUrl]);
 
   const handlePreview = async (file: UploadFile) => {
+    console.log("handlePreview: file =", file);
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj as FileType);
     }
@@ -56,30 +63,71 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
     setPreviewOpen(true);
   };
 
-  const handleChange: UploadProps["onChange"] = ({ fileList: newFileList }) => {
-    const latestFile = newFileList.slice(-maxCount); // Keep up to maxCount files
-    setFileList(latestFile);
-    const files = latestFile
-      .filter((file) => file.originFileObj) // Ensure file exists
-      .map((file) => file.originFileObj as File); // Extract File objects
-    onFileChange?.(files.length > 0 ? files : null); // Pass array of files or null
-    if (latestFile.some((file) => file.status === "error")) {
-      message.error("Failed to upload one or more images");
+  const handleFileChange: UploadProps["onChange"] = ({
+    fileList: newFileList,
+  }) => {
+    console.log("handleFileChange: newFileList =", newFileList);
+    setFileList(newFileList);
+    if (newFileList.length > 0 && newFileList[0].originFileObj) {
+      const file = newFileList[0].originFileObj as RcFile;
+      console.log("Selected file:", file.name);
+      hasUploadedFile.current = true; // Mark that a file has been uploaded
+      onFileChange(file);
+      getBase64(file).then((base64) => {
+        console.log("Base64 generated for preview");
+        setPreviewImage(base64);
+        setFileList([
+          {
+            uid: "-1",
+            name: file.name,
+            status: "done",
+            url: base64,
+          },
+        ]);
+      });
+    } else {
+      console.log("No file selected, clearing preview");
+      hasUploadedFile.current = false; // Reset when file is removed
+      onFileChange(null);
+      setPreviewImage("");
+      setFileList([]);
     }
   };
 
   const beforeUpload = (file: FileType) => {
+    console.log("beforeUpload: file =", file.name);
     const isImage = file.type.startsWith("image/");
     if (!isImage) {
-      message.error("You can only upload image files!");
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: "You can only upload image files!",
+        life: 3000,
+      });
       return false;
     }
-    const isLtMaxSize = file.size / 1024 / 1024 <= maxFileSize;
+    const isLtMaxSize = file.size / 1024 / 1024 < maxFileSize;
     if (!isLtMaxSize) {
-      message.error(`Image must be smaller than ${maxFileSize}MB!`);
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: `Image must be smaller than ${maxFileSize}MB!`,
+        life: 3000,
+      });
       return false;
     }
-    return false; // Handle upload manually via onChange
+    return false; // Prevent any upload attempt
+  };
+
+  const customRequest: UploadProps["customRequest"] = ({
+    file,
+    onSuccess,
+    onError,
+  }) => {
+    console.log("customRequest triggered for file:", file);
+    setTimeout(() => {
+      onSuccess?.("ok");
+    }, 0);
   };
 
   const uploadButton = (
@@ -90,19 +138,21 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
   );
 
   return (
-    <div>
+    <>
+      <PrimeToast ref={toast} />
       <Upload
         listType="picture-card"
         fileList={fileList}
         onPreview={handlePreview}
-        onChange={handleChange}
+        onChange={handleFileChange}
         beforeUpload={beforeUpload}
+        customRequest={customRequest}
+        action={undefined}
+        maxCount={1}
         accept="image/*"
-        maxCount={maxCount}
         disabled={disabled}
-        multiple={maxCount > 1} // Enable multiple file selection if maxCount > 1
       >
-        {fileList.length >= maxCount ? null : uploadButton}
+        {fileList.length >= 1 ? null : uploadButton}
       </Upload>
       {previewImage && (
         <Image
@@ -111,12 +161,11 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
             visible: previewOpen,
             onVisibleChange: (visible) => setPreviewOpen(visible),
             afterOpenChange: (visible) => !visible && setPreviewImage(""),
-            zIndex: 10000,
           }}
           src={previewImage}
         />
       )}
-    </div>
+    </>
   );
 };
 

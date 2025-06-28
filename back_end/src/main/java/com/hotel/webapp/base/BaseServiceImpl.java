@@ -17,7 +17,10 @@ import org.springframework.data.jpa.domain.Specification;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Transactional
 @FieldDefaults(level = AccessLevel.PROTECTED, makeFinal = true)
@@ -55,22 +58,15 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
 
   @Override
   public Page<E> getAll(Map<String, String> filters, Map<String, String> sort, int size, int page) {
-    Map<String, Object> filterMap = filters != null ? new HashMap<>(filters) : new HashMap<>();
-    filterMap.remove("size");
-    filterMap.remove("page");
-    filterMap.keySet().removeIf(key -> key.startsWith("sort["));
-
-    Map<String, Object> sortMap = sort != null ? new HashMap<>(sort) : new HashMap<>();
-    sortMap.remove("size");
-    sortMap.remove("page");
-    sortMap.keySet().removeIf(key -> key.startsWith("filters["));
+    Map<String, Object> filterMap = removedFiltersKey(filters);
+    Map<String, Object> sortMap = removedSortedKey(sort);
 
     Specification<E> spec = buildSpecification(filterMap);
     Pageable defaultPage = buildPageable(sortMap, page, size);
     return repository.findAll(spec, defaultPage);
   }
 
-  private <E> Specification<E> buildSpecification(Map<String, Object> filters) {
+  public <E> Specification<E> buildSpecification(Map<String, Object> filters) {
     return (root, query, cb) -> {
       List<Predicate> predicates = new ArrayList<>();
       predicates.add(cb.isNull(root.get("deletedAt")));
@@ -195,7 +191,6 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
     return repository.save(entity);
   }
 
-
   @Override
   public void delete(ID id) {
     E entity = findById(id);
@@ -223,7 +218,6 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
                      .orElseThrow(() -> createNotFoundException(id));
   }
 
-
   protected Integer getAuthId() {
     Integer authId = authService.getAuthLogin();
     if (authId == null) {
@@ -232,12 +226,22 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
     return authId;
   }
 
-  public Collection<E> createCollectionBulk(DTO dto) {
-    throw new RuntimeException("Not implemented yet");
+  protected Map<String, Object> removedFiltersKey(Map<String, String> filters) {
+    Map<String, Object> filterMap = filters != null ? new HashMap<>(filters) : new HashMap<>();
+    filterMap.remove("size");
+    filterMap.remove("page");
+    filterMap.keySet().removeIf(key -> key.startsWith("sort["));
+
+    return filterMap;
   }
 
-  public Collection<E> updateCollectionBulk(ID id, DTO dto) {
-    throw new RuntimeException("Not implemented yet");
+  protected Map<String, Object> removedSortedKey(Map<String, String> sort) {
+    Map<String, Object> sortMap = sort != null ? new HashMap<>(sort) : new HashMap<>();
+    sortMap.remove("size");
+    sortMap.remove("page");
+    sortMap.keySet().removeIf(key -> key.startsWith("filters["));
+
+    return sortMap;
   }
 
   protected void beforeCommon(E entity, DTO dto) {
@@ -275,7 +279,6 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
 
   protected void afterCommon(E entity, DTO dto) {
   }
-
 
 
 }

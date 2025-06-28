@@ -88,8 +88,27 @@ const data: BreadCrumbGroup[] = [
       },
     ],
   },
-   {
-    name: "FacilityList",
+  {
+    name: "HotelList",
+    data: [
+      {
+        icon: "pi pi-home",
+        label: " Home page",
+        className: "text-gray-700",
+        template: "",
+        link: "/",
+      },
+      {
+        icon: "pi pi-building",
+        label: "Hotel Management",
+        className: "text-gray-700",
+        template: "",
+        link: "/hotels",
+      },
+    ],
+  },
+  {
+    name: "Facilities",
     data: [
       {
         icon: "pi pi-home",

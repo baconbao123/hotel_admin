@@ -26,7 +26,7 @@ public class User implements AuditEntity {
   @Lob
   String password;
   String avatarUrl;
-  Integer addressId;
+  String userType;
   @Lob
   String refreshToken;
   LocalDateTime expired;

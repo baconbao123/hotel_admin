@@ -8,13 +8,14 @@ import { Image } from "antd";
 import { Toast } from "primereact/toast";
 import BreadCrumbComponent from "@/components/common/breadCrumb/BreadCrumbComponent";
 import useCrud from "@/hooks/crudHook";
-import UserForm from "./UserForm";
 import Swal from "sweetalert2";
 import { Tag } from "primereact/tag";
 import UserDetail from "./UserDetail";
 import { Skeleton } from "primereact/skeleton";
 import { SkeletonTemplate } from "@/components/common/skeleton";
 import noImg from "@/asset/images/no-img.png";
+import UserForm from "./UserForm";
+import { useSelector } from "react-redux";
 
 export default function UserList() {
   const [selectedUserId, setSelectedUserId] = useState<string | undefined>(
@@ -82,6 +83,15 @@ export default function UserList() {
           });
       }
     });
+  };
+
+  const permissions = useSelector(
+    (state: any) => state.permissions.permissions
+  );
+
+  const hasPermission = (actionName: string) => {
+    const resource = permissions.find((p: any) => p.resourceName === "User");
+    return resource ? resource.actionNames.includes(actionName) : false;
   };
 
   const statusBody = (row: any) => (
@@ -223,44 +233,50 @@ export default function UserList() {
             ></Column>
             <Column
               header="Actions"
-              style={{ width: "15%" }}
-              body={(rowData: any) => (
-                <div className="flex gap-2 ">
-                  <Button
-                    icon="pi pi-eye"
-                    rounded
-                    text
-                    severity="info"
-                    onClick={() => {
-                      setSelectedUserId(rowData.id);
-                      setFormMode("view");
-                      setOpenFormDetail(true);
-                    }}
-                    tooltip="View"
-                    tooltipOptions={{ position: "top" }}
-                  />
-                  <Button
-                    icon="pi pi-pencil"
-                    rounded
-                    text
-                    severity="success"
-                    onClick={() => {
-                      setSelectedUserId(rowData.id);
-                      setFormMode("edit");
-                      setOpenForm(true);
-                    }}
-                    tooltip="Edit"
-                    tooltipOptions={{ position: "top" }}
-                  />
-                  <Button
-                    icon="pi pi-trash"
-                    rounded
-                    text
-                    severity="danger"
-                    onClick={() => handleDelete(rowData.id)}
-                    tooltip="Delete"
-                    tooltipOptions={{ position: "top" }}
-                  />
+              className="w-60"
+              body={(row: any) => (
+                <div className="flex gap-2 justify-center">
+                  {hasPermission("view") && (
+                    <Button
+                      icon="pi pi-eye"
+                      rounded
+                      text
+                      severity="info"
+                      onClick={() => {
+                        setSelectedUserId(row.id);
+                        setFormMode("view");
+                        setOpenFormDetail(true);
+                      }}
+                      tooltip="View"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  )}
+                  {hasPermission("update") && (
+                    <Button
+                      icon="pi pi-pencil"
+                      rounded
+                      text
+                      severity="success"
+                      onClick={() => {
+                        setSelectedUserId(row.id);
+                        setFormMode("edit");
+                        setOpenForm(true);
+                      }}
+                      tooltip="Edit"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  )}
+                  {hasPermission("delete") && (
+                    <Button
+                      icon="pi pi-trash"
+                      rounded
+                      text
+                      severity="danger"
+                      onClick={() => handleDelete(String(row.id))}
+                      tooltip="Delete"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  )}
                 </div>
               )}
             ></Column>
@@ -268,32 +284,36 @@ export default function UserList() {
         )}
       </Card>
 
-      <UserForm
-        id={selectedUserId}
-        open={openForm}
-        mode={formMode}
-        onClose={() => {
-          setOpenForm(false);
-          setSelectedUserId(undefined);
-          setFormMode("create");
-        }}
-        loadDataById={loadById}
-        createItem={createItem}
-        updateItem={updateItem}
-        error={error}
-      />
-
-      <UserDetail
-        id={selectedUserId}
-        open={openFormDetail}
-        mode={formMode}
-        onClose={() => {
-          setOpenFormDetail(false);
-          setSelectedUserId(undefined);
-          setFormMode("view");
-        }}
-        loadDataById={loadById}
-      />
+      {(hasPermission("create") || hasPermission("update")) && (
+        <UserForm
+          id={selectedUserId}
+          open={openForm}
+          mode={formMode}
+          onClose={() => {
+            setOpenForm(false);
+            setSelectedUserId(undefined);
+            setFormMode("create");
+          }}
+          loadDataById={loadById}
+          createItem={createItem}
+          updateItem={updateItem}
+          error={error}
+        />
+      )}
+      
+      {hasPermission("view") && (
+        <UserDetail
+          id={selectedUserId}
+          open={openFormDetail}
+          mode={formMode}
+          onClose={() => {
+            setOpenFormDetail(false);
+            setSelectedUserId(undefined);
+            setFormMode("view");
+          }}
+          loadDataById={loadById}
+        />
+      )}
     </div>
   );
 }

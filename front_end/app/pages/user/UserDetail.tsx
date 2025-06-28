@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { Tag } from "primereact/tag";
 import { Image } from "antd";
 import noImg from "@/asset/images/no-img.png";
-import "./UserFrom.scss";
+import "./UserForm.scss";
 import { format } from "date-fns";
 
 interface Props {

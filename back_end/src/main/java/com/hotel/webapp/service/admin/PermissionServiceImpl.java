@@ -4,11 +4,13 @@ import com.hotel.webapp.base.BaseServiceImpl;
 import com.hotel.webapp.dto.request.MappingDTO;
 import com.hotel.webapp.dto.response.PermissionRes;
 import com.hotel.webapp.entity.Permissions;
+import com.hotel.webapp.entity.User;
 import com.hotel.webapp.exception.AppException;
 import com.hotel.webapp.exception.ErrorCode;
 import com.hotel.webapp.repository.MapResourceActionRepository;
 import com.hotel.webapp.repository.MapUserRoleRepository;
 import com.hotel.webapp.repository.PermissionsRepository;
+import com.hotel.webapp.repository.UserRepository;
 import com.hotel.webapp.service.admin.interfaces.AuthService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -26,17 +28,20 @@ import java.util.*;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer, MappingDTO, PermissionsRepository> {
   MapResourceActionRepository mapResourceActionRepository;
+  UserRepository userRepository;
   MapUserRoleRepository mapUserRoleRepository;
 
   public PermissionServiceImpl(
         AuthService authService,
         PermissionsRepository repository,
         MapResourceActionRepository mapResourceActionRepository,
-        MapUserRoleRepository mapUserRoleRepository
+        MapUserRoleRepository mapUserRoleRepository,
+        UserRepository userRepository
   ) {
     super(repository, authService);
     this.mapResourceActionRepository = mapResourceActionRepository;
     this.mapUserRoleRepository = mapUserRoleRepository;
+    this.userRepository = userRepository;
   }
 
   public List<Permissions> updatePermission(MappingDTO updateDto) {
@@ -218,6 +223,44 @@ public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer,
                   ))
                   .toList();
   }
+
+  public List<PermissionRes.ResourceActions> getUserResource() {
+    Integer userId = getAuthId();
+    User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
+
+    List<Object[]> queryResults;
+
+    if (user.getEmail().equals("sa@gmail.com")) {
+      queryResults = repository.getResources();
+    } else {
+      queryResults = repository.getResourceByUserId(userId);
+    }
+
+    Map<String, List<String>> resourceActionMap = new HashMap<>();
+    for (Object[] result : queryResults) {
+      String resourceName = (String) result[0];
+      String actionName = (String) result[1];
+      resourceActionMap.computeIfAbsent(resourceName, k -> new ArrayList<>()).add(actionName);
+    }
+
+    List<PermissionRes.ResourceActions> resourceActions = new ArrayList<>();
+    for (Map.Entry<String, List<String>> entry : resourceActionMap.entrySet()) {
+      resourceActions.add(new PermissionRes.ResourceActions(entry.getKey(), entry.getValue()));
+    }
+
+    return resourceActions;
+  }
+
+  //  public List<Resources> getUserResource() {
+//    Integer userId = getAuthId();
+//    User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
+//
+//    if (user.getEmail().equals("sa@gmail.com")) {
+//      return repository.getResources();
+//    }
+//
+//    return repository.getResourceByUserId(userId);
+//  }
 
   @Override
   protected RuntimeException createNotFoundException(Integer integer) {

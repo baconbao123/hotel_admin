@@ -8,9 +8,5 @@ import java.util.List;
 
 @Repository
 public interface MapHotelTypeRepository extends BaseRepository<MapHotelType, Integer> {
-  boolean existsByHotelIdAndDeletedAtIsNull(int hotelId);
-
-  List<MapHotelType> findByHotelIdAndDeletedAtIsNull(int hotelId);
-
-//  List<MapHotelType> findByColNameAndDeletedAtIsNull(String colName);
+  List<MapHotelType> findAllByHotelIdAndDeletedAtIsNull(Integer hotelId);
 }

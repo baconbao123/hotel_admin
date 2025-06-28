@@ -8,5 +8,5 @@ import java.util.List;
 
 @Repository
 public interface DocumentsHotelRepository extends BaseRepository<DocumentsHotel, Integer> {
-  List<DocumentsHotel> findByColNameAndDeletedAtIsNull(String colName);
+  List<DocumentsHotel> findByHotelId(Integer hotelId);
 }

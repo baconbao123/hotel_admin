@@ -113,6 +113,7 @@ export default function FacilityDetail({
           {/* Icon */}
           <div className="grid grid-cols-3 gap-2 items-center mb-2">
             <span className="col-span-2 flex items-center gap-2">
+              <label className="font-bold col-span-1">Icon:</label>
               {icon && <i className={`${icon} text-xl`} />}
             </span>
           </div>
