@@ -8,6 +8,8 @@ import { InputSwitch } from "primereact/inputswitch";
 import { MultiSelect } from "primereact/multiselect";
 import { useRoles } from "@/hooks/useCommonData";
 import "./UserForm.scss";
+import { useSelector } from "react-redux";
+import $axios from "@/axios";
 interface Props {
   id?: string;
   open: boolean;
@@ -29,7 +31,6 @@ export default function UserForm({
   updateItem,
   error,
 }: Props) {
-  const [userData, setUserData] = useState<any>();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [fullName, setFullName] = useState<string>("");
@@ -38,7 +39,13 @@ export default function UserForm({
   const [password, setPassword] = useState<string>("");
   const [status, setStatus] = useState<boolean>(true);
   const [submitting, setSubmitting] = useState(false);
-  const [selectedRoles, setSelectedRoles] = useState<string[]>([]); // Lưu mảng id
+  const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+
+  const [viewChangePassword, setViewChangePassword] = useState<boolean>(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showError, setShowError] = useState(false);
+  const [passwordsMatch, setPasswordsMatch] = useState(true);
 
   const { roles, loading: rolesLoading, error: rolesError } = useRoles();
 
@@ -46,11 +53,14 @@ export default function UserForm({
 
   const header = mode === "edit" ? "EDIT USER" : "ADD NEW USER";
 
+  const permissions = useSelector(
+    (state: any) => state.permissions.permissions
+  );
+
   useEffect(() => {
     if (id && open && !rolesLoading) {
       loadDataById(id)
         .then((data) => {
-          setUserData(data);
           setFullName(data.fullName || "");
           setEmail(data.email || "");
           setPhoneNumber(data.phoneNumber || "");
@@ -72,7 +82,6 @@ export default function UserForm({
           });
         });
     } else {
-      setUserData(null);
       setFullName("");
       setEmail("");
       setPhoneNumber("");
@@ -83,6 +92,26 @@ export default function UserForm({
       setSelectedRoles([]);
     }
   }, [id, open, loadDataById, roles, rolesLoading]);
+
+  useEffect(() => {
+    let timeout: NodeJS.Timeout;
+
+    const checkPasswords = () => {
+      if (confirmPassword && newPassword !== confirmPassword) {
+        setPasswordsMatch(false);
+        timeout = setTimeout(() => {
+          setShowError(true);
+        }, 700);
+      } else {
+        setPasswordsMatch(true);
+        setShowError(false);
+      }
+    };
+
+    checkPasswords();
+
+    return () => clearTimeout(timeout);
+  }, [newPassword, confirmPassword]);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,7 +134,6 @@ export default function UserForm({
       formData.append("keepAvatar", "true");
     }
 
-    // Thêm rolesIds từ selectedRoles
     selectedRoles.forEach((roleId) => {
       formData.append("rolesIds", roleId.toString());
     });
@@ -146,6 +174,51 @@ export default function UserForm({
       typeof error === "object" &&
       (error as Record<string, string>)[field]) ||
     null;
+
+  const hasPermission = (actionName: string) => {
+    const resource = permissions.find((p: any) => p.resourceName === "User");
+    return resource ? resource.actionNames.includes(actionName) : false;
+  };
+
+  const handleChangePassword = async () => {
+    if (!passwordsMatch) {
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Password don't match",
+        life: 3000,
+      });
+
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const res = await $axios.put(
+        `/user/change-password?email=${email}&password=${newPassword}`
+      );
+      if (res.status === 200) {
+        setNewPassword("");
+        setConfirmPassword("");
+        setViewChangePassword(false);
+        toast.current?.show({
+          severity: "success",
+          summary: "Success",
+          detail: "Password updated successfully",
+          life: 3000,
+        });
+      }
+    } catch (err: any) {
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: err.message || "Failed to change password",
+        life: 3000,
+      });
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div>
@@ -213,6 +286,7 @@ export default function UserForm({
                 </small>
               )}
             </div>
+
             <div className="col-span-12 md:col-span-12">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -237,6 +311,7 @@ export default function UserForm({
                     </small>
                   )}
                 </div>
+
                 <div>
                   <label
                     htmlFor="email"
@@ -259,6 +334,7 @@ export default function UserForm({
                     </small>
                   )}
                 </div>
+
                 <div>
                   <label
                     htmlFor="phoneNumber"
@@ -281,30 +357,8 @@ export default function UserForm({
                     </small>
                   )}
                 </div>
+
                 <div>
-                  <label
-                    htmlFor="password"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Password <span className="text-red-500">*</span>
-                  </label>
-                  <InputText
-                    id="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    type="password"
-                    disabled={submitting}
-                    className={`w-full p-2 border rounded-lg ${
-                      getError("password") ? "p-invalid" : ""
-                    }`}
-                  />
-                  {getError("password") && (
-                    <small className="text-red-500 text-xs mt-1">
-                      {getError("password")}
-                    </small>
-                  )}
-                </div>
-                <div className="md:col-span-2">
                   <label
                     htmlFor="roles"
                     className="block text-sm font-medium text-gray-700 mb-1"
@@ -330,28 +384,152 @@ export default function UserForm({
                     </small>
                   )}
                 </div>
-              </div>
-            </div>
 
-            {/* Status */}
-            <div className="col-span-12 flex items-center gap-4 mt-4">
-              <label
-                htmlFor="status"
-                className="text-sm font-medium text-gray-700"
-              >
-                Status <span className="text-red-500">*</span>
-              </label>
-              <InputSwitch
-                id="status"
-                checked={status}
-                onChange={(e) => setStatus(e.value)}
-                disabled={submitting}
-              />
-              {getError("status") && (
-                <small className="text-red-500 text-xs mt-1">
-                  {getError("status")}
-                </small>
-              )}
+                {!id && (
+                  <div>
+                    <label
+                      htmlFor="password"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Password <span className="text-red-500">*</span>
+                    </label>
+                    <InputText
+                      id="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      type="password"
+                      disabled={submitting}
+                      className={`w-full p-2 border rounded-lg ${
+                        getError("password") ? "p-invalid" : ""
+                      }`}
+                    />
+                    {getError("password") && (
+                      <small className="text-red-500 text-xs mt-1">
+                        {getError("password")}
+                      </small>
+                    )}
+                  </div>
+                )}
+
+                <div className="flex items-center gap-3">
+                  <label
+                    htmlFor="status"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    Status <span className="text-red-500">*</span>
+                  </label>
+                  <InputSwitch
+                    id="status"
+                    checked={status}
+                    onChange={(e) => setStatus(e.value)}
+                    disabled={submitting}
+                  />
+                  {getError("status") && (
+                    <small className="text-red-500 text-xs mt-1">
+                      {getError("status")}
+                    </small>
+                  )}
+                </div>
+
+                {id && hasPermission("change_password") && (
+                  <div className="mt-3">
+                    <Button
+                      severity="secondary"
+                      raised
+                      label="Change Password"
+                      onClick={() => setViewChangePassword(!viewChangePassword)}
+                    />
+
+                    {viewChangePassword && (
+                      <Dialog
+                        header="Change Password"
+                        visible={viewChangePassword}
+                        style={{ width: "40vw" }}
+                        onHide={() => {
+                          if (!viewChangePassword) return;
+                          setViewChangePassword(false);
+                        }}
+                        footer={
+                          <div className="flex justify-center gap-2">
+                            <Button
+                              label="Close"
+                              onClick={() =>
+                                setViewChangePassword(!viewChangePassword)
+                              }
+                              severity="secondary"
+                              outlined
+                              disabled={submitting}
+                              className="px-6 py-2 rounded-lg"
+                            />
+                            <Button
+                              label="Save"
+                              onClick={handleChangePassword}
+                              severity="success"
+                              disabled={submitting}
+                              loading={submitting}
+                              className="px-6 py-2 rounded-lg"
+                            />
+                          </div>
+                        }
+                      >
+                        <div className="col-span-12 md:col-span-12">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <label
+                                htmlFor="status"
+                                className="text-sm font-medium text-gray-700"
+                              >
+                                New Password{" "}
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <InputText
+                                id="newPassword"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                type="password"
+                                disabled={submitting}
+                                className={`w-full p-2 border rounded-lg ${
+                                  getError("newPassword") ? "p-invalid" : ""
+                                }`}
+                              />
+                            </div>
+
+                            <div>
+                              <label
+                                htmlFor="status"
+                                className="text-sm font-medium text-gray-700"
+                              >
+                                Confirm Password
+                                <span className="text-red-500">*</span>
+                              </label>
+                              <InputText
+                                id="confirmPassword"
+                                value={confirmPassword}
+                                onChange={(e) =>
+                                  setConfirmPassword(e.target.value)
+                                }
+                                type="password"
+                                disabled={submitting}
+                                className={`w-full p-2 border rounded-lg ${
+                                  getError("newPassword") ? "p-invalid" : ""
+                                }`}
+                              />
+                            </div>
+                          </div>
+
+                          {showError && !passwordsMatch && (
+                            <div className="flex justify-center mt-2">
+                              <span className="text-red-500">
+                                Passwords don't match
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </Dialog>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

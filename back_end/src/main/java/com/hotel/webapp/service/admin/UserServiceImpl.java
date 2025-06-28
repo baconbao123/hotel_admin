@@ -70,7 +70,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
     }
 
     user.setPassword(passwordEncoder.encode(create.getPassword()));
-    
+
     repository.save(user);
 
     if (create.getRolesIds() != null) {
@@ -125,7 +125,6 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
     } else {
       user.setAvatarUrl(user.getAvatarUrl());
     }
-
 
 
     user = repository.save(user);
@@ -206,13 +205,18 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
     );
   }
 
+  // Update Profile
   public User updateProfile(Integer id, UserDTO.ProfileDTO update) {
     var user = findById(id);
+
+    if (repository.existsByEmailAndIdNot(update.getEmail(), id))
+      throw new AppException(ErrorCode.FIELD_EXISTED, "Email");
 
     user = User.builder()
                .id(user.getId())
                .fullName(update.getFullName())
                .email(update.getEmail())
+               .password(user.getPassword())
                .avatarUrl(user.getAvatarUrl())
                .phoneNumber(update.getPhoneNumber())
                .createdBy(user.getCreatedBy())
@@ -221,12 +225,6 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
                .updatedAt(LocalDateTime.now())
                .status(user.getStatus())
                .build();
-
-    if (update.getPassword() != null && !update.getPassword().isEmpty()) {
-      user.setPassword(passwordEncoder.encode(update.getPassword()));
-    } else {
-      user.setPassword(user.getPassword());
-    }
 
     if (update.getAvatarUrl() != null && !update.getAvatarUrl().isEmpty()) {
       String fileName = storageFileService.uploadUserImg(update.getAvatarUrl());
@@ -237,39 +235,8 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
 
     return repository.save(user);
   }
-//  @Override
-//  protected void beforeDelete(Integer id) {
-//    updateMapURIfUserDelete(id, getAuthId());
-//  }
-//
-//
-//  private void updateMapURIfUserDelete(int userId, int authId) {
-//    List<MapUserRoles> mapUserRolesList = mapUserRoleRepository.findAllByUserId(userId);
-//
-//    List<Integer> mapURIds = mapUserRolesList.stream()
-//                                             .map(MapUserRoles::getId)
-//                                             .toList();
-//
-//    updatePermissionIfUserDelete(mapURIds, authId);
-//
-//    for (MapUserRoles mapUserRoles : mapUserRolesList) {
-//      mapUserRoles.setDeletedAt(LocalDateTime.now());
-//      mapUserRoles.setUpdatedBy(authId);
-//      mapUserRoleRepository.save(mapUserRoles);
-//    }
-//  }
-//
-//  private void updatePermissionIfUserDelete(Collection<Integer> mapUserRoleId, int authId) {
 
-  /// /    List<Permissions> findAllPermissions = permissionsRepository.findAllByMapURId(mapUserRoleId);
-//    List<Permissions> findAllPermissions = null;
-//
-//    for (Permissions permission : findAllPermissions) {
-//      permission.setDeletedAt(LocalDateTime.now());
-//      permission.setUpdatedBy(authId);
-//      permissionsRepository.save(permission);
-//    }
-//  }
+
   @Transactional
   public boolean existsByEmail(String email) {
     return repository.existsByEmail(email);
@@ -282,6 +249,12 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
     repository.save(user);
   }
 
+  public boolean matchPassword(String email, String oldPassword) {
+    var user = repository.findByEmail(email)
+                         .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
+
+    return passwordEncoder.matches(oldPassword, user.getPassword());
+  }
 
   @Override
   protected RuntimeException createNotFoundException(Integer integer) {

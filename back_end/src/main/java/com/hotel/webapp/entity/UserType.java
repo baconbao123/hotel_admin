@@ -15,22 +15,11 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class User implements AuditEntity {
+public class UserType implements AuditEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer id;
-  String fullName;
-  @Column(nullable = false, unique = true)
-  String email;
-  String phoneNumber;
-  @Lob
-  String password;
-  String avatarUrl;
-  String userType;
-  @Lob
-  String refreshToken;
-  LocalDateTime expired;
-  Boolean status;
+  String name;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;
   Integer createdBy;

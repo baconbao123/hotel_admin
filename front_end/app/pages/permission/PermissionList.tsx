@@ -13,6 +13,7 @@ import PermissionDetail from "./PermissionDetail";
 import { InputText } from "primereact/inputtext";
 import { Skeleton } from "primereact/skeleton";
 import { SkeletonTemplate } from "@/components/common/skeleton";
+import { useSelector } from "react-redux";
 
 interface Resource {
   id: number; // mapRsActionId
@@ -35,9 +36,7 @@ interface PermissionRes {
 
 export default function PermissionList() {
   const [selectedId, setSelectedId] = useState<string>();
-  const [formMode, setFormMode] = useState<"create" | "edit" | "view">(
-    "create"
-  );
+
   const [permissionData, setPermissionData] = useState<any>(null);
   const [processedData, setProcessedData] = useState<RoleData[]>([]);
 
@@ -65,6 +64,10 @@ export default function PermissionList() {
     sortOrder,
     openFormDetail,
   } = useCrud("/permission");
+
+  const permissions = useSelector(
+    (state: any) => state.permissions.permissions
+  );
 
   useEffect(() => {
     setMounted(true);
@@ -121,6 +124,11 @@ export default function PermissionList() {
           );
       }
     });
+  };
+
+  const hasPermission = (actionName: string) => {
+    const resource = permissions.find((p: any) => p.resourceName === "Role");
+    return resource ? resource.actionNames.includes(actionName) : false;
   };
 
   return (
@@ -263,63 +271,74 @@ export default function PermissionList() {
               className="w-60"
               body={(rowData) => (
                 <div className="flex gap-2 justify-center">
-                  <Button
-                    icon="pi pi-eye"
-                    rounded
-                    text
-                    severity="info"
-                    onClick={async () => {
-                      try {
-                        const response = await loadById(String(rowData.roleId));
-                        setSelectedId(String(rowData.roleId));
-                        setFormMode("view");
-                        setPermissionData(response);
-                        setOpenFormDetail(true);
-                      } catch (error) {
-                        toast.current?.show({
-                          severity: "error",
-                          summary: "Error",
-                          detail: "Failed to load permission details",
-                          life: 3000,
-                        });
-                      }
-                    }}
-                    tooltip="View"
-                    tooltipOptions={{ position: "top" }}
-                  />
-                  <Button
-                    icon="pi pi-pencil"
-                    rounded
-                    text
-                    severity="success"
-                    onClick={async () => {
-                      try {
-                        const response = await loadById(String(rowData.roleId));
-                        setSelectedId(String(rowData.roleId));
-                        setFormMode("edit");
-                        setPermissionData(response);
-                        setOpenForm(true);
-                      } catch (error) {
-                        toast.current?.show({
-                          severity: "error",
-                          summary: "Error",
-                          detail: "Failed to load permission details",
-                          life: 3000,
-                        });
-                      }
-                    }}
-                    tooltip="Edit"
-                    tooltipOptions={{ position: "top" }}
-                  />
-                  <Button
-                    icon="pi pi-trash"
-                    rounded
-                    text
-                    severity="danger"
-                    onClick={() => handleDelete(rowData.roleId.toString())}
-                    tooltip="Delete"
-                    tooltipOptions={{ position: "top" }}
-                  />
+                  {hasPermission("view") && (
+                    <Button
+                      icon="pi pi-eye"
+                      rounded
+                      text
+                      severity="info"
+                      onClick={async () => {
+                        try {
+                          const response = await loadById(
+                            String(rowData.roleId)
+                          );
+                          setSelectedId(String(rowData.roleId));
+
+                          setPermissionData(response);
+                          setOpenFormDetail(true);
+                        } catch (error) {
+                          toast.current?.show({
+                            severity: "error",
+                            summary: "Error",
+                            detail: "Failed to load permission details",
+                            life: 3000,
+                          });
+                        }
+                      }}
+                      tooltip="View"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  )}
+
+                  {hasPermission("update") && (
+                    <Button
+                      icon="pi pi-pencil"
+                      rounded
+                      text
+                      severity="success"
+                      onClick={async () => {
+                        try {
+                          const response = await loadById(
+                            String(rowData.roleId)
+                          );
+                          setSelectedId(String(rowData.roleId));
+                          setPermissionData(response);
+                          setOpenForm(true);
+                        } catch (error) {
+                          toast.current?.show({
+                            severity: "error",
+                            summary: "Error",
+                            detail: "Failed to load permission details",
+                            life: 3000,
+                          });
+                        }
+                      }}
+                      tooltip="Edit"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  )}
+
+                  {hasPermission("delete") && (
+                    <Button
+                      icon="pi pi-trash"
+                      rounded
+                      text
+                      severity="danger"
+                      onClick={() => handleDelete(rowData.roleId.toString())}
+                      tooltip="Delete"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  )}
                 </div>
               )}
             ></Column>
@@ -327,32 +346,34 @@ export default function PermissionList() {
         )}
       </Card>
 
-      <PermissionForm
-        id={selectedId}
-        open={openForm}
-        permissionData={permissionData}
-        onClose={() => {
-          setOpenForm(false);
-          setSelectedId(undefined);
-          setPermissionData(null);
-          setFormMode("create");
-        }}
-        loadDataTable={async () => {
-          await updatePageData(page, pageSize);
-        }}
-      />
+      {(hasPermission("create") || hasPermission("update")) && (
+        <PermissionForm
+          id={selectedId}
+          open={openForm}
+          permissionData={permissionData}
+          onClose={() => {
+            setOpenForm(false);
+            setSelectedId(undefined);
+            setPermissionData(null);
+          }}
+          loadDataTable={async () => {
+            await updatePageData(page, pageSize);
+          }}
+        />
+      )}
 
-      <PermissionDetail
-        id={selectedId}
-        open={openFormDetail}
-        permissionData={permissionData}
-        onClose={() => {
-          setOpenFormDetail(false);
-          setSelectedId(undefined);
-          setPermissionData(null);
-          setFormMode("view");
-        }}
-      />
+      {hasPermission("view") && (
+        <PermissionDetail
+          id={selectedId}
+          open={openFormDetail}
+          permissionData={permissionData}
+          onClose={() => {
+            setOpenFormDetail(false);
+            setSelectedId(undefined);
+            setPermissionData(null);
+          }}
+        />
+      )}
     </div>
   );
 }
