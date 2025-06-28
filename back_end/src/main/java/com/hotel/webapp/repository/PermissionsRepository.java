@@ -74,7 +74,7 @@ public interface PermissionsRepository extends BaseRepository<Permissions, Integ
 
   @Query("select re.name, a.name from Resources re " +
         "join MapUserRoles mur on mur.userId = :userId and mur.deletedAt is null " +
-        "join Role r on mur.roleId = r.id " +
+        "join Role r on mur.roleId = r.id and r.deletedAt is null " +
         "join MapResourcesAction mra on mra.resourceId = re.id and mra.deletedAt is null " +
         "join Actions a on mra.actionId = a.id and a.deletedAt is null " +
         "join Permissions p on p.mapResourcesActionId = mra.id and p.roleId = r.id and p.deletedAt is null ")

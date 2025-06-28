@@ -100,8 +100,8 @@ const LoginPage = () => {
         error.response?.data?.message || "Invalid email or password";
       setLoginError(errorMessage);
 
-      Cookies.remove("token");
-      Cookies.remove("refreshToken");
+      // Cookies.remove("token");
+      // Cookies.remove("refreshToken");
     }
   };
 

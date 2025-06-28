@@ -249,7 +249,6 @@ export default function RoleList() {
                         try {
                           const deleted = await handleDelete(String(row.id));
                           if (deleted) {
-                            // Refresh Redux store
                             const result = await dispatch(
                               fetchCommonData({
                                 types: ["roles"],
@@ -264,7 +263,6 @@ export default function RoleList() {
                                 life: 3000,
                               });
                             }
-                            // Refresh DataTable data
                             await updatePageData(page, pageSize);
                           }
                         } catch (error) {

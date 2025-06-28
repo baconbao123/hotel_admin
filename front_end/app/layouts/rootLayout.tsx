@@ -20,7 +20,7 @@ const fetchUser = async (id: number) => {
 export default function RootLayout() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const user = useSelector((state: RootState) => state.userData);
+  // const user = useSelector((state: RootState) => state.userData);
   const [isInitializing, setIsInitializing] = useState(true);
   useFetchPermissions();
 
@@ -76,8 +76,8 @@ export default function RootLayout() {
           dispatch(setUser(userDataLoad));
         } catch (error) {
           console.error("Failed to restore user:", error);
-          Cookies.remove("token");
-          Cookies.remove("refreshToken");
+          // Cookies.remove("token");
+          // Cookies.remove("refreshToken");
           navigate("/login");
         }
       } else {
@@ -100,9 +100,9 @@ export default function RootLayout() {
     );
   }
 
-  if (!user.id) {
-    return null;
-  }
+  // if (!user.id) {
+  //   return null;
+  // }
 
   return (
     <div className="flex h-screen bg-gray-100">
