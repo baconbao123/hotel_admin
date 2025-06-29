@@ -26,35 +26,29 @@ import java.util.Map;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class HotelServiceImpl extends BaseServiceImpl<Hotels, Integer, HotelDTO, HotelRepository> {
+public class HotelService extends BaseServiceImpl<Hotels, Integer, HotelDTO, HotelRepository> {
   HotelImagesRepository hotelImagesRepository;
   HotelPolicyRepository hotelPolicyRepository;
   StorageFileService storageFileService;
-  AddressServiceImpl addressService;
+  AddressService addressService;
   DocumentsHotelRepository documentsHotelRepository;
-  DocumentTypeRepository documentTypeRepository;
   MapHotelFacilityRepository mapHotelFacilityRepository;
   MapHotelTypeRepository mapHotelTypeRepository;
   UserRepository userRepository;
-  TypeHotelRepository typeHotelRepository;
-  FacilityTypeRepository facilityTypeRepository;
   FacilitiesRepository facilitiesRepository;
 
-  public HotelServiceImpl(
+  public HotelService(
         HotelRepository repository,
         BaseMapper<Hotels, HotelDTO> mapper,
         AuthService authService,
         HotelImagesRepository hotelImagesRepository,
         HotelPolicyRepository policyRepository,
         StorageFileService storageFileService,
-        AddressServiceImpl addressService,
+        AddressService addressService,
         DocumentsHotelRepository documentsHotelRepository,
-        DocumentTypeRepository documentTypeRepository,
         MapHotelFacilityRepository mapHotelFacilityRepository,
         MapHotelTypeRepository mapHotelTypeRepository,
         UserRepository userRepository,
-        TypeHotelRepository typeHotelRepository,
-        FacilityTypeRepository facilityTypeRepository,
         FacilitiesRepository facilitiesRepository
   ) {
     super(repository, mapper, authService);
@@ -66,9 +60,6 @@ public class HotelServiceImpl extends BaseServiceImpl<Hotels, Integer, HotelDTO,
     this.mapHotelFacilityRepository = mapHotelFacilityRepository;
     this.mapHotelTypeRepository = mapHotelTypeRepository;
     this.userRepository = userRepository;
-    this.typeHotelRepository = typeHotelRepository;
-    this.documentTypeRepository = documentTypeRepository;
-    this.facilityTypeRepository = facilityTypeRepository;
     this.facilitiesRepository = facilitiesRepository;
   }
 
@@ -85,11 +76,6 @@ public class HotelServiceImpl extends BaseServiceImpl<Hotels, Integer, HotelDTO,
 //    hotel.setApproveId(create.getApproveId());
 //    hotel.setReason(create.getReason());
 
-    // avatar
-//    if (create.getAvatar() != null && !create.getAvatar().getAvatarUrl().isEmpty()) {
-//      String avatarStr = storageFileService.uploadHotelImg(create.getAvatar().getAvatarUrl());
-//      hotel.setAvatar(avatarStr);
-//    }
     if (create.getAvatar() != null) {
       HotelDTO.AvatarReq avatar = create.getAvatar();
       if (avatar.getAvatarUrl() != null && !avatar.getAvatarUrl().isEmpty()) {
@@ -352,7 +338,7 @@ public class HotelServiceImpl extends BaseServiceImpl<Hotels, Integer, HotelDTO,
                      .policyId(hotelCrr.getPolicyId())
                      .status(update.getStatus())
                      .approveId(null)
-                     .reason(null)
+                     .note(null)
                      .updatedAt(LocalDateTime.now())
                      .updatedBy(getAuthId())
                      .build();
@@ -505,12 +491,12 @@ public class HotelServiceImpl extends BaseServiceImpl<Hotels, Integer, HotelDTO,
 
   // find types
   public List<TypeHotel> findTypeHotels() {
-    return typeHotelRepository.findAllAndDeletedAtIsNull();
+    return repository.findAllTypeHotel();
   }
 
   // find documents
   public List<DocumentType> findDocumentHotels() {
-    return documentTypeRepository.findAllAndDeletedAtIsNull();
+    return documentsHotelRepository.findDocumentTypeAndDeletedAtIsNull();
   }
 
   // find facilities

@@ -26,12 +26,12 @@ import java.util.List;
 @Slf4j
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, UserRepository> {
+public class UserService extends BaseServiceImpl<User, Integer, UserDTO, UserRepository> {
   MapUserRoleRepository mapUserRoleRepository;
   StorageFileService storageFileService;
   PasswordEncoder passwordEncoder;
 
-  public UserServiceImpl(
+  public UserService(
         UserRepository repository,
         AuthService authService,
         MapUserRoleRepository mapUserRoleRepository,
@@ -56,6 +56,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
     var user = User.builder()
                    .fullName(create.getFullName())
                    .email(create.getEmail())
+                   .password(passwordEncoder.encode(create.getPassword()))
                    .phoneNumber(create.getPhoneNumber())
                    .createdAt(LocalDateTime.now())
                    .createdBy(authService.getAuthLogin())
@@ -69,7 +70,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
       user.setAvatarUrl("");
     }
 
-    user.setPassword(passwordEncoder.encode(create.getPassword()));
+//    user.setPassword(passwordEncoder.encode(create.getPassword()));
 
     repository.save(user);
 
@@ -101,6 +102,7 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
                .id(user.getId())
                .fullName(update.getFullName())
                .email(update.getEmail())
+               .password(user.getPassword())
                .avatarUrl(user.getAvatarUrl())
                .phoneNumber(update.getPhoneNumber())
                .createdBy(user.getCreatedBy())
@@ -109,13 +111,6 @@ public class UserServiceImpl extends BaseServiceImpl<User, Integer, UserDTO, Use
                .updatedAt(LocalDateTime.now())
                .status(update.getStatus())
                .build();
-
-    // before update
-    if (update.getPassword() != null && !update.getPassword().isEmpty()) {
-      user.setPassword(passwordEncoder.encode(update.getPassword()));
-    } else {
-      user.setPassword(user.getPassword());
-    }
 
     if ("false".equals(update.getKeepAvatar())) {
       if (update.getAvatarUrl() != null && !update.getAvatarUrl().isEmpty()) {

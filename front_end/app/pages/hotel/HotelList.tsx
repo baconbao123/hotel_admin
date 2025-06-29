@@ -104,7 +104,9 @@ export default function RoleList() {
   );
 
   const hasPermission = (actionName: string) => {
-    const resource = permissions.find((p: any) => p.resourceName === "Role");
+    const resource = permissions.find((p: any) => p.resourceName === "Hotel");
+    console.log(permissions);
+    
     return resource ? resource.actionNames.includes(actionName) : false;
   };
 

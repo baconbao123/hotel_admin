@@ -10,9 +10,10 @@ import { setUser, type UserLogin } from "@/store/slices/userDataSlice";
 import Cookies from "js-cookie";
 import $axios from "@/axios";
 import Loading from "@/components/shared/Loading";
+import '@/styles/globals.scss'
 
 const fetchUser = async (id: number) => {
-  const res = await $axios.get(`/user/${id}`);
+  const res = await $axios.get(`/user/profile/${id}`);
   console.log("fetchUser response:", res.data.result);
   return res.data.result;
 };
@@ -20,7 +21,6 @@ const fetchUser = async (id: number) => {
 export default function RootLayout() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  // const user = useSelector((state: RootState) => state.userData);
   const [isInitializing, setIsInitializing] = useState(true);
   useFetchPermissions();
 

@@ -5,6 +5,7 @@ import {
   layout,
 } from "@react-router/dev/routes";
 
+
 export default [
   layout("./layouts/rootLayout.tsx", [
     route("/", "./pages/welcome/WelcomePage.tsx"),

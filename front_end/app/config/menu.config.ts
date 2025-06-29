@@ -41,17 +41,17 @@ export const navigation: MenuItem[] = [
     resourceName: "Street",
   },
   {
-    name: "Hotel facilities",
-    href: "/facilities",
-    resourceName: "Facilities",
-    icon: TagIcon,
-  },
-  {
     name: "Hotel Management",
     href: "/hotels",
     icon: BuildingOffice2Icon,
     resourceName: "Hotel",
   },
+  {
+    name: "Hotel Facilities",
+    href: "/facilities",
+    resourceName: "Facilities",
+    icon: TagIcon,
+  }
 ];
 
 export interface MenuItem {

@@ -4,7 +4,7 @@ import com.hotel.webapp.dto.request.AuthReq;
 import com.hotel.webapp.dto.request.TokenRefreshReq;
 import com.hotel.webapp.dto.response.ApiResponse;
 import com.hotel.webapp.dto.response.AuthResponse;
-import com.hotel.webapp.service.admin.UserServiceImpl;
+import com.hotel.webapp.service.admin.UserService;
 import com.hotel.webapp.service.admin.interfaces.AuthService;
 import com.hotel.webapp.service.system.EmailService;
 import com.hotel.webapp.service.system.OtpService;
@@ -25,7 +25,7 @@ public class AuthController {
   AuthService authService;
   EmailService emailService;
   OtpService otpService;
-  UserServiceImpl userService;
+  UserService userService;
 
   @PostMapping("/login")
   public ApiResponse<AuthResponse> authentication(@Valid @RequestBody AuthReq authReq) {

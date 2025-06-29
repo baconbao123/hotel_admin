@@ -14,20 +14,13 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Hotels implements AuditEntity {
+public class RoomType implements AuditEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer id;
-  Integer ownerId;
   String name;
   @Lob
   String description;
-  String avatar;
-  Integer addressId;
-  Integer policyId;
-  Boolean status;
-  Integer approveId;
-  String note;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;
   Integer createdBy;

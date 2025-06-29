@@ -1,7 +1,10 @@
 package com.hotel.webapp.entity;
 
 import com.hotel.webapp.base.AuditEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,20 +17,12 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Hotels implements AuditEntity {
+public class MapRoomFacility implements AuditEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer id;
-  Integer ownerId;
-  String name;
-  @Lob
-  String description;
-  String avatar;
-  Integer addressId;
-  Integer policyId;
-  Boolean status;
-  Integer approveId;
-  String note;
+  Integer facilityId;
+  Integer roomId;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;
   Integer createdBy;

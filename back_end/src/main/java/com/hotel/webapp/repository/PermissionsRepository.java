@@ -58,7 +58,7 @@ public interface PermissionsRepository extends BaseRepository<Permissions, Integ
         "WHERE p.roleId = :roleId AND p.deletedAt IS NULL")
   List<Object[]> getPermissionsByRoleId(@Param("roleId") Integer roleId);
 
-  // check permission
+  // check permission when use resource + action
   @Query("select count(p) > 0 from Permissions p " +
         "join Role r on p.roleId = r.id " +
         "join MapResourcesAction mra on p.mapResourcesActionId = mra.id and mra.deletedAt is null " +
@@ -85,16 +85,4 @@ public interface PermissionsRepository extends BaseRepository<Permissions, Integ
         "join Actions a on a.id = mra.actionId")
   List<Object[]> getResources();
 
-
-//  @Query("select re from Resources re " +
-//        "join MapUserRoles mur on mur.userId = :userId and mur.deletedAt is null " +
-//        "join Role r on mur.roleId = r.id " +
-//        "join MapResourcesAction mra on mra.resourceId = re.id and mra.deletedAt is null " +
-//        "join Permissions p on p.mapResourcesActionId = mra.id and p.roleId = r.id and p.deletedAt is null ")
-//  List<Resources> getResourceByUserId(Integer userId);
-//
-//  @Query("select re from Resources re")
-//  List<Resources> getResources();
-
-  List<Permissions> findPermissionsByRoleId(Integer roleId);
 }

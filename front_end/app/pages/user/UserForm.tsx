@@ -7,7 +7,7 @@ import ImageUploader from "@/utils/ImageUploader";
 import { InputSwitch } from "primereact/inputswitch";
 import { MultiSelect } from "primereact/multiselect";
 import { useRoles } from "@/hooks/useCommonData";
-import "./UserForm.scss";
+// import "./UserForm.scss";
 import { useSelector } from "react-redux";
 import $axios from "@/axios";
 interface Props {

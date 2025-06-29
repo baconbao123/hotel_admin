@@ -11,6 +11,8 @@ import Loading from "@/components/shared/Loading";
 import { useLoading } from "@/contexts/LoadingContext";
 import { useDispatch } from "react-redux";
 import { setUser, type UserLogin } from "@/store/slices/userDataSlice";
+import { useFetchPermissions } from "@/hooks/useFetchPermissions";
+import { fetchUserResources } from "@/components/service/api";
 
 interface LoginForm {
   email: string;
@@ -38,7 +40,7 @@ const LoginPage = () => {
   }, [navigate]);
 
   const fetchUser = async (id: number) => {
-    const res = await $axios.get(`/user/${id}`);
+    const res = await $axios.get(`/user/profile/${id}`);
     return res.data.result;
   };
 
@@ -68,6 +70,7 @@ const LoginPage = () => {
           expires: 7,
         });
       }
+
 
       const payload = JSON.parse(
         atob(response.data.result.token.split(".")[1])

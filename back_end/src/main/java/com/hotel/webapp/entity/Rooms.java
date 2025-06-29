@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,20 +15,22 @@ import java.time.LocalDateTime;
 @Setter
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Hotels implements AuditEntity {
+public class Rooms implements AuditEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer id;
-  Integer ownerId;
   String name;
+  String roomAvatar;
+  Integer hotelId;
+  Integer roomNumber;
+  BigDecimal roomArea;
+  Integer roomType;
+  BigDecimal priceHour;
+  BigDecimal priceNight;
+  Integer limitPerson;
   @Lob
   String description;
-  String avatar;
-  Integer addressId;
-  Integer policyId;
   Boolean status;
-  Integer approveId;
-  String note;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;
   Integer createdBy;

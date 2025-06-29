@@ -2,10 +2,9 @@ package com.hotel.webapp.controller;
 
 import com.hotel.webapp.dto.request.HotelDTO;
 import com.hotel.webapp.dto.response.ApiResponse;
-import com.hotel.webapp.dto.response.CommonRes;
 import com.hotel.webapp.dto.response.HotelsRes;
 import com.hotel.webapp.entity.*;
-import com.hotel.webapp.service.admin.HotelServiceImpl;
+import com.hotel.webapp.service.admin.HotelService;
 import com.hotel.webapp.validation.Permission;
 import com.hotel.webapp.validation.Resource;
 import jakarta.validation.Valid;
@@ -16,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -25,7 +23,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class HotelController {
-  HotelServiceImpl hotelService;
+  HotelService hotelService;
 
 //  @Permission(name = "create")
 //  @PostMapping(consumes = {"multipart/form-data"})

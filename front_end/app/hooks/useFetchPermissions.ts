@@ -20,12 +20,9 @@ export const useFetchPermissions = () => {
       ) {
         try {
           dispatch(startLoading());
-          console.log("Starting permission fetch for token:", currentToken);
           const response = await fetchUserResources();
-          console.log("Permission fetch response:", response);
           dispatch(setPermissions(response.result || response));
         } catch (error) {
-          console.error("Permission fetch failed:", error);
           dispatch(setPermissions([]));
         }
       }

@@ -11,7 +11,7 @@ interface Props {
 }
 
 export default function EditProfile({ onBack }: Props) {
-  // const user = useSelector((state: RootState) => state.userData);
+  const user = useSelector((state: RootState) => state.userData);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [error, setError] = useState<Object | null>(null);
   const navigate = useNavigate();

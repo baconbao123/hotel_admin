@@ -145,10 +145,13 @@ public class AuthServiceImpl implements AuthService {
   private String generateToken(User user) {
     var userRoles = userRoleRepository.findAllByUserIdAndDeletedAtIsNull(user.getId());
 
+    if (userRoles.isEmpty()) throw new AppException(ErrorCode.COMMON_400,
+          "Something went wrong with account");
+
     List<String> roles = userRoles.stream()
                                   .map(ur -> roleRepository.findRolesByDeletedAtIsNull(ur.getRoleId())
-                                                           .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,
-                                                                 "Role not found")))
+                                                           .orElseThrow(() -> new AppException(ErrorCode.COMMON_400,
+                                                                 "Something went wrong with account")))
                                   .map(Role::getName)
                                   .toList();
 

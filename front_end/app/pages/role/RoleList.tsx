@@ -16,6 +16,7 @@ import { SkeletonTemplate } from "@/components/common/skeleton";
 import { useSelector } from "react-redux";
 import { useAppDispatch } from "@/store";
 import { fetchCommonData } from "@/store/slices/commonDataSlice";
+import "@/styles/globals.scss";
 
 export default function RoleList() {
   const [selectedId, setSelectedId] = useState<string>();
@@ -213,7 +214,8 @@ export default function RoleList() {
                       icon="pi pi-eye"
                       rounded
                       text
-                      severity="info"
+                      // severity="info"
+                      className="icons_view"
                       onClick={() => {
                         setSelectedId(String(row.id));
                         setFormMode("view");
@@ -244,7 +246,8 @@ export default function RoleList() {
                       icon="pi pi-trash"
                       rounded
                       text
-                      severity="danger"
+                      // severity="danger"
+                      style={{ color: "blue" }}
                       onClick={async () => {
                         try {
                           const deleted = await handleDelete(String(row.id));
