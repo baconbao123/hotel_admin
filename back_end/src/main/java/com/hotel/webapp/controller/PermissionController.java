@@ -4,8 +4,7 @@ import com.hotel.webapp.dto.request.MappingDTO;
 import com.hotel.webapp.dto.response.ApiResponse;
 import com.hotel.webapp.dto.response.PermissionRes;
 import com.hotel.webapp.entity.Permissions;
-import com.hotel.webapp.entity.Resources;
-import com.hotel.webapp.service.admin.PermissionServiceImpl;
+import com.hotel.webapp.service.admin.PermissionService;
 import com.hotel.webapp.validation.Permission;
 import com.hotel.webapp.validation.Resource;
 import jakarta.validation.Valid;
@@ -24,7 +23,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class PermissionController {
-  PermissionServiceImpl permissionService;
+  PermissionService permissionService;
 
   @PutMapping
   @Permission(name = "update")
@@ -56,9 +55,16 @@ public class PermissionController {
   }
 
   @GetMapping("/resources")
-  public ApiResponse<List<Resources>> getResourceByUser() {
-    return ApiResponse.<List<Resources>>builder()
-                      .result(permissionService.getUserResource())
-                      .build();
-  }
+    public ApiResponse<List<PermissionRes.ResourceActions>> getResourceByUser() {
+      return ApiResponse.<List<PermissionRes.ResourceActions>>builder()
+                        .result(permissionService.getUserResource())
+                        .build();
+    }
+
+//  @GetMapping("/resources")
+//  public ApiResponse<List<Resources>> getResourceByUser() {
+//    return ApiResponse.<List<Resources>>builder()
+//                      .result(permissionService.getUserResource())
+//                      .build();
+//  }
 }

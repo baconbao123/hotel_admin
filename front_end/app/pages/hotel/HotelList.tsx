@@ -18,6 +18,7 @@ import noImg from "@/asset/images/no-img.png";
 import UserForm from "../user/UserForm";
 import HotelForm from "./HotelForm";
 import HotelDetail from "./HotelDetail";
+import { useSelector } from "react-redux";
 
 export default function RoleList() {
   const [selectedId, setSelectedId] = useState<string>();
@@ -26,6 +27,10 @@ export default function RoleList() {
   );
   const [mounted, setMounted] = useState(false);
   const toast = useRef<Toast>(null);
+
+  const permissions = useSelector(
+    (state: any) => state.permissions.permissions
+  );
 
   const {
     data,
@@ -98,6 +103,13 @@ export default function RoleList() {
     </div>
   );
 
+  const hasPermission = (actionName: string) => {
+    const resource = permissions.find((p: any) => p.resourceName === "Hotel");
+    console.log(permissions);
+
+    return resource ? resource.actionNames.includes(actionName) : false;
+  };
+
   return (
     <div className="main-container">
       {mounted && <Toast ref={toast} />}
@@ -134,6 +146,7 @@ export default function RoleList() {
               <div className="flex flex-wrap gap-2 justify-end">
                 <Button
                   label="Add new"
+                  className="btn_add_new"
                   onClick={() => {
                     setSelectedId(undefined);
                     setFormMode("create");
@@ -146,7 +159,7 @@ export default function RoleList() {
         </div>
 
         {tableLoading ? (
-          SkeletonTemplate("Hotel Management", 5)
+          SkeletonTemplate("Hotel Management", 6)
         ) : (
           <DataTable
             value={data}
@@ -228,44 +241,50 @@ export default function RoleList() {
             <Column
               frozen={true}
               header={() => <div className="flex justify-center">Actions</div>}
-              className="w-70"
-              body={(row: any) => (
+              className="w-60"
+              body={(row) => (
                 <div className="flex gap-2 justify-center">
-                  <Button
-                    icon="pi pi-eye"
-                    rounded
-                    text
-                    severity="info"
-                    onClick={() => {
-                      setSelectedId(String(row.id));
-                      setFormMode("view");
-                      setOpenFormDetail(true);
-                    }}
-                    tooltip="View"
-                    tooltipOptions={{ position: "top" }}
-                  />
-                  <Button
-                    icon="pi pi-pencil"
-                    rounded
-                    text
-                    severity="success"
-                    onClick={() => {
-                      setSelectedId(String(row.id));
-                      setFormMode("edit");
-                      setOpenForm(true);
-                    }}
-                    tooltip="Edit"
-                    tooltipOptions={{ position: "top" }}
-                  />
-                  <Button
-                    icon="pi pi-trash"
-                    rounded
-                    text
-                    severity="danger"
-                    onClick={() => handleDelete(String(row.id))}
-                    tooltip="Delete"
-                    tooltipOptions={{ position: "top" }}
-                  />
+                  {hasPermission("view") && (
+                    <Button
+                      icon="pi pi-eye"
+                      className="icon_view"
+                      rounded
+                      text
+                      onClick={() => {
+                        setSelectedId(String(row.id));
+                        setFormMode("view");
+                        setOpenFormDetail(true);
+                      }}
+                      tooltip="View"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  )}
+                  {hasPermission("update") && (
+                    <Button
+                      icon="pi pi-pencil"
+                      rounded
+                      text
+                      className="icon_edit"
+                      onClick={() => {
+                        setSelectedId(String(row.id));
+                        setFormMode("edit");
+                        setOpenForm(true);
+                      }}
+                      tooltip="Edit"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  )}
+                  {hasPermission("delete") && (
+                    <Button
+                      icon="pi pi-trash"
+                      rounded
+                      text
+                      className="icon_trash"
+                      onClick={() => handleDelete(String(row.id))}
+                      tooltip="Delete"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  )}
                 </div>
               )}
             />

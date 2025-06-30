@@ -20,9 +20,9 @@ import java.util.List;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class LocalServiceImpl extends BaseServiceImpl<Streets, Integer, StreetsDTO, StreetsRepository> {
+public class LocalService extends BaseServiceImpl<Streets, Integer, StreetsDTO, StreetsRepository> {
 
-  public LocalServiceImpl(
+  public LocalService(
         StreetsRepository repository,
         BaseMapper<Streets, StreetsDTO> mapper,
         AuthService authService

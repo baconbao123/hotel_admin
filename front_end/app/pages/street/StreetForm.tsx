@@ -5,7 +5,7 @@ import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { Dropdown } from "primereact/dropdown";
 import $axios from "@/axios";
-import { useProvinces } from "@/hooks/useCommonData";
+import { useCommonData } from "@/hooks/useCommonData";
 
 interface Props {
   id?: string;
@@ -47,9 +47,11 @@ export default function StreetForm({
   const [selectedWard, setSelectedWard] = useState<LocalResponse | null>(null);
 
   const toast = useRef<Toast>(null);
-  const header = mode === "edit" ? "EDIT STREET" : "ADD NEW STREET";
+  const header = mode === "edit" ? "EDIT" : "ADD";
 
-  const { provinces } = useProvinces();
+  const { commonData } = useCommonData(["provinces"]);
+
+  const provinces = commonData.provinces ?? [];
 
   // Fetch districts when province is selected
   useEffect(() => {
@@ -268,30 +270,22 @@ export default function StreetForm({
               disabled={submitting}
               style={{ padding: "8px 40px" }}
             />
-            {mode !== "view" && (
-              <Button
-                label="Save"
-                onClick={submit}
-                severity="success"
-                disabled={
-                  submitting ||
-                  !name ||
-                  !selectedProvince ||
-                  !selectedDistrict ||
-                  !selectedWard
-                }
-                loading={submitting}
-                style={{ padding: "8px 40px" }}
-              />
-            )}
+            <Button
+              label="Save"
+              onClick={submit}
+              severity="success"
+              className="btn_submit"
+              loading={submitting}
+              style={{ padding: "8px 40px" }}
+            />
           </div>
         }
-        style={{ width: "40%" }}
+        style={{ width: "50%", maxWidth: "95vw" }}
         modal
         className="p-fluid"
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
       >
-        <div className="p-4">
+        <div className="pl-4 pr-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Name */}
             <div>

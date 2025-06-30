@@ -18,17 +18,16 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class RoleServiceImpl extends BaseServiceImpl<Role, Integer, RoleDTO, RoleRepository> {
+public class RoleService extends BaseServiceImpl<Role, Integer, RoleDTO, RoleRepository> {
   ValidateDataInput validateDataInput;
   MapUserRoleRepository mapUserRoleRepository;
   PermissionsRepository permissionsRepository;
 
-  public RoleServiceImpl(
+  public RoleService(
         RoleRepository repository,
         BaseMapper<Role, RoleDTO> mapper,
         AuthService authService,
@@ -74,34 +73,22 @@ public class RoleServiceImpl extends BaseServiceImpl<Role, Integer, RoleDTO, Rol
 
   @Override
   protected void beforeDelete(Integer id) {
-    updateMapURIfRoleDelete(id, getAuthId());
+    updateMappingsIfRoleDelete(id);
   }
 
-  private void updateMapURIfRoleDelete(int roleId, int authId) {
-    List<MapUserRoles> mapUserRolesList = mapUserRoleRepository.findAllByRoleId(roleId);
+  private void updateMappingsIfRoleDelete(Integer id) {
+    List<Permissions> crrRoleInPermission = permissionsRepository.findAllByRoleId(id);
+    List<MapUserRoles> crrMapUserRole = mapUserRoleRepository.findAllByRoleIdAndDeletedAtIsNull(id);
 
-    List<Integer> mapURIds = mapUserRolesList.stream()
-                                             .map(MapUserRoles::getId)
-                                             .toList();
-
-    updatePermissionIfUserDelete(mapURIds, authId);
-
-    for (MapUserRoles mapUserRoles : mapUserRolesList) {
-      mapUserRoles.setDeletedAt(LocalDateTime.now());
-      mapUserRoles.setUpdatedBy(authId);
-      mapUserRoleRepository.save(mapUserRoles);
+    for (Permissions crrRole : crrRoleInPermission) {
+      crrRole.setDeletedAt(LocalDateTime.now());
+      crrRole.setUpdatedBy(getAuthId());
+      permissionsRepository.save(crrRole);
     }
-  }
-
-  private void updatePermissionIfUserDelete(Collection<Integer> mapUserRoleId, int authId) {
-//    List<Permissions> findAllPermissions = permissionsRepository.findAllByMapURId(mapUserRoleId);
-
-    List<Permissions> findAllPermissions = null;
-
-    for (Permissions permission : findAllPermissions) {
-      permission.setDeletedAt(LocalDateTime.now());
-      permission.setUpdatedBy(authId);
-      permissionsRepository.save(permission);
+    for (MapUserRoles crrRole : crrMapUserRole) {
+      crrRole.setDeletedAt(LocalDateTime.now());
+      crrRole.setUpdatedBy(getAuthId());
+      mapUserRoleRepository.save(crrRole);
     }
   }
 

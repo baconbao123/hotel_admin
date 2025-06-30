@@ -13,6 +13,9 @@ import useCrud from "@/hooks/crudHook";
 import RoleForm from "@/pages/role/RoleForm";
 import RoleDetail from "@/pages/role/RoleDetail";
 import { SkeletonTemplate } from "@/components/common/skeleton";
+import { useSelector } from "react-redux";
+import { useAppDispatch } from "@/store";
+import { fetchCommonData } from "@/store/slices/commonDataSlice";
 
 export default function RoleList() {
   const [selectedId, setSelectedId] = useState<string>();
@@ -21,6 +24,10 @@ export default function RoleList() {
   );
   const [mounted, setMounted] = useState(false);
   const toast = useRef<Toast>(null);
+
+  const permissions = useSelector(
+    (state: any) => state.permissions.permissions
+  );
 
   const {
     data,
@@ -55,26 +62,39 @@ export default function RoleList() {
   const handleSortChange = (e: any) =>
     handleSort(e.sortField || "", e.sortOrder || 0);
 
-  const handleDelete = (id: string) => {
-    Swal.fire({
-      title: "Delete role?",
-      showDenyButton: true,
-      showCancelButton: true,
-      confirmButtonText: "Delete",
-    }).then((result) => {
+  const dispatch = useAppDispatch();
+
+  async function handleDelete(id: string): Promise<boolean> {
+    try {
+      const result = await Swal.fire({
+        title: "Delete role?",
+        showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonText: "Delete",
+      });
+
       if (result.isConfirmed) {
-        deleteItem(id)
-          .then(() => Swal.fire("Deleted!", "", "success"))
-          .catch(() =>
-            toast.current?.show({
-              severity: "error",
-              summary: "Error",
-              detail: "Failed to delete role",
-              life: 3000,
-            })
-          );
+        await deleteItem(id);
+        await Swal.fire("Deleted!", "", "success");
+        return true; // Delete successful
       }
-    });
+      return false; // User canceled or denied
+    } catch (error) {
+      console.error("Error during delete operation:", error);
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Failed to delete role",
+        life: 3000,
+      });
+      return false; // Delete failed due to error
+    }
+  }
+
+  // Check actions
+  const hasPermission = (actionName: string) => {
+    const resource = permissions.find((p: any) => p.resourceName === "Role");
+    return resource ? resource.actionNames.includes(actionName) : false;
   };
 
   const statusBody = (row: any) => (
@@ -127,14 +147,17 @@ export default function RoleList() {
             </div>
             <div className="col-span-4 2xl:col-span-1">
               <div className="flex flex-wrap gap-2 justify-end">
-                <Button
-                  label="Add new"
-                  onClick={() => {
-                    setSelectedId(undefined);
-                    setFormMode("create");
-                    setOpenForm(true);
-                  }}
-                />
+                {hasPermission("create") && (
+                  <Button
+                    label="Add New"
+                    className="btn_add_new"
+                    onClick={() => {
+                      setSelectedId(undefined);
+                      setFormMode("create");
+                      setOpenForm(true);
+                    }}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -189,74 +212,114 @@ export default function RoleList() {
               frozen={true}
               header={() => <div className="flex justify-center">Actions</div>}
               className="w-60"
-              body={(row: any) => (
+              body={(row) => (
                 <div className="flex gap-2 justify-center">
-                  <Button
-                    icon="pi pi-eye"
-                    rounded
-                    text
-                    severity="info"
-                    onClick={() => {
-                      setSelectedId(String(row.id));
-                      setFormMode("view");
-                      setOpenFormDetail(true);
-                    }}
-                    tooltip="View"
-                    tooltipOptions={{ position: "top" }}
-                  />
-                  <Button
-                    icon="pi pi-pencil"
-                    rounded
-                    text
-                    severity="success"
-                    onClick={() => {
-                      setSelectedId(String(row.id));
-                      setFormMode("edit");
-                      setOpenForm(true);
-                    }}
-                    tooltip="Edit"
-                    tooltipOptions={{ position: "top" }}
-                  />
-                  <Button
-                    icon="pi pi-trash"
-                    rounded
-                    text
-                    severity="danger"
-                    onClick={() => handleDelete(String(row.id))}
-                    tooltip="Delete"
-                    tooltipOptions={{ position: "top" }}
-                  />
+                  {hasPermission("view") && (
+                    <Button
+                      icon="pi pi-eye"
+                      rounded
+                      text
+                      className="icon_view"
+                      onClick={() => {
+                        setSelectedId(String(row.id));
+                        setFormMode("view");
+                        setOpenFormDetail(true);
+                      }}
+                      tooltip="View"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  )}
+                  
+                  {hasPermission("update") && (
+                    <Button
+                      icon="pi pi-pencil"
+                      rounded
+                      text
+                      className="icon_edit"
+                      onClick={() => {
+                        setSelectedId(String(row.id));
+                        setFormMode("edit");
+                        setOpenForm(true);
+                      }}
+                      tooltip="Edit"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  )}
+
+                  {hasPermission("delete") && (
+                    <Button
+                      icon="pi pi-trash"
+                      rounded
+                      text
+                      className="icon_trash"
+                      style={{ color: "blue" }}
+                      onClick={async () => {
+                        try {
+                          const deleted = await handleDelete(String(row.id));
+                          if (deleted) {
+                            const result = await dispatch(
+                              fetchCommonData({
+                                types: ["roles"],
+                                forceRefresh: true,
+                              })
+                            );
+                            if (fetchCommonData.rejected.match(result)) {
+                              toast.current?.show({
+                                severity: "error",
+                                summary: "Error",
+                                detail: "Failed to refresh roles data",
+                                life: 3000,
+                              });
+                            }
+                            await updatePageData(page, pageSize);
+                          }
+                        } catch (error) {
+                          console.error(
+                            "Error during delete operation:",
+                            error
+                          );
+                        }
+                      }}
+                      tooltip="Delete"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  )}
                 </div>
               )}
             />
           </DataTable>
         )}
       </Card>
-      <RoleForm
-        id={selectedId}
-        open={openForm}
-        mode={formMode}
-        onClose={() => {
-          closeForm();
-          setFormMode("create");
-        }}
-        loadDataById={loadById}
-        createItem={createItem}
-        updateItem={updateItem}
-        error={error}
-      />
 
-      <RoleDetail
-        id={selectedId}
-        open={openFormDetail}
-        mode={formMode}
-        onClose={() => {
-          setOpenFormDetail(false);
-          setSelectedId(undefined);
-          setFormMode("view");
-        }}
-        loadDataById={loadById}
-      />
+      {(hasPermission("create") || hasPermission("update")) && (
+        <RoleForm
+          id={selectedId}
+          open={openForm}
+          mode={formMode}
+          onClose={() => {
+            closeForm();
+            setFormMode("create");
+          }}
+          loadDataById={loadById}
+          createItem={createItem}
+          updateItem={updateItem}
+          error={error}
+        />
+      )}
+
+      {hasPermission("view") && (
+        <RoleDetail
+          id={selectedId}
+          open={openFormDetail}
+          mode={formMode}
+          onClose={() => {
+            setOpenFormDetail(false);
+            setSelectedId(undefined);
+            setFormMode("view");
+          }}
+          loadDataById={loadById}
+        />
+      )}
     </div>
   );
 }

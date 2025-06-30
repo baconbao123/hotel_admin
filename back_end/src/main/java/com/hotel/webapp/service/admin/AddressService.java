@@ -23,7 +23,7 @@ import java.util.Objects;
 @Transactional
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class AddressServiceImpl {
+public class AddressService {
   AddressRepository repository;
   StreetsRepository streetRepository;
   AuthService authService;
@@ -85,4 +85,6 @@ public class AddressServiceImpl {
     if (!Objects.equals(streets.getWardCode(), addressDTO.getWardCode()))
       throw new AppException(ErrorCode.COMMON_400, "Street not include in district");
   }
+
+
 }

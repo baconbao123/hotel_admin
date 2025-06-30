@@ -1,9 +1,11 @@
 package com.hotel.webapp.service.system;
 
-import com.hotel.webapp.repository.DocumentTypeRepository;
-import com.hotel.webapp.repository.FacilityTypeRepository;
+import com.hotel.webapp.repository.DocumentsHotelRepository;
+import com.hotel.webapp.repository.FacilitiesRepository;
 import com.hotel.webapp.repository.MapResourceActionRepository;
 import com.hotel.webapp.repository.TypeHotelRepository;
+import com.hotel.webapp.repository.seeder.PaymentMethodRepository;
+import com.hotel.webapp.repository.seeder.RoomTypeRepository;
 import com.hotel.webapp.util.ValidateDataInput;
 import com.nimbusds.jose.util.Pair;
 import jakarta.transaction.Transactional;
@@ -23,17 +25,16 @@ import java.util.Map;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SystemSeeder {
   MapResourceActionRepository mapResourceActionRepository;
-  DocumentTypeRepository documentTypeRepository;
-  FacilityTypeRepository facilityTypeRepository;
-  TypeHotelRepository typeHotelRepository;
   ValidateDataInput validateDataInput;
-
-  //
-  // create update delete
+  TypeHotelRepository typeHotelRepository;
+  DocumentsHotelRepository documentsHotelRepository;
+  FacilitiesRepository facilitiesRepository;
+  RoomTypeRepository roomTypeRepository;
+  PaymentMethodRepository paymentMethodRepository;
 
   List<String> DEFAULT_RESOURCE = List.of("Hotel", "User", "Permissions", "Role", "Street", "Dashboard", "Facilities");
 
-  List<String> DEFAULT_ACTION = List.of("view", "create", "update", "delete");
+  List<String> DEFAULT_ACTION = List.of("view", "create", "update", "delete", "change_password");
 
   List<String> DEFAULT_DOCUMENT_TYPE = List.of("Booking Confirmation", "Guest Registration", "Guest Folio");
 
@@ -42,13 +43,17 @@ public class SystemSeeder {
 
   List<String> DEFAULT_TYPE_HOTEL = List.of("Business", "Resort", "Airport", "Casino", "Extended Stay");
 
+  List<String> ROOM_TYPE = List.of("Standard", "Superior", "Deluxe", "Executive", "Suite");
+
+  List<String> PAYMENT_METHOD = List.of("Cash", "VN Pay");
+
+
   @Transactional
   public void seeder() {
     Map<String, Integer> resourceIds = seederResources();
 
     Map<String, Integer> actionIds = seederActions();
 
-    // create resource-actions mapping
     seederResourceActionMapping(resourceIds, actionIds);
 
     seederType();
@@ -103,7 +108,11 @@ public class SystemSeeder {
     for (String resourceName : DEFAULT_RESOURCE) {
       int resourceId = resourceIds.get(resourceName);
 
-      for (String actionName : DEFAULT_ACTION) {
+      List<String> actions = resourceName.equals("User") ?
+            DEFAULT_ACTION : DEFAULT_ACTION.stream()
+                                           .filter(a -> !a.equals("change_password")).toList();
+
+      for (String actionName : actions) {
         int actionId = actionIds.get(actionName);
 
         int mappingId = mapResourceActionRepository.findIdByResourceIdAndActionId(resourceId, actionId)
@@ -128,34 +137,53 @@ public class SystemSeeder {
   public void seederType() {
     for (String type : DEFAULT_DOCUMENT_TYPE) {
       String colName = validateDataInput.generateColName(type);
-      documentTypeRepository.findByNameAndDeletedAtIsNull(type)
-                            .orElseGet(() -> {
-                              documentTypeRepository.insertDocumentType(type, colName, LocalDateTime.now(), 0);
-                              return documentTypeRepository.findByNameAndDeletedAtIsNull(type)
-                                                           .orElseThrow(
-                                                                 () -> new RuntimeException("Failed insert type"));
-                            });
+      documentsHotelRepository.findDocumentTypeByName(type)
+                              .orElseGet(() -> {
+                                documentsHotelRepository.insertDocumentType(type, colName, LocalDateTime.now(), 0);
+                                return documentsHotelRepository.findDocumentTypeByName(type)
+                                                               .orElseThrow(
+                                                                     () -> new RuntimeException("Failed insert type"));
+                              });
     }
 
     for (String facility : DEFAULT_HOTEL_FACILITIES_TYPE) {
       String colName = validateDataInput.generateColName(facility);
-      facilityTypeRepository.findByNameAndDeletedAtIsNull(facility)
-                            .orElseGet(() -> {
-                              facilityTypeRepository.insertType(facility, colName, LocalDateTime.now(), 0);
-                              return facilityTypeRepository.findByNameAndDeletedAtIsNull(facility)
-                                                           .orElseThrow(
-                                                                 () -> new RuntimeException("Failed insert type"));
-                            });
+      facilitiesRepository.findFacilityTypeByName(facility)
+                          .orElseGet(() -> {
+                            facilitiesRepository.insertFacilityType(facility, colName, LocalDateTime.now(), 0);
+                            return facilitiesRepository.findFacilityTypeByName(facility)
+                                                       .orElseThrow(
+                                                             () -> new RuntimeException("Failed insert type"));
+                          });
     }
 
     for (String type : DEFAULT_TYPE_HOTEL) {
       String colName = validateDataInput.generateColName(type);
-      typeHotelRepository.findByNameAndDeletedAtIsNull(type)
+      typeHotelRepository.findHTypeHotelByName(type)
                          .orElseGet(() -> {
                            typeHotelRepository.insertTypeHotel(type, colName, LocalDateTime.now(), 0);
-                           return typeHotelRepository.findByNameAndDeletedAtIsNull(type)
+                           return typeHotelRepository.findHTypeHotelByName(type)
                                                      .orElseThrow(() -> new RuntimeException("Failed insert type"));
                          });
+    }
+
+    for (String room : ROOM_TYPE) {
+      roomTypeRepository.findRoomTypeByName(room)
+                        .orElseGet(() -> {
+                          roomTypeRepository.insertRoomType(room, LocalDateTime.now(), 0);
+                          return roomTypeRepository.findRoomTypeByName(room)
+                                                   .orElseThrow(() -> new RuntimeException("Failed insert type"));
+                        });
+    }
+
+    for (String type : PAYMENT_METHOD) {
+      paymentMethodRepository.findPaymentMethodByName(type)
+                             .orElseGet(() -> {
+                               paymentMethodRepository.insertPaymentMethod(type, LocalDateTime.now(), 0);
+                               return paymentMethodRepository.findPaymentMethodByName(type)
+                                                             .orElseThrow(
+                                                                   () -> new RuntimeException("Failed insert type"));
+                             });
     }
   }
 

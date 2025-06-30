@@ -1,1 +1,13 @@
 @import "./calendar.scss";
+
+@import "./table.scss";
+
+.p-breadcrumb {
+  height: 42px;
+  flex-wrap: wrap;
+}
+
+.p-menuitem {
+    display: flex;
+    align-items: center;
+}

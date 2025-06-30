@@ -120,12 +120,12 @@ export default function HotelDetail({
             />
           </div>
         }
-        style={{ width: "50vw" }}
+        style={{ width: "50%" }}
         modal
         className="p-fluid"
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
       >
-        <div className="space-y-6 p-4">
+        <div className="space-y-6 pl-4 pr-4">
           {/* Basic Info & Address Info */}
           <div className="grid grid-cols-2 gap-6">
             {/* Left Column: Avatar + Basic Info */}

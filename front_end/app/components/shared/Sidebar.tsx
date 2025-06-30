@@ -1,37 +1,33 @@
-// src/components/Sidebar.tsx
-import { useState, useEffect } from "react";
-import { ArrowRightIcon, ChevronDownIcon } from "@heroicons/react/24/outline";
-import { Link, useLocation, useNavigate } from "react-router";
+import { useState, useMemo } from "react";
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { Link, useLocation } from "react-router";
 import { navigation } from "../../config/menu.config";
 import logo from "../../asset/images/logo.png";
-import Cookies from "js-cookie";
-import { fetchUserResources } from "../service/api";
+import { useSelector } from "react-redux";
+import { selectHasPermission } from "@/store/slices/permissionSlice";
+import { Button } from "antd";
 
 export default function Sidebar() {
   const [expandedMenus, setExpandedMenus] = useState<string[]>([]);
   const [collapsed, setCollapsed] = useState(false);
-  const [userResources, setUserResources] = useState<string[]>([]);
   const location = useLocation();
-  const navigate = useNavigate();
 
-  // Fetch user resources on mount
-  useEffect(() => {
-    const loadResources = async () => {
-      try {
-        const resources = await fetchUserResources();
-        setUserResources(resources);
-      } catch (error) {
-        // Axios interceptors handle errors (e.g., redirect to /login on 401)
-        console.error("Failed to fetch resources:", error);
-      }
-    };
-    loadResources();
-  }, []);
-
-  // Filter navigation based on user resources
-  const filteredNavigation = navigation.filter((item) =>
-    userResources.includes(item.resourceName)
+  const permissions = useSelector(
+    (state: any) => state.permissions.permissions
   );
+  const isLoading = useSelector((state: any) => state.permissions.loading);
+
+  const hasPermission = (resourceName: string, actionName?: string) => {
+    return selectHasPermission(
+      { permissions: { permissions } } as any,
+      resourceName,
+      actionName || "view"
+    );
+  };
+
+  const filteredNavigation = useMemo(() => {
+    return navigation.filter((item) => hasPermission(item.resourceName));
+  }, [permissions]);
 
   const toggleMenu = (menuName: string) => {
     setExpandedMenus((current) =>
@@ -43,17 +39,22 @@ export default function Sidebar() {
 
   const handleCollapse = () => setCollapsed((c) => !c);
 
-  const isActive = (href: string) => location.pathname === href;
-
-  const handleLogout = () => {
-    Cookies.remove("token");
-    Cookies.remove("refreshToken");
-    navigate("/login");
+  const isActive = (href: string) => {
+    const currentPath = location.pathname;
+    return currentPath === href || currentPath.startsWith(`${href}/`);
   };
+
+  if (isLoading || !permissions || permissions.length === 0) {
+    return (
+      <div className="sidebar flex items-center justify-center h-full">
+        Loading...
+      </div>
+    );
+  }
 
   return (
     <div
-      className={`flex flex-col bg-white border-r border-gray-200 min-h-screen transition-all duration-200 overflow-hidden ${
+      className={`sidebar flex flex-col bg-white border-r border-gray-200 min-h-screen transition-all duration-200 overflow-hidden ${
         collapsed ? "w-20" : "w-70"
       }`}
     >
@@ -149,11 +150,11 @@ export default function Sidebar() {
                             <Link
                               to={child.href}
                               className={`flex items-center px-3 py-2 rounded-lg text-sm transition 
-                              ${
-                                isActive(child.href)
-                                  ? "bg-blue-100 text-blue-700 font-semibold"
-                                  : "text-gray-500 hover:bg-gray-100"
-                              }`}
+                                ${
+                                  isActive(child.href)
+                                    ? "bg-blue-100 text-blue-700 font-semibold"
+                                    : "text-gray-500 hover:bg-gray-100"
+                                }`}
                             >
                               <span className="truncate">{child.name}</span>
                             </Link>
@@ -169,7 +170,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Collapse Button */}
-      <button
+      <Button
         onClick={handleCollapse}
         className="text-gray-500 hover:text-blue-400 p-1 rounded transition justify-end flex m-5"
         aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
@@ -205,7 +206,7 @@ export default function Sidebar() {
             />
           </svg>
         )}
-      </button>
+      </Button>
     </div>
   );
 }

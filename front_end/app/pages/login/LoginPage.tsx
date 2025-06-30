@@ -9,6 +9,10 @@ import $axios from "@/axios"; // Import custom axios instance
 import Cookies from "js-cookie";
 import Loading from "@/components/shared/Loading";
 import { useLoading } from "@/contexts/LoadingContext";
+import { useDispatch } from "react-redux";
+import { setUser, type UserLogin } from "@/store/slices/userDataSlice";
+import { useFetchPermissions } from "@/hooks/useFetchPermissions";
+import { fetchUserResources } from "@/components/service/api";
 
 interface LoginForm {
   email: string;
@@ -26,7 +30,8 @@ const LoginPage = () => {
   const [loginError, setLoginError] = useState<string>("");
   const [serverError, setServerError] = useState(false);
   const { isLoading } = useLoading();
-  // Check if user is already logged in
+  const dispatch = useDispatch();
+
   useEffect(() => {
     const token = Cookies.get("token");
     if (token) {
@@ -34,7 +39,10 @@ const LoginPage = () => {
     }
   }, [navigate]);
 
-  
+  const fetchUser = async (id: number) => {
+    const res = await $axios.get(`/user/profile/${id}`);
+    return res.data.result;
+  };
 
   const handleSubmit = async (e: any): Promise<void> => {
     e.preventDefault();
@@ -43,9 +51,6 @@ const LoginPage = () => {
     setLoginError("");
     setServerError(false);
 
-    
-
-   
     if (!email) {
       setEmailError("Email is required");
       return;
@@ -58,24 +63,47 @@ const LoginPage = () => {
     const loginData: LoginForm = { email, password, remember };
     try {
       const response = await $axios.post("/auth/login", loginData);
-      console.log(response.data.code);
-    
+
       if (response.data.code === 200) {
-        Cookies.set("token", response.data.result.token, { expires: 1/24 });
-        Cookies.set("refreshToken", response.data.result.refreshToken, { expires: 7 });
-        navigate("/");
+        Cookies.set("token", response.data.result.token, { expires: 1 / 24 });
+        Cookies.set("refreshToken", response.data.result.refreshToken, {
+          expires: 7,
+        });
       }
+
+      const payload = JSON.parse(
+        atob(response.data.result.token.split(".")[1])
+      );
+
+      const userId = payload.userId || 0;
+
+      const data = await fetchUser(userId);
+
+      const userData: UserLogin = {
+        id: userId,
+        email: data.email,
+        fullname: data.fullName,
+        phoneNumber: data.phoneNumber,
+        avatar: data.avatarUrl,
+        role: data.roles,
+        loading: false,
+      };
+
+      dispatch(setUser(userData));
+
+      navigate("/");
     } catch (error: any) {
-      if (!error.response || error.code === 'ERR_NETWORK') {
+      if (!error.response || error.code === "ERR_NETWORK") {
         setServerError(true);
         return;
       }
-      
-      const errorMessage = error.response?.data?.message || "Invalid email or password";
+
+      const errorMessage =
+        error.response?.data?.message || "Invalid email or password";
       setLoginError(errorMessage);
-      
-      Cookies.remove("token");
-      Cookies.remove("refreshToken");
+
+      // Cookies.remove("token");
+      // Cookies.remove("refreshToken");
     }
   };
 
@@ -86,7 +114,7 @@ const LoginPage = () => {
   return (
     <div className="flex items-center justify-center p-4 relative">
       {isLoading && <Loading fullScreen={true} />}
-      
+
       <div className="lg:hidden">
         <i className="fas fa-hotel text-3xl text-blue-600"></i>
       </div>
@@ -106,32 +134,40 @@ const LoginPage = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="email"
+              className="block text-sm font-medium text-gray-700"
+            >
               Email
             </label>
             <div className="relative">
-              
               <InputText
                 id="email"
                 placeholder="Email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={`w-full pl-10 pr-4 py-2 border ${
-                  emailError ? 'border-red-500' : 'border-gray-300'
+                  emailError ? "border-red-500" : "border-gray-300"
                 } rounded-lg focus:ring-2 ${
-                  emailError ? 'focus:ring-red-500 focus:border-red-500' : 'focus:ring-blue-500 focus:border-blue-500'
+                  emailError
+                    ? "focus:ring-red-500 focus:border-red-500"
+                    : "focus:ring-blue-500 focus:border-blue-500"
                 } text-sm hover:border-blue-400 transition-colors`}
               />
-              {emailError && <p className="mt-1 text-xs text-red-500">{emailError}</p>}
+              {emailError && (
+                <p className="mt-1 text-xs text-red-500">{emailError}</p>
+              )}
             </div>
           </div>
 
           <div className="space-y-2">
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="password"
+              className="block text-sm font-medium text-gray-700"
+            >
               Password
             </label>
             <div className="relative">
-              
               <InputText
                 id="password"
                 type="password"
@@ -139,12 +175,16 @@ const LoginPage = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className={`w-full pl-10 pr-4 py-2 border ${
-                  passwordError ? 'border-red-500' : 'border-gray-300'
+                  passwordError ? "border-red-500" : "border-gray-300"
                 } rounded-lg focus:ring-2 ${
-                  passwordError ? 'focus:ring-red-500 focus:border-red-500' : 'focus:ring-blue-500 focus:border-blue-500'
+                  passwordError
+                    ? "focus:ring-red-500 focus:border-red-500"
+                    : "focus:ring-blue-500 focus:border-blue-500"
                 } text-sm hover:border-blue-400 transition-colors`}
               />
-              {passwordError && <p className="mt-1 text-xs text-red-500">{passwordError}</p>}
+              {passwordError && (
+                <p className="mt-1 text-xs text-red-500">{passwordError}</p>
+              )}
             </div>
           </div>
 
@@ -170,7 +210,7 @@ const LoginPage = () => {
             type="submit"
             disabled={isLoading}
             className={`w-full ${
-              isLoading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
+              isLoading ? "bg-blue-400" : "bg-blue-600 hover:bg-blue-700"
             } text-white py-2 rounded-lg transition-colors`}
           />
 

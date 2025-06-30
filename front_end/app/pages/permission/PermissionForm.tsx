@@ -6,7 +6,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import $axios from "@/axios";
 import { Checkbox } from "antd";
-import { useResourceActions } from "@/hooks/useCommonData";
+import { useCommonData } from "@/hooks/useCommonData";
 
 interface Resource {
   id: number;
@@ -42,15 +42,12 @@ export default function PermissionForm({
   const getHeader = (): string => {
     return "EDIT PERMISSION";
   };
+  const { commonData } = useCommonData(["permissions"]);
 
-  const {
-    resourceActions,
-    loading: resourceLoading,
-    error: resourceError,
-  } = useResourceActions();
+  const resourceActions = commonData.resourceActions;
 
   useEffect(() => {
-    if (!resourceLoading && resourceActions) {
+    if (resourceActions) {
       setActionData(resourceActions);
 
       const uniqueResources: any = [
@@ -66,7 +63,7 @@ export default function PermissionForm({
       ];
       setResourceData(uniqueResources);
     }
-  }, [resourceActions, resourceLoading]);
+  }, [resourceActions]);
 
   const submit = async () => {
     setSubmitting(true);
@@ -228,6 +225,7 @@ export default function PermissionForm({
                 label="Save"
                 onClick={submit}
                 severity="success"
+                className="btn_submit"
                 disabled={submitting}
                 loading={submitting}
                 style={{ padding: "8px 40px" }}
@@ -235,7 +233,7 @@ export default function PermissionForm({
             </div>
           );
         }}
-        style={{ width: "50%" }}
+        style={{ width: "50%", maxWidth: "95vw" }}
         modal
         className="p-fluid"
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}

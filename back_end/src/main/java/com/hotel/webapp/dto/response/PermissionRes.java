@@ -14,7 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PermissionRes {
-  //  Integer permissionId;
   String createdBy;
   LocalDateTime createdAt;
   String updateBy;
@@ -42,5 +41,14 @@ public class PermissionRes {
     String resourceName;
     Integer actionId;
     String actionName;
+  }
+
+  @Getter
+  @Setter
+  @AllArgsConstructor
+  @FieldDefaults(level = AccessLevel.PRIVATE)
+  public static class ResourceActions {
+    String resourceName;
+    List<String> actionNames;
   }
 }

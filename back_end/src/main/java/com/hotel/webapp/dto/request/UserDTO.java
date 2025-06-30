@@ -1,8 +1,9 @@
 package com.hotel.webapp.dto.request;
 
+import com.hotel.webapp.validation.FieldAndCheckRegexp;
 import com.hotel.webapp.validation.FieldNotEmpty;
+import com.hotel.webapp.validation.ForceType;
 import com.hotel.webapp.validation.Trim;
-import jakarta.validation.constraints.Email;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,17 +19,15 @@ public class UserDTO {
   @Trim
   @FieldNotEmpty(field = "Full name")
   String fullName;
-  @Email(message = "EMAIL_INVALID", regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
+  @FieldAndCheckRegexp(field = "Email", force = ForceType.MANDATORY, regex = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
   @Trim
-  @FieldNotEmpty(field = "Otp")
   String email;
-  //  @Pattern(regexp = "^\\d{10}$")
+  @FieldAndCheckRegexp(field = "Phone Number", force = ForceType.MANDATORY, regex = "^(\\(\\d{3}\\)|\\d{3})-?\\d{3}-?\\d{4}$")
   @Trim
-  @FieldNotEmpty(field = "Phone number")
   String phoneNumber;
   String password;
-  MultipartFile avatarUrl;
 
+  MultipartFile avatarUrl;
   String keepAvatar;
 
   @FieldNotEmpty(field = "Status")
@@ -40,20 +39,18 @@ public class UserDTO {
   @Getter
   @Setter
   @FieldDefaults(level = AccessLevel.PRIVATE)
-  public class ProfileDTO {
+  public static class ProfileDTO {
     @Trim
     @FieldNotEmpty(field = "Full name")
     String fullName;
-    @Email(message = "EMAIL_INVALID", regexp = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
+    @FieldAndCheckRegexp(field = "Email", force = ForceType.MANDATORY, regex = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
     @Trim
-    @FieldNotEmpty(field = "Otp")
     String email;
+    @FieldAndCheckRegexp(field = "Phone Number", force = ForceType.MANDATORY, regex = "^(\\(\\d{3}\\)|\\d{3})-?\\d{3}-?\\d{4}$")
     @Trim
-    @FieldNotEmpty(field = "Phone number")
     String phoneNumber;
-    String password;
-
     MultipartFile avatarUrl;
+    String keepAvatar;
   }
 }
 

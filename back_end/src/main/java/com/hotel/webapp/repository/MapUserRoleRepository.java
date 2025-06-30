@@ -17,16 +17,7 @@ public interface MapUserRoleRepository extends BaseRepository<MapUserRoles, Inte
   //  find all
   List<MapUserRoles> findAllByUserIdAndDeletedAtIsNull(int userId);
 
-  List<MapUserRoles> findAllByRoleId(int roleId);
-
-  List<MapUserRoles> findAllByUserIdInAndDeletedAtIsNull(Collection<Integer> userId);
-
-
-  // find role ids
-  List<Integer> findRoleIdsByUserIdAndDeletedAtIsNull(Integer userId);
-
-  //  exist
-  boolean existsByIdAndDeletedAtIsNull(Integer id);
+  List<MapUserRoles> findAllByRoleIdAndDeletedAtIsNull(int roleId);
 
 
 }

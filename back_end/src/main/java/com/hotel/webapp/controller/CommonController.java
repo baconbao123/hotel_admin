@@ -2,7 +2,8 @@ package com.hotel.webapp.controller;
 
 import com.hotel.webapp.dto.response.ApiResponse;
 import com.hotel.webapp.dto.response.AttributeDataResponse;
-import com.hotel.webapp.entity.Resources;
+import com.hotel.webapp.repository.seeder.PaymentMethodRepository;
+import com.hotel.webapp.repository.seeder.RoomTypeRepository;
 import com.hotel.webapp.service.admin.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -19,18 +20,17 @@ import java.util.List;
 @RequestMapping("/api")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CommonController {
-  RoleServiceImpl roleService;
-  LocalServiceImpl localService;
-  FacilitiesServiceImpl facilitiesService;
-  PermissionServiceImpl permissionService;
-  HotelServiceImpl hotelService;
+  RoleService roleService;
+  LocalService localService;
+  FacilitiesService facilitiesService;
+  PermissionService permissionService;
+  HotelService hotelService;
+  PaymentMethodRepository paymentMethodRepository;
+  RoomTypeRepository roomTypeRepository;
 
   @GetMapping("/common-data")
   public ApiResponse<AttributeDataResponse> getCommonData(
         @RequestParam List<String> types
-//        @RequestParam(required = false) String provinceCode,
-//        @RequestParam(required = false) String districtCode,
-//        @RequestParam(required = false) String wardCode
   ) {
     AttributeDataResponse.AttributeDataResponseBuilder builder = AttributeDataResponse.builder();
 
@@ -42,35 +42,26 @@ public class CommonController {
         case "provinces":
           builder.provinces(localService.getProvinces());
           break;
-//        case "districts":
-//          if (provinceCode != null && !provinceCode.isBlank()) {
-//            builder.districts(localService.findDistrictsByProvinceCode(provinceCode));
-//          }
-//          break;
-//        case "wards":
-//          if (districtCode != null && !districtCode.isBlank()) {
-//            builder.wards(localService.findWardsByDistrict(districtCode));
-//          }
-//          break;
-//        case "streets":
-//          if (wardCode != null && !wardCode.isBlank()) {
-//            builder.streets(localService.findStreetByWard(wardCode));
-//          }
-//          break;
-        case "facility-types":
+        case "facilitiestype":
           builder.facilityTypes(facilitiesService.findAllFacilityType());
           break;
-        case "resource-actions":
+        case "permissions":
           builder.resourceActions(permissionService.getMapResourcesActions());
           break;
-        case "hotel-documents":
+        case "hoteldocuments":
           builder.documentTypes(hotelService.findDocumentHotels());
           break;
-        case "hotel-types":
+        case "hoteltypes":
           builder.hotelTypes(hotelService.findTypeHotels());
           break;
-        case "hotel-facilities":
+        case "hotelfacilities":
           builder.hotelFacilities(hotelService.findFacilities());
+          break;
+        case "paymentmethods":
+          builder.paymentMethods(paymentMethodRepository.findAllPayment());
+          break;
+        case "roomtypes":
+          builder.roomTypes(roomTypeRepository.findRoomTypes());
           break;
         default:
           break;

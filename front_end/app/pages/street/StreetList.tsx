@@ -10,8 +10,6 @@ import { Skeleton } from "primereact/skeleton";
 import Swal from "sweetalert2";
 import BreadCrumbComponent from "@/components/common/breadCrumb/BreadCrumbComponent";
 import useCrud from "@/hooks/crudHook";
-import RoleForm from "@/pages/role/RoleForm";
-import RoleDetail from "@/pages/role/RoleDetail";
 import { SkeletonTemplate } from "@/components/common/skeleton";
 import StreetForm from "./StreetForm";
 import StreetDetail from "./StreetDetail";
@@ -48,8 +46,6 @@ export default function StreetList() {
     sortOrder,
     closeForm,
   } = useCrud("/local");
-
-
 
   useEffect(() => {
     setMounted(true);
@@ -117,6 +113,7 @@ export default function StreetList() {
               <div className="flex flex-wrap gap-2 justify-end">
                 <Button
                   label="Add new"
+                  className="btn_add_new"
                   onClick={() => {
                     setSelectedId(undefined);
                     setFormMode("create");
@@ -182,7 +179,7 @@ export default function StreetList() {
                     icon="pi pi-eye"
                     rounded
                     text
-                    severity="info"
+                    className="icon_view"
                     onClick={() => {
                       setSelectedId(String(row.id));
                       setFormMode("view");
@@ -193,9 +190,9 @@ export default function StreetList() {
                   />
                   <Button
                     icon="pi pi-pencil"
+                    className="icon_edit"
                     rounded
                     text
-                    severity="success"
                     onClick={() => {
                       setSelectedId(String(row.id));
                       setFormMode("edit");
@@ -208,7 +205,7 @@ export default function StreetList() {
                     icon="pi pi-trash"
                     rounded
                     text
-                    severity="danger"
+                    className="icon_trash"
                     onClick={() => handleDelete(String(row.id))}
                     tooltip="Delete"
                     tooltipOptions={{ position: "top" }}
