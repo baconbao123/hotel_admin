@@ -21,9 +21,7 @@ public class HotelDTO {
   Boolean status;
 
   //  approve
-//  @FieldNotEmpty(field = "Approve")
-//  Integer approveId;
-//  String reason;
+  String noteHotel;
 
   // address ----
   @FieldNotEmpty(field = "Province code")
@@ -70,8 +68,8 @@ public class HotelDTO {
   @Setter
   @FieldDefaults(level = AccessLevel.PRIVATE)
   public static class ImagesReq {
-    Integer imageId;
-    String existingImageUrl;
+    Integer imageId = null;
+    String existingImageUrl = null;
     MultipartFile imageFile;
   }
 

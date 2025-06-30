@@ -39,7 +39,7 @@ public class UserDTO {
   @Getter
   @Setter
   @FieldDefaults(level = AccessLevel.PRIVATE)
-  public class ProfileDTO {
+  public static class ProfileDTO {
     @Trim
     @FieldNotEmpty(field = "Full name")
     String fullName;

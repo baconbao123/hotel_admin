@@ -106,7 +106,7 @@ export default function RoleList() {
   const hasPermission = (actionName: string) => {
     const resource = permissions.find((p: any) => p.resourceName === "Hotel");
     console.log(permissions);
-    
+
     return resource ? resource.actionNames.includes(actionName) : false;
   };
 
@@ -146,6 +146,7 @@ export default function RoleList() {
               <div className="flex flex-wrap gap-2 justify-end">
                 <Button
                   label="Add new"
+                  className="btn_add_new"
                   onClick={() => {
                     setSelectedId(undefined);
                     setFormMode("create");
@@ -158,7 +159,7 @@ export default function RoleList() {
         </div>
 
         {tableLoading ? (
-          SkeletonTemplate("Hotel Management", 5)
+          SkeletonTemplate("Hotel Management", 6)
         ) : (
           <DataTable
             value={data}
@@ -240,15 +241,15 @@ export default function RoleList() {
             <Column
               frozen={true}
               header={() => <div className="flex justify-center">Actions</div>}
-              className="w-70"
+              className="w-60"
               body={(row) => (
                 <div className="flex gap-2 justify-center">
                   {hasPermission("view") && (
                     <Button
                       icon="pi pi-eye"
+                      className="icon_view"
                       rounded
                       text
-                      severity="info"
                       onClick={() => {
                         setSelectedId(String(row.id));
                         setFormMode("view");
@@ -263,7 +264,7 @@ export default function RoleList() {
                       icon="pi pi-pencil"
                       rounded
                       text
-                      severity="success"
+                      className="icon_edit"
                       onClick={() => {
                         setSelectedId(String(row.id));
                         setFormMode("edit");
@@ -278,7 +279,7 @@ export default function RoleList() {
                       icon="pi pi-trash"
                       rounded
                       text
-                      severity="danger"
+                      className="icon_trash"
                       onClick={() => handleDelete(String(row.id))}
                       tooltip="Delete"
                       tooltipOptions={{ position: "top" }}

@@ -69,12 +69,7 @@ public class HotelService extends BaseServiceImpl<Hotels, Integer, HotelDTO, Hot
   public Hotels create(HotelDTO create) {
     var hotel = mapper.toCreate(create); // name, desc, status
     hotel.setOwnerId(null);
-
-    /*
-     *  approve
-     * */
-//    hotel.setApproveId(create.getApproveId());
-//    hotel.setReason(create.getReason());
+    hotel.setNote(create.getNoteHotel());
 
     if (create.getAvatar() != null) {
       HotelDTO.AvatarReq avatar = create.getAvatar();
@@ -88,8 +83,10 @@ public class HotelService extends BaseServiceImpl<Hotels, Integer, HotelDTO, Hot
       }
     }
 
+    hotel.setAddressId(getAuthId());
     hotel.setCreatedAt(LocalDateTime.now());
     hotel.setCreatedBy(getAuthId());
+
     hotel = repository.save(hotel);
 
     // type

@@ -71,7 +71,6 @@ const LoginPage = () => {
         });
       }
 
-
       const payload = JSON.parse(
         atob(response.data.result.token.split(".")[1])
       );

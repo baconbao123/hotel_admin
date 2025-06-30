@@ -19,4 +19,5 @@ public interface RoomRepository extends BaseRepository<Rooms, Integer> {
         "from Rooms r " +
         "where r.deletedAt is null")
   List<Object[]> findMinMaxPrice();
+
 }

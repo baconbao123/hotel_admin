@@ -7,6 +7,7 @@ import {
   IdentificationIcon,
   MapIcon,
   TagIcon,
+  ShieldCheckIcon,
 } from "@heroicons/react/24/outline";
 
 export const navigation: MenuItem[] = [
@@ -31,7 +32,7 @@ export const navigation: MenuItem[] = [
   {
     name: "Permission Management",
     href: "/permission",
-    icon: RectangleGroupIcon,
+    icon: ShieldCheckIcon,
     resourceName: "Permissions",
   },
   {
@@ -51,7 +52,7 @@ export const navigation: MenuItem[] = [
     href: "/facilities",
     resourceName: "Facilities",
     icon: TagIcon,
-  }
+  },
 ];
 
 export interface MenuItem {

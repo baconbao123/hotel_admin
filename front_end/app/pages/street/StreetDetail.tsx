@@ -30,7 +30,7 @@ export default function StreetDetail({
 
   const toast = useRef<Toast>(null);
 
-  const header = mode === "view" ? "ROLE DETAILS" : "ADD NEW ROLE";
+  const header = mode === "view" ? "DETAILS" : "ADD";
 
   useEffect(() => {
     if (id && open) {
@@ -73,12 +73,12 @@ export default function StreetDetail({
             />
           </div>
         }
-        style={{ width: "40%" }}
+        style={{ width: "50%" }}
         modal
         className="p-fluid"
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-4 pr-4">
           <div className="grid grid-cols-3 gap-2 items-center mb-2">
             <label htmlFor="name" className="font-bold col-span-1">
               Name:

@@ -25,30 +25,6 @@ export default function RootLayout() {
   useFetchPermissions();
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await dispatch(
-          fetchCommonData({
-            types: [
-              "roles",
-              "provinces",
-              "facility-types",
-              "resource-actions",
-              "hotel-documents",
-              "hotel-types",
-              "hotel-facilities",
-            ],
-            forceRefresh: true,
-          })
-        ).unwrap();
-      } catch (err) {
-        console.error("Fetch common data error:", err);
-      }
-    };
-    fetchData();
-  }, [dispatch]);
-
-  useEffect(() => {
     const initializeUser = async () => {
       const token = Cookies.get("token");
 

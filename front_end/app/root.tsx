@@ -4,7 +4,6 @@ import { LoadingProvider } from "./contexts/LoadingContext";
 import { Provider } from "react-redux";
 import { store } from "./store";
 
-
 import {
   Links,
   Meta,
@@ -16,6 +15,7 @@ import {
 
 function ErrorBoundary() {
   const error = useRouteError();
+  console.log("ErrorBoundary caught:", error); // Add logging for debugging
   return (
     <div className="error-container">
       <h1>Oops! Something went wrong</h1>
@@ -38,7 +38,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        <LoadingProvider>{children}</LoadingProvider>
+        {children} {/* Remove LoadingProvider from here */}
         <ScrollRestoration />
         <Scripts />
       </body>

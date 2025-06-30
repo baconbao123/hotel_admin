@@ -42,25 +42,25 @@ public class CommonController {
         case "provinces":
           builder.provinces(localService.getProvinces());
           break;
-        case "facility-types":
+        case "facilitiestype":
           builder.facilityTypes(facilitiesService.findAllFacilityType());
           break;
-        case "resource-actions":
+        case "permissions":
           builder.resourceActions(permissionService.getMapResourcesActions());
           break;
-        case "hotel-documents":
+        case "hoteldocuments":
           builder.documentTypes(hotelService.findDocumentHotels());
           break;
-        case "hotel-types":
+        case "hoteltypes":
           builder.hotelTypes(hotelService.findTypeHotels());
           break;
-        case "hotel-facilities":
+        case "hotelfacilities":
           builder.hotelFacilities(hotelService.findFacilities());
           break;
-        case "payment-methods":
+        case "paymentmethods":
           builder.paymentMethods(paymentMethodRepository.findAllPayment());
           break;
-        case "room-types":
+        case "roomtypes":
           builder.roomTypes(roomTypeRepository.findRoomTypes());
           break;
         default:

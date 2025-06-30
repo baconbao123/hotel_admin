@@ -23,7 +23,7 @@ const data: BreadCrumbGroup[] = [
         link: "/",
       },
       {
-        icon: "pi pi-sitemap",
+        icon: "pi pi-users",
         label: "Users management",
         className: "text-gray-700",
         template: "",
@@ -61,7 +61,7 @@ const data: BreadCrumbGroup[] = [
         link: "/",
       },
       {
-        icon: "pi pi-sitemap",
+        icon: "pi pi-shield",
         label: "Permission Management",
         className: "text-gray-700",
         template: "",
