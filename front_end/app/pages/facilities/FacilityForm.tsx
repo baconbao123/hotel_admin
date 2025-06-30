@@ -4,8 +4,9 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { Dropdown } from "primereact/dropdown";
-import { useFacilityTypes } from "@/hooks/useCommonData";
-
+import { useCommonData } from "@/hooks/useCommonData";
+import { useAppDispatch } from "@/store"; // Import useAppDispatch from your store
+import { fetchCommonData } from "@/store/slices/commonDataSlice"; // Adjust path if needed
 interface Props {
   id?: string;
   open: boolean;
@@ -32,8 +33,12 @@ export default function FacilityForm({
   const [type, setType] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  const { commonData } = useCommonData(["facilitiestype"]);
+
+  const facilitiesData = commonData.facilityTypes ?? [];
+
   const toast = useRef<Toast>(null);
-  const { facilityTypes } = useFacilityTypes();
+  const dispatch = useAppDispatch();
 
   const resetForm = () => {
     setName("");
@@ -43,7 +48,7 @@ export default function FacilityForm({
 
   useEffect(() => {
     const fetchData = async () => {
-      if (mode === "edit" && id && facilityTypes.length > 0) {
+      if (mode === "edit" && id && facilitiesData.length > 0) {
         try {
           const data = await loadDataById(id);
           console.log("Data loaded:", data);
@@ -51,8 +56,10 @@ export default function FacilityForm({
           setName(data.name || "");
           setIcon(data.icon || "");
 
-          const matched = facilityTypes.find((t) =>
-            typeof data.type === "object" ? t.id === data.type.id : t.id === data.type
+          const matched = facilitiesData.find((t: any) =>
+            typeof data.type === "object"
+              ? t.id === data.type.id
+              : t.id === data.type
           );
           setType(matched || null);
         } catch (err) {
@@ -73,7 +80,7 @@ export default function FacilityForm({
     if (open) {
       fetchData();
     }
-  }, [id, open, mode, facilityTypes]);
+  }, [id, open, mode, facilitiesData]);
 
   const submit = async () => {
     setSubmitting(true);
@@ -88,6 +95,9 @@ export default function FacilityForm({
           detail: "Facility updated",
           life: 3000,
         });
+        await dispatch(
+          fetchCommonData({ types: ["facilitiestype"], force: true })
+        );
       } else {
         await createItem(facilityDTO);
         toast.current?.show({
@@ -114,7 +124,7 @@ export default function FacilityForm({
   const getError = (field: string) =>
     (error && typeof error === "object" && (error as any)[field]) || null;
 
-  const header = mode === "edit" ? "EDIT FACILITY" : "ADD NEW FACILITY";
+  const header = mode === "edit" ? "EDIT" : "ADD";
 
   return (
     <div>
@@ -124,34 +134,38 @@ export default function FacilityForm({
         onHide={onClose}
         header={header}
         footer={
-          <div className="flex justify-center gap-3 px-4 pb-4">
+          <div className="flex justify-center gap-2">
             <Button
               label="Close"
               onClick={onClose}
               severity="secondary"
               outlined
               disabled={submitting}
-              className="px-6 py-2"
+              style={{ padding: "8px 40px" }}
             />
             <Button
               label="Save"
               onClick={submit}
-              severity="success"
-              loading={submitting}
               disabled={submitting}
-              className="px-6 py-2"
+              severity="success"
+              className="btn_submit"
+              loading={submitting}
+              style={{ padding: "8px 40px" }}
             />
           </div>
         }
-        style={{ width: "42%" }}
+        style={{ width: "50%" }}
         modal
-        className="p-fluid rounded-xl"
+        className="p-fluid"
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4">
           {/* Name */}
           <div>
-            <label htmlFor="name" className="font-medium block mb-1">
+            <label
+              htmlFor="name"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Name <span className="text-red-500">*</span>
             </label>
             <InputText
@@ -159,30 +173,41 @@ export default function FacilityForm({
               value={name}
               onChange={(e) => setName(e.target.value)}
               disabled={submitting}
-              className="w-full"
+              className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                getError("name") ? "p-invalid" : ""
+              }`}
             />
             {getError("name") && (
-              <small className="p-error text-red-500">{getError("name")}</small>
+              <small className="text-red-600 text-xs mt-1 block">
+                {getError("name")}
+              </small>
             )}
           </div>
 
           {/* Type */}
           <div>
-            <label htmlFor="type" className="font-medium block mb-1">
+            <label
+              htmlFor="type"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
               Type <span className="text-red-500">*</span>
             </label>
             <Dropdown
               id="type"
               value={type}
               onChange={(e) => setType(e.value)}
-              options={facilityTypes}
+              options={facilitiesData}
               optionLabel="name"
               placeholder="Select a type"
-              className="w-full"
+              style={{ width: "100%" }} // ✅ giữ
+              className={`w-full border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                getError("type") ? "p-invalid" : ""
+              }`} // ❌ bỏ p-2
               checkmark
               highlightOnSelect={false}
               disabled={submitting}
             />
+
             {getError("type") && (
               <small className="p-error text-red-500">{getError("type")}</small>
             )}
@@ -190,8 +215,11 @@ export default function FacilityForm({
 
           {/* Icon */}
           <div className="sm:col-span-2">
-            <div className="w-full sm:w-3/5 mx-auto">
-              <label htmlFor="icon" className="font-medium block mb-1">
+            <div className="w-full">
+              <label
+                htmlFor="icon"
+                className="block text-sm font-medium text-gray-700 mb-1"
+              >
                 Icon <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -201,7 +229,7 @@ export default function FacilityForm({
                   onChange={(e) => setIcon(e.target.value)}
                   disabled={submitting}
                   placeholder="e.g. pi pi-check"
-                  className="w-full pr-10"
+                  className="w-full"
                 />
                 {icon && (
                   <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">

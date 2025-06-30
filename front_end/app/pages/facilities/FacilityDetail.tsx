@@ -64,10 +64,10 @@ export default function FacilityDetail({
         footer={
           <div className="flex justify-center gap-2">
             <Button
-              outlined
               label="Close"
               onClick={onClose}
               severity="secondary"
+              outlined
               style={{ padding: "8px 40px" }}
             />
           </div>

@@ -5,7 +5,6 @@ import {
   layout,
 } from "@react-router/dev/routes";
 
-
 export default [
   layout("./layouts/rootLayout.tsx", [
     route("/", "./pages/welcome/WelcomePage.tsx"),
@@ -28,6 +27,7 @@ export default [
     route("/reset-password-profile", "./pages/profile/ResetPassword.tsx"),
   ]),
   route("/404", "./pages/error/NotFound.tsx"),
+  route("/403", "./pages/error/Error403.tsx"),
   route("/500", "./pages/error/Error500.tsx"),
   route("*", "./pages/error/NotFound.tsx", { id: "catch-all" }),
 ] satisfies RouteConfig;
