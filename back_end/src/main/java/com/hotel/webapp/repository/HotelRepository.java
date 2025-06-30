@@ -1,7 +1,11 @@
 package com.hotel.webapp.repository;
 
 import com.hotel.webapp.base.BaseRepository;
+import com.hotel.webapp.dto.response.LocalResponse;
 import com.hotel.webapp.entity.Hotels;
+import com.hotel.webapp.entity.TypeHotel;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
@@ -52,4 +56,20 @@ public interface HotelRepository extends BaseRepository<Hotels, Integer> {
         "from HotelPolicy hp " +
         "where hp.hotelId = :hotelId and hp.deletedAt is null")
   List<Object[]> getPolicyByHotelId(Integer hotelId);
+
+  // TypeHotel
+  @Query("select t from TypeHotel t where t.deletedAt is null")
+  List<TypeHotel> findAllTypeHotel();
+
+  // for user - home
+  //  get province
+  @Query("select new com.hotel.webapp.dto.response.LocalResponse(p.code, p.name) from Address a " +
+        "join Hotels h on h.addressId = a.id " +
+        "join Provinces p on p.code = a.provinceCode " +
+        "where a.deletedAt is null and h.deletedAt is null")
+  List<LocalResponse> geProvinceCodeByHotels();
+
+  // get hotel
+  @Query("select h from  Hotels h where h.deletedAt is null")
+  Page<Hotels> getHotelsInfo(Pageable pageable);
 }

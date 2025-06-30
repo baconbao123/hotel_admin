@@ -15,12 +15,11 @@ import java.util.List;
 public class AttributeDataResponse {
   List<Role> roles;
   List<LocalResponse> provinces;
-//  List<LocalResponse> districts;
-//  List<LocalResponse> wards;
-//  List<LocalResponse.StreetResponse> streets;
   List<FacilityType> facilityTypes;
   List<PermissionRes.DataResponse> resourceActions;
   List<DocumentType> documentTypes;
   List<TypeHotel> hotelTypes;
   List<Facilities> hotelFacilities;
+  List<PaymentMethod> paymentMethods;
+  List<RoomType> roomTypes;
 }

@@ -14,7 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PermissionRes {
-  //  Integer permissionId;
   String createdBy;
   LocalDateTime createdAt;
   String updateBy;

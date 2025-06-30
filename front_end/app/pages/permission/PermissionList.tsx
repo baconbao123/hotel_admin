@@ -127,7 +127,9 @@ export default function PermissionList() {
   };
 
   const hasPermission = (actionName: string) => {
-    const resource = permissions.find((p: any) => p.resourceName === "Role");
+    const resource = permissions.find(
+      (p: any) => p.resourceName === "Permissions"
+    );
     return resource ? resource.actionNames.includes(actionName) : false;
   };
 
@@ -136,7 +138,7 @@ export default function PermissionList() {
       {mounted && <Toast ref={toast} />}
       <div className="mb-5">
         {mounted ? (
-          <BreadCrumbComponent name="RoleList" />
+          <BreadCrumbComponent name="PermissionList" />
         ) : (
           <Skeleton width="100%" height="34px" />
         )}
@@ -205,10 +207,9 @@ export default function PermissionList() {
               sortable
               field="roleName"
               header="Name"
-              className="w-30"
+              className="w-50"
             ></Column>
             <Column
-              style={{ width: "700px" }}
               field="permissions"
               header="Resources"
               body={(rowData) => {
@@ -221,7 +222,6 @@ export default function PermissionList() {
                     )
                   ),
                 ];
-
                 return (
                   <div
                     className="resource-container"
@@ -267,6 +267,7 @@ export default function PermissionList() {
               }}
             />
             <Column
+              frozen={true}
               header="Actions"
               className="w-60"
               body={(rowData) => (
@@ -276,7 +277,7 @@ export default function PermissionList() {
                       icon="pi pi-eye"
                       rounded
                       text
-                      severity="info"
+                      className="icon_view"
                       onClick={async () => {
                         try {
                           const response = await loadById(
@@ -303,6 +304,7 @@ export default function PermissionList() {
                   {hasPermission("update") && (
                     <Button
                       icon="pi pi-pencil"
+                      className="icon_edit"
                       rounded
                       text
                       severity="success"
@@ -331,6 +333,7 @@ export default function PermissionList() {
                   {hasPermission("delete") && (
                     <Button
                       icon="pi pi-trash"
+                      className="icon_trash"
                       rounded
                       text
                       severity="danger"

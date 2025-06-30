@@ -10,7 +10,6 @@ import com.hotel.webapp.exception.AppException;
 import com.hotel.webapp.exception.ErrorCode;
 import com.hotel.webapp.mapper.FacilitiesMapper;
 import com.hotel.webapp.repository.FacilitiesRepository;
-import com.hotel.webapp.repository.FacilityTypeRepository;
 import com.hotel.webapp.repository.MapHotelFacilityRepository;
 import com.hotel.webapp.service.admin.interfaces.AuthService;
 import com.hotel.webapp.util.ValidateDataInput;
@@ -29,23 +28,19 @@ import java.util.Map;
 @Slf4j
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class FacilitiesServiceImpl extends BaseServiceImpl<Facilities, Integer, FacilitiesDTO, FacilitiesRepository> {
+public class FacilitiesService extends BaseServiceImpl<Facilities, Integer, FacilitiesDTO, FacilitiesRepository> {
   ValidateDataInput validateDataInput;
-  FacilityTypeRepository facilityTypeRepository;
   MapHotelFacilityRepository mapHotelFacilityRepository;
 
-
-  public FacilitiesServiceImpl(
+  public FacilitiesService(
         FacilitiesRepository repository,
         FacilitiesMapper mapper,
         AuthService authService,
-        FacilityTypeRepository facilityTypeRepository,
         ValidateDataInput validateDataInput,
         MapHotelFacilityRepository mapHotelFacilityRepository
   ) {
     super(repository, mapper, authService);
     this.validateDataInput = validateDataInput;
-    this.facilityTypeRepository = facilityTypeRepository;
     this.mapHotelFacilityRepository = mapHotelFacilityRepository;
   }
 
@@ -68,7 +63,7 @@ public class FacilitiesServiceImpl extends BaseServiceImpl<Facilities, Integer, 
   }
 
   public List<FacilityType> findAllFacilityType() {
-    return facilityTypeRepository.findAllFacilityType();
+    return repository.findAllFacilityTYpe();
   }
 
   public FacilitiesRes.FacilityRes getByIdRes(Integer id) {
@@ -104,7 +99,7 @@ public class FacilitiesServiceImpl extends BaseServiceImpl<Facilities, Integer, 
       dto.setIcon(facility.getIcon());
 
       if (facility.getType() != null) {
-        facilityTypeRepository.findById(facility.getType()).ifPresent(facilityType -> {
+        repository.findFacilityTypeById(facility.getType()).ifPresent(facilityType -> {
           dto.setTypeName(facilityType.getName());
         });
       }

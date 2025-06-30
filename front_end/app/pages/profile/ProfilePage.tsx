@@ -82,9 +82,9 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-1">
             <p className="text-sm text-gray-500">Email</p>
-            <div className="flex items-center gap-2">
+            <div className="flex justify-start items-center gap-2">
               <EnvelopeIcon className="w-5 h-5 text-gray-400" />
-              <p className="font-medium text-gray-800">{user.email}</p>
+              <span className="font-medium text-gray-800">{user.email}</span>
             </div>
           </div>
 
@@ -93,7 +93,7 @@ export default function ProfilePage() {
             {user.role.map((r: any) => (
               <div className="flex items-center gap-2">
                 <ShieldCheckIcon className="w-5 h-5 text-gray-400" />
-                <p className="font-medium text-gray-800">{r.roleName}</p>
+                <span className="font-medium text-gray-800">{r.roleName}</span>
               </div>
             ))}
           </div>
@@ -102,16 +102,27 @@ export default function ProfilePage() {
             <p className="text-sm text-gray-500">Phone Number</p>
             <div className="flex items-center gap-2">
               <PhoneIcon className="w-5 h-5 text-gray-400" />
-              <p className="font-medium text-gray-800">{user.phoneNumber}</p>
+              <span className="font-medium text-gray-800">
+                {user.phoneNumber}
+              </span>
             </div>
           </div>
         </div>
 
         <div className="mt-8  flex gap-2">
-          <Button severity="success" onClick={() => setViewEditPassword(true)}>
+          <Button
+            severity="success"
+            style={{ color: "white", fontWeight: "600" }}
+            onClick={() => setViewEditPassword(true)}
+          >
             Password
           </Button>
-          <Button severity="info" onClick={() => setEditing(true)}>
+
+          <Button
+            severity="info"
+            onClick={() => setEditing(true)}
+            style={{ color: "white", fontWeight: "600" }}
+          >
             Edit Profile
           </Button>
         </div>
@@ -159,7 +170,7 @@ export default function ProfilePage() {
                 className="w-95"
               />
             </div>
-            <div style={{color: "green"}}>{mess}</div>
+            <div style={{ color: "green" }}>{mess}</div>
           </Dialog>
         )}
       </div>

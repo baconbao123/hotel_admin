@@ -35,7 +35,7 @@ export default function RoleForm({
   const toast = useRef<Toast>(null);
   const dispatch = useAppDispatch();
 
-  const header = mode === "edit" ? "EDIT ROLE" : "ADD NEW ROLE";
+  const header = mode === "edit" ? "EDIT" : "ADD";
 
   const submit = async () => {
     setSubmitting(true);
@@ -49,9 +49,7 @@ export default function RoleForm({
           detail: "Role updated",
           life: 3000,
         });
-        await dispatch(
-          fetchCommonData({ types: ["roles"], forceRefresh: true })
-        );
+        await dispatch(fetchCommonData({ types: ["roles"], force: true }));
       } else {
         await createItem(roleDTO);
         toast.current?.show({
@@ -61,9 +59,7 @@ export default function RoleForm({
           life: 3000,
         });
 
-        await dispatch(
-          fetchCommonData({ types: ["roles"], forceRefresh: true })
-        );
+        await dispatch(fetchCommonData({ types: ["roles"], force: true }));
       }
       onClose();
     } catch (err: any) {
@@ -108,7 +104,7 @@ export default function RoleForm({
   }, [id, open, loadDataById]);
 
   return (
-    <div className="z-50">
+    <div>
       <Toast ref={toast} />
       <Dialog
         visible={open}
@@ -127,14 +123,15 @@ export default function RoleForm({
             <Button
               label="Save"
               onClick={submit}
-              severity="success"
               disabled={submitting}
+              severity="success"
+              className="btn_submit"
               loading={submitting}
               style={{ padding: "8px 40px" }}
             />
           </div>
         }
-        style={{ width: "40%" }}
+        style={{ width: "50%" }}
         modal
         className="p-fluid"
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
@@ -166,7 +163,6 @@ export default function RoleForm({
               )}
             </div>
 
-            {/* Description */}
             <div>
               <label
                 htmlFor="description"

@@ -4,7 +4,7 @@ import com.hotel.webapp.dto.request.RoleDTO;
 import com.hotel.webapp.dto.response.ApiResponse;
 import com.hotel.webapp.dto.response.CommonRes;
 import com.hotel.webapp.entity.Role;
-import com.hotel.webapp.service.admin.RoleServiceImpl;
+import com.hotel.webapp.service.admin.RoleService;
 import com.hotel.webapp.validation.Permission;
 import com.hotel.webapp.validation.Resource;
 import jakarta.validation.Valid;
@@ -22,7 +22,7 @@ import java.util.Map;
 @Resource(name = "role")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RoleController {
-  RoleServiceImpl roleService;
+  RoleService roleService;
 
   @PostMapping
   @Permission(name = "create")

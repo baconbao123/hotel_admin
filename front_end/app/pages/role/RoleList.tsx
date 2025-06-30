@@ -64,27 +64,32 @@ export default function RoleList() {
 
   const dispatch = useAppDispatch();
 
-  const handleDelete = (id: string) => {
-    Swal.fire({
-      title: "Delete role?",
-      showDenyButton: true,
-      showCancelButton: true,
-      confirmButtonText: "Delete",
-    }).then((result) => {
+  async function handleDelete(id: string): Promise<boolean> {
+    try {
+      const result = await Swal.fire({
+        title: "Delete role?",
+        showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonText: "Delete",
+      });
+
       if (result.isConfirmed) {
-        deleteItem(id)
-          .then(() => Swal.fire("Deleted!", "", "success"))
-          .catch(() =>
-            toast.current?.show({
-              severity: "error",
-              summary: "Error",
-              detail: "Failed to delete role",
-              life: 3000,
-            })
-          );
+        await deleteItem(id);
+        await Swal.fire("Deleted!", "", "success");
+        return true; // Delete successful
       }
-    });
-  };
+      return false; // User canceled or denied
+    } catch (error) {
+      console.error("Error during delete operation:", error);
+      toast.current?.show({
+        severity: "error",
+        summary: "Error",
+        detail: "Failed to delete role",
+        life: 3000,
+      });
+      return false; // Delete failed due to error
+    }
+  }
 
   // Check actions
   const hasPermission = (actionName: string) => {
@@ -144,7 +149,8 @@ export default function RoleList() {
               <div className="flex flex-wrap gap-2 justify-end">
                 {hasPermission("create") && (
                   <Button
-                    label="Add new"
+                    label="Add New"
+                    className="btn_add_new"
                     onClick={() => {
                       setSelectedId(undefined);
                       setFormMode("create");
@@ -213,7 +219,7 @@ export default function RoleList() {
                       icon="pi pi-eye"
                       rounded
                       text
-                      severity="info"
+                      className="icon_view"
                       onClick={() => {
                         setSelectedId(String(row.id));
                         setFormMode("view");
@@ -223,12 +229,13 @@ export default function RoleList() {
                       tooltipOptions={{ position: "top" }}
                     />
                   )}
+                  
                   {hasPermission("update") && (
                     <Button
                       icon="pi pi-pencil"
                       rounded
                       text
-                      severity="success"
+                      className="icon_edit"
                       onClick={() => {
                         setSelectedId(String(row.id));
                         setFormMode("edit");
@@ -244,12 +251,12 @@ export default function RoleList() {
                       icon="pi pi-trash"
                       rounded
                       text
-                      severity="danger"
+                      className="icon_trash"
+                      style={{ color: "blue" }}
                       onClick={async () => {
                         try {
                           const deleted = await handleDelete(String(row.id));
                           if (deleted) {
-                            // Refresh Redux store
                             const result = await dispatch(
                               fetchCommonData({
                                 types: ["roles"],
@@ -264,7 +271,6 @@ export default function RoleList() {
                                 life: 3000,
                               });
                             }
-                            // Refresh DataTable data
                             await updatePageData(page, pageSize);
                           }
                         } catch (error) {

@@ -15,7 +15,7 @@ public interface HotelMapper extends BaseMapper<Hotels, HotelDTO> {
   @Mapping(target = "addressId", ignore = true)
   @Mapping(target = "policyId", ignore = true)
   @Mapping(target = "approveId", ignore = true)
-  @Mapping(target = "reason", ignore = true)
+  @Mapping(target = "note", ignore = true)
   Hotels toCreate(HotelDTO create);
 
   @Override
@@ -24,6 +24,6 @@ public interface HotelMapper extends BaseMapper<Hotels, HotelDTO> {
   @Mapping(target = "addressId", ignore = true)
   @Mapping(target = "policyId", ignore = true)
   @Mapping(target = "approveId", ignore = true)
-  @Mapping(target = "reason", ignore = true)
+  @Mapping(target = "note", ignore = true)
   void toUpdate(@MappingTarget Hotels target, HotelDTO update);
 }

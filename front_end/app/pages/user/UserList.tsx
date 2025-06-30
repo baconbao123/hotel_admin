@@ -151,14 +151,13 @@ export default function UserList() {
             <div className="col-span-4 2xl:col-span-1 xl:col-span-1 lg:col-span-1 md:col-span-1">
               <div className="flex flex-wrap gap-2 justify-end">
                 <Button
-                  className="me-2"
                   label="Add new"
+                  className="btn_add_new"
                   onClick={() => {
                     setSelectedUserId(undefined);
                     setOpenForm(true);
                   }}
                 />
-                <Button className="me-2" label="Export excel" />
               </div>
             </div>
           </div>
@@ -239,9 +238,9 @@ export default function UserList() {
                   {hasPermission("view") && (
                     <Button
                       icon="pi pi-eye"
+                      className="icon_view"
                       rounded
                       text
-                      severity="info"
                       onClick={() => {
                         setSelectedUserId(row.id);
                         setFormMode("view");
@@ -256,7 +255,7 @@ export default function UserList() {
                       icon="pi pi-pencil"
                       rounded
                       text
-                      severity="success"
+                      className="icon_edit"
                       onClick={() => {
                         setSelectedUserId(row.id);
                         setFormMode("edit");
@@ -271,7 +270,7 @@ export default function UserList() {
                       icon="pi pi-trash"
                       rounded
                       text
-                      severity="danger"
+                      className="icon_trash"
                       onClick={() => handleDelete(String(row.id))}
                       tooltip="Delete"
                       tooltipOptions={{ position: "top" }}
@@ -300,7 +299,7 @@ export default function UserList() {
           error={error}
         />
       )}
-      
+
       {hasPermission("view") && (
         <UserDetail
           id={selectedUserId}

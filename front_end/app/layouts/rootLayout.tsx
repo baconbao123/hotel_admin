@@ -10,9 +10,10 @@ import { setUser, type UserLogin } from "@/store/slices/userDataSlice";
 import Cookies from "js-cookie";
 import $axios from "@/axios";
 import Loading from "@/components/shared/Loading";
+import '@/styles/globals.scss'
 
 const fetchUser = async (id: number) => {
-  const res = await $axios.get(`/user/${id}`);
+  const res = await $axios.get(`/user/profile/${id}`);
   console.log("fetchUser response:", res.data.result);
   return res.data.result;
 };
@@ -20,33 +21,8 @@ const fetchUser = async (id: number) => {
 export default function RootLayout() {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const user = useSelector((state: RootState) => state.userData);
   const [isInitializing, setIsInitializing] = useState(true);
   useFetchPermissions();
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        await dispatch(
-          fetchCommonData({
-            types: [
-              "roles",
-              "provinces",
-              "facility-types",
-              "resource-actions",
-              "hotel-documents",
-              "hotel-types",
-              "hotel-facilities",
-            ],
-            forceRefresh: true,
-          })
-        ).unwrap();
-      } catch (err) {
-        console.error("Fetch common data error:", err);
-      }
-    };
-    fetchData();
-  }, [dispatch]);
 
   useEffect(() => {
     const initializeUser = async () => {
@@ -76,8 +52,8 @@ export default function RootLayout() {
           dispatch(setUser(userDataLoad));
         } catch (error) {
           console.error("Failed to restore user:", error);
-          Cookies.remove("token");
-          Cookies.remove("refreshToken");
+          // Cookies.remove("token");
+          // Cookies.remove("refreshToken");
           navigate("/login");
         }
       } else {
@@ -100,9 +76,9 @@ export default function RootLayout() {
     );
   }
 
-  if (!user.id) {
-    return null;
-  }
+  // if (!user.id) {
+  //   return null;
+  // }
 
   return (
     <div className="flex h-screen bg-gray-100">

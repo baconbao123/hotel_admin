@@ -42,28 +42,10 @@ public interface MapResourceActionRepository extends BaseRepository<MapResources
   void insertMapping(int resourceId, int actionId, Timestamp createdAt, int createdBy);
 
   //  -------------- seeder --------------
-
-  List<MapResourcesAction> findAllByActionId(int actionId);
-
-  List<MapResourcesAction> findAllByResourceId(int resourceId);
-
-  boolean existsByIdAndDeletedAtIsNull(int id);
-
-  List<MapResourcesAction> findAllByResourceIdInAndDeletedAtIsNull(Collection<Integer> resourceIds);
-
-
-  @Query("select count(a) > 0 from Actions a where a.id = :id and a.deletedAt is null")
-  boolean existedAction(Integer id);
-
-  @Query("select count(r) > 0 from Resources r where r.id = :id and r.deletedAt is null")
-  boolean existedResource(Integer id);
-
   @Query("SELECT mra.id, r.id, r.name, a.id, a.name " +
         "FROM MapResourcesAction mra " +
         "JOIN Resources r ON mra.resourceId = r.id " +
         "JOIN Actions a ON mra.actionId = a.id")
   List<Object[]> findMapResourcesActions();
 
-//  @Query("select new com.hotel.webapp.dto.response.DataResponse(r.id, r.name) from Resources r where r.deletedAt is null")
-//  List<DataResponse> findAllResources();
 }

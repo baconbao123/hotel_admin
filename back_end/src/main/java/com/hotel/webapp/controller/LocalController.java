@@ -5,7 +5,7 @@ import com.hotel.webapp.dto.response.ApiResponse;
 import com.hotel.webapp.dto.response.CommonRes;
 import com.hotel.webapp.dto.response.LocalResponse;
 import com.hotel.webapp.entity.Streets;
-import com.hotel.webapp.service.admin.LocalServiceImpl;
+import com.hotel.webapp.service.admin.LocalService;
 import com.hotel.webapp.validation.Permission;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -23,7 +23,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class LocalController {
-  LocalServiceImpl localService;
+  LocalService localService;
 
 //  @GetMapping("/get-province")
 //  public ApiResponse<List<LocalResponse>> getProvince() {

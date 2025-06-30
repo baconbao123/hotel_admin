@@ -26,12 +26,12 @@ import java.util.*;
 @Service
 @Transactional
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class PermissionServiceImpl extends BaseServiceImpl<Permissions, Integer, MappingDTO, PermissionsRepository> {
+public class PermissionService extends BaseServiceImpl<Permissions, Integer, MappingDTO, PermissionsRepository> {
   MapResourceActionRepository mapResourceActionRepository;
   UserRepository userRepository;
   MapUserRoleRepository mapUserRoleRepository;
 
-  public PermissionServiceImpl(
+  public PermissionService(
         AuthService authService,
         PermissionsRepository repository,
         MapResourceActionRepository mapResourceActionRepository,
