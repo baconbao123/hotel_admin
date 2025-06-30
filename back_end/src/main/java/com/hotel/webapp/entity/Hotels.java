@@ -27,7 +27,7 @@ public class Hotels implements AuditEntity {
   Integer policyId;
   Boolean status;
   Integer approveId;
-  String reason;
+  String note;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;
   Integer createdBy;

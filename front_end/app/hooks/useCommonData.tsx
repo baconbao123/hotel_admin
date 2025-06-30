@@ -1,110 +1,50 @@
-import type { AppDispatch, RootState } from "@/store";
+import { type AppDispatch, type RootState } from "@/store";
+import {
+  fetchCommonData,
+  type CommonData,
+  type CommonDataResponse,
+} from "@/store/slices/commonDataSlice";
+import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
-export const useRoles = () => {
+const typeMapping: Partial<Record<keyof CommonData, keyof CommonDataResponse>> =
+  {
+    facilitiestype: "facilityTypes",
+    hoteldocuments: "documentTypes",
+    hoteltypes: "hotelTypes",
+    roles: "roles",
+    provinces: "provinces",
+    permissions: "resourceActions",
+    hotelfacilities: "hotelFacilities",
+    paymentmethods: "paymentMethods",
+    roomtypes: "roomTypes",
+  };
+
+export const useCommonData = (
+  types: (keyof CommonData)[],
+  options: { force?: boolean } = {}
+) => {
   const dispatch = useDispatch<AppDispatch>();
-  const roles = useSelector(
-    (state: RootState) => state.commonData.data.roles || []
-  );
-  const loading = useSelector(
-    (state: RootState) => state.commonData.loading.roles || false
-  );
-  const error = useSelector(
-    (state: RootState) => state.commonData.error.roles || null
-  );
+  const commonData = useSelector((state: RootState) => state.commonData.data);
+  const status = useSelector((state: RootState) => state.commonData.status);
+  const error = useSelector((state: RootState) => state.commonData.error);
 
-  return { roles, loading, error };
-};
+  useEffect(() => {
+    dispatch(fetchCommonData({ types, force: options.force }));
+  }, [dispatch, types.join(","), options.force]); 
 
-// Custom hooks cho các loại dữ liệu khác
-export const useProvinces = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const provinces = useSelector(
-    (state: RootState) => state.commonData.data.provinces || []
-  );
-  const loading = useSelector(
-    (state: RootState) => state.commonData.loading.provinces || false
-  );
-  const error = useSelector(
-    (state: RootState) => state.commonData.error.provinces || null
-  );
+  // Map CommonData to CommonDataResponse
+  const mappedData = types.reduce((acc, type) => {
+    const responseKey = typeMapping[type];
+    if (responseKey) {
+      acc[responseKey] = commonData[type] || [];
+    }
+    return acc;
+  }, {} as CommonDataResponse);
 
-  return { provinces, loading, error };
-};
-
-///
-export const useFacilityTypes = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const facilityTypes = useSelector(
-    (state: RootState) => state.commonData.data.facilityTypes || []
-  );
-  const loading = useSelector(
-    (state: RootState) => state.commonData.loading.facilityTypes || false
-  );
-  const error = useSelector(
-    (state: RootState) => state.commonData.error.facilityTypes || null
-  );
-
-  return { facilityTypes, loading, error };
-};
-
-// Tương tự cho resourceActions, hotelDocuments, hotelTypes, hotelFacilities
-export const useResourceActions = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const resourceActions = useSelector(
-    (state: RootState) => state.commonData.data.resourceActions || []
-  );
-  const loading = useSelector(
-    (state: RootState) => state.commonData.loading.resourceActions || false
-  );
-  const error = useSelector(
-    (state: RootState) => state.commonData.error.resourceActions || null
-  );
-
-  return { resourceActions, loading, error };
-};
-
-export const useHotelDocuments = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const hotelDocuments = useSelector(
-    (state: RootState) => state.commonData.data.documentTypes || []
-  );
-  const loading = useSelector(
-    (state: RootState) => state.commonData.loading.documentTypes || false
-  );
-  const error = useSelector(
-    (state: RootState) => state.commonData.error.documentTypes || null
-  );
-
-  return { hotelDocuments, loading, error };
-};
-
-export const useHotelTypes = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const hotelTypes = useSelector(
-    (state: RootState) => state.commonData.data.hotelTypes || []
-  );
-  const loading = useSelector(
-    (state: RootState) => state.commonData.loading.hotelTypes || false
-  );
-  const error = useSelector(
-    (state: RootState) => state.commonData.error.hotelTypes || null
-  );
-
-  return { hotelTypes, loading, error };
-};
-
-export const useHotelFacilities = () => {
-  const dispatch = useDispatch<AppDispatch>();
-  const hotelFacilities = useSelector(
-    (state: RootState) => state.commonData.data.hotelFacilities || []
-  );
-  const loading = useSelector(
-    (state: RootState) => state.commonData.loading.hotelFacilities || false
-  );
-  const error = useSelector(
-    (state: RootState) => state.commonData.error.hotelFacilities || null
-  );
-
-  return { hotelFacilities, loading, error };
+  return {
+    commonData: mappedData,
+    status,
+    error,
+  };
 };

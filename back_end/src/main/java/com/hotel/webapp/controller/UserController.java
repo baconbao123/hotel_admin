@@ -4,7 +4,7 @@ import com.hotel.webapp.dto.request.UserDTO;
 import com.hotel.webapp.dto.response.ApiResponse;
 import com.hotel.webapp.dto.response.UserRes;
 import com.hotel.webapp.entity.User;
-import com.hotel.webapp.service.admin.UserServiceImpl;
+import com.hotel.webapp.service.admin.UserService;
 import com.hotel.webapp.validation.Permission;
 import com.hotel.webapp.validation.Resource;
 import jakarta.validation.Valid;
@@ -26,7 +26,7 @@ import java.util.Map;
 @Resource(name = "user")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class UserController {
-  UserServiceImpl userService;
+  UserService userService;
 
   @Permission(name = "create")
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -74,12 +74,12 @@ public class UserController {
                       .build();
   }
 
-//  @GetMapping("/profile")
-//  public ApiResponse<User> getProfile(@RequestParam("id") Integer id) {
-//    return ApiResponse.<User>builder()
-//                      .result(userService.findById(id))
-//                      .build();
-//  }
+  @GetMapping("/profile/{id}")
+  public ApiResponse<UserRes> findProfileById(@PathVariable Integer id) {
+    return ApiResponse.<UserRes>builder()
+                      .result(userService.findUserById(id))
+                      .build();
+  }
 
   @PutMapping(value = "/profile", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ApiResponse<User> updateProfile(@RequestParam("id") Integer id,

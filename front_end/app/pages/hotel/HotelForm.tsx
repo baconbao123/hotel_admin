@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
@@ -10,12 +10,7 @@ import { MultiSelect } from "primereact/multiselect";
 import ImageUploader from "@/utils/ImageUploader";
 import GalleryUploader from "@/utils/GalleryUploader";
 import { FileUpload } from "primereact/fileupload";
-import {
-  useHotelDocuments,
-  useHotelFacilities,
-  useHotelTypes,
-  useProvinces,
-} from "@/hooks/useCommonData";
+import { useCommonData } from "@/hooks/useCommonData";
 import type { RcFile } from "antd/es/upload";
 
 interface Props {
@@ -81,12 +76,19 @@ export default function HotelForm({
   const [policyName, setPolicyName] = useState("");
   const [policyDescription, setPolicyDescription] = useState("");
 
-  const header = mode === "edit" ? "EDIT HOTEL" : "ADD NEW HOTEL";
+  const { commonData } = useCommonData([
+    "provinces",
+    "hoteltypes",
+    "hotelfacilities",
+    "hoteldocuments",
+  ]);
 
-  const { hotelTypes } = useHotelTypes();
-  const { hotelDocuments } = useHotelDocuments();
-  const { hotelFacilities } = useHotelFacilities();
-  const { provinces } = useProvinces();
+  const provinces = commonData.provinces;
+  const hotelTypes = commonData.hotelTypes;
+  const hotelFacilities = commonData.hotelTypes;
+  const hotelDocuments = commonData.documentTypes;
+
+  const header = mode === "edit" ? "EDIT" : "ADD";
 
   const handleRemoveExistingImage = (index: number) => {
     setExistingImages((prev) => prev.filter((_, i) => i !== index));
@@ -502,15 +504,7 @@ export default function HotelForm({
       setWardData([]);
       setStreetData([]);
     }
-  }, [
-    id,
-    open,
-    loadDataById,
-    provinces,
-    hotelTypes,
-    hotelFacilities,
-    hotelDocuments,
-  ]);
+  }, [id, open, loadDataById]);
 
   // Fetch districts when province changes
   useEffect(() => {
@@ -522,13 +516,16 @@ export default function HotelForm({
           );
           const districts = res.data.result || [];
           setDistrictData(districts);
-          // Set selectedDistrict based on districtCode if available
+
+          // Chỉ cập nhật selectedDistrict nếu cần
           if (hotelData?.result?.districtCode) {
             const district =
               districts.find(
                 (d: LocalResponse) => d.code === hotelData.result.districtCode
               ) || null;
-            setSelectedDistrict(district);
+            if (district?.code !== selectedDistrict?.code) {
+              setSelectedDistrict(district);
+            }
           }
         } catch (error: any) {
           toast.current?.show({
@@ -542,9 +539,11 @@ export default function HotelForm({
       fetchDistricts();
     } else {
       setDistrictData([]);
-      setSelectedDistrict(null);
+      if (selectedDistrict) {
+        setSelectedDistrict(null);
+      }
     }
-  }, [selectedProvince, hotelData?.result?.districtCode]);
+  }, [selectedProvince?.code, hotelData?.result?.districtCode]);
 
   // Fetch wards when district changes
   useEffect(() => {
@@ -620,14 +619,14 @@ export default function HotelForm({
         onHide={onClose}
         header={header}
         footer={
-          <div className="flex justify-end gap-3 p-4">
+          <div className="flex justify-center gap-2">
             <Button
               label="Close"
               onClick={onClose}
               severity="secondary"
               outlined
               disabled={submitting}
-              className="px-6 py-2 rounded-lg"
+              style={{ padding: "8px 40px" }}
             />
             <Button
               label="Save"
@@ -635,16 +634,17 @@ export default function HotelForm({
               severity="success"
               disabled={submitting}
               loading={submitting}
-              className="px-6 py-2 rounded-lg"
+              className="btn_submit"
+              style={{ padding: "8px 40px" }}
             />
           </div>
         }
-        style={{ width: "70rem", maxWidth: "95vw" }}
+        style={{ width: "50%", maxWidth: "95vw" }}
         modal
         className="p-fluid rounded-lg shadow-lg bg-white"
         breakpoints={{ "960px": "85vw", "641px": "95vw" }}
       >
-        <div className="p-4">
+        <div className="pl-4 pr-4">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
             <div className="col-span-12">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
@@ -936,7 +936,7 @@ export default function HotelForm({
                         }
                         options={hotelDocuments}
                         optionLabel="name"
-                        optionValue="id" // Ensure optionValue is 'id' to store the number directly
+                        optionValue="id"
                         placeholder="Select a document type"
                         className={`w-full ${
                           getError(`documentType-${index}`) ? "p-invalid" : ""

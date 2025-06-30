@@ -18,17 +18,16 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.List;
 
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class RoleServiceImpl extends BaseServiceImpl<Role, Integer, RoleDTO, RoleRepository> {
+public class RoleService extends BaseServiceImpl<Role, Integer, RoleDTO, RoleRepository> {
   ValidateDataInput validateDataInput;
   MapUserRoleRepository mapUserRoleRepository;
   PermissionsRepository permissionsRepository;
 
-  public RoleServiceImpl(
+  public RoleService(
         RoleRepository repository,
         BaseMapper<Role, RoleDTO> mapper,
         AuthService authService,
@@ -74,16 +73,22 @@ public class RoleServiceImpl extends BaseServiceImpl<Role, Integer, RoleDTO, Rol
 
   @Override
   protected void beforeDelete(Integer id) {
-    updatePermissionIfRoleDelete(id);
+    updateMappingsIfRoleDelete(id);
   }
 
-  private void updatePermissionIfRoleDelete(Integer id) {
-    List<Permissions> crrRoleInPermission = permissionsRepository.findPermissionsByRoleId(id);
+  private void updateMappingsIfRoleDelete(Integer id) {
+    List<Permissions> crrRoleInPermission = permissionsRepository.findAllByRoleId(id);
+    List<MapUserRoles> crrMapUserRole = mapUserRoleRepository.findAllByRoleIdAndDeletedAtIsNull(id);
 
-    for(Permissions crrRole : crrRoleInPermission){
+    for (Permissions crrRole : crrRoleInPermission) {
       crrRole.setDeletedAt(LocalDateTime.now());
       crrRole.setUpdatedBy(getAuthId());
       permissionsRepository.save(crrRole);
+    }
+    for (MapUserRoles crrRole : crrMapUserRole) {
+      crrRole.setDeletedAt(LocalDateTime.now());
+      crrRole.setUpdatedBy(getAuthId());
+      mapUserRoleRepository.save(crrRole);
     }
   }
 

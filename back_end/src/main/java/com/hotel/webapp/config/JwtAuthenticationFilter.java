@@ -1,6 +1,6 @@
 package com.hotel.webapp.config;
 
-import com.hotel.webapp.service.admin.PermissionServiceImpl;
+import com.hotel.webapp.service.admin.PermissionService;
 import com.hotel.webapp.validation.Permission;
 import com.hotel.webapp.validation.Resource;
 import jakarta.servlet.FilterChain;
@@ -30,7 +30,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 @Slf4j
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-  PermissionServiceImpl permissionService;
+  PermissionService permissionService;
   ApplicationContext applicationContext;
 
   @Override
@@ -132,6 +132,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     String resourceName = resourceAnnotation.name().toLowerCase();
     String permissionName = permissionAnnotation.name().toLowerCase();
+
+
 
     boolean hasPermission = permissionService.checkPermission(Integer.valueOf(userId), resourceName, permissionName);
     log.info("Permission check for userId={}, resource={}, permission={}: {}",

@@ -30,7 +30,7 @@ export default function RoleDetail({
 
   const toast = useRef<Toast>(null);
 
-  const header = mode === "view" ? "ROLE DETAILS" : "ADD NEW ROLE";
+  const header = mode === "view" ? "DETAILS" : "ADD";
 
   useEffect(() => {
     if (id && open) {
@@ -78,7 +78,7 @@ export default function RoleDetail({
         className="p-fluid"
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-4 pr-4">
           <div className="grid grid-cols-3 gap-2 items-center mb-2">
             <label htmlFor="name" className="font-bold col-span-1">
               Name:
@@ -108,45 +108,49 @@ export default function RoleDetail({
           </div>
 
           <div></div>
+        </div>
+        
+        {/* Info data create/update */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pl-4 pr-4">
+          {/* Left */}
+          <div className="flex flex-col gap-4">
+            <div>
+              <label htmlFor="createdName" className="font-bold block mb-1">
+                Created By:
+              </label>
+              <span id="createdName">{createdData || "-"}</span>
+            </div>
 
-          <div className="grid grid-cols-3 gap-2 items-center mb-2">
-            <label htmlFor="createdName" className="font-bold col-span-1">
-              Created By:
-            </label>
-            <span id="createdName" className="col-span-2">
-              {createdData || "-"}
-            </span>
+            <div>
+              <label htmlFor="createdAt" className="font-bold block mb-1">
+                Created At:
+              </label>
+              <span id="createdAt">
+                {createdAt
+                  ? format(new Date(createdAt), "yyyy-MM-dd HH:mm:ss")
+                  : "-"}
+              </span>
+            </div>
           </div>
+          {/* Right */}
+          <div className="flex flex-col gap-4">
+            <div>
+              <label htmlFor="updatedName" className="font-bold block mb-1">
+                Updated By:
+              </label>
+              <span id="updatedName">{updatedData || "-"}</span>
+            </div>
 
-          <div className="grid grid-cols-3 gap-2 items-center mb-2">
-            <label htmlFor="updatedName" className="font-bold col-span-1">
-              Updated By:
-            </label>
-            <span id="updatedName" className="col-span-2">
-              {updatedData || "-"}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-3 gap-2 items-center mb-2">
-            <label htmlFor="createdAt" className="font-bold col-span-1">
-              Created At:
-            </label>
-            <span id="createdAt" className="col-span-2">
-              {createdAt
-                ? format(new Date(createdAt), "yyyy-MM-dd HH:mm:ss")
-                : "-"}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-3 gap-2 items-center mb-2">
-            <label htmlFor="updatedAt" className="font-bold col-span-1">
-              Updated At:
-            </label>
-            <span id="updatedAt" className="col-span-2">
-              {updateAt
-                ? format(new Date(updateAt), "yyyy-MM-dd HH:mm:ss")
-                : "-"}
-            </span>
+            <div>
+              <label htmlFor="createdAt" className="font-bold block mb-1">
+                Update At:
+              </label>
+              <span id="createdAt">
+                {updateAt
+                  ? format(new Date(updateAt), "yyyy-MM-dd HH:mm:ss")
+                  : "-"}
+              </span>
+            </div>
           </div>
         </div>
       </Dialog>

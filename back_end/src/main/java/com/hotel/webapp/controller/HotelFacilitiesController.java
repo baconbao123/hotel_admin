@@ -4,8 +4,7 @@ import com.hotel.webapp.dto.request.FacilitiesDTO;
 import com.hotel.webapp.dto.response.ApiResponse;
 import com.hotel.webapp.dto.response.FacilitiesRes;
 import com.hotel.webapp.entity.Facilities;
-import com.hotel.webapp.entity.FacilityType;
-import com.hotel.webapp.service.admin.FacilitiesServiceImpl;
+import com.hotel.webapp.service.admin.FacilitiesService;
 import com.hotel.webapp.validation.Permission;
 import com.hotel.webapp.validation.Resource;
 import jakarta.validation.Valid;
@@ -15,7 +14,6 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -24,7 +22,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class HotelFacilitiesController {
-  FacilitiesServiceImpl facilitiesService;
+  FacilitiesService facilitiesService;
 
   // facilities
   @PostMapping
@@ -64,13 +62,6 @@ public class HotelFacilitiesController {
                       .build();
   }
 
-//  @GetMapping("/facilities-type")
-//  @Permission(name = "view")
-//  public ApiResponse<List<FacilityType>> getByFacilitiesId() {
-//    return ApiResponse.<List<FacilityType>>builder()
-//                      .result(facilitiesService.findAllFacilityType())
-//                      .build();
-//  }
 
   @DeleteMapping("/{id}")
   @Permission(name = "delete")

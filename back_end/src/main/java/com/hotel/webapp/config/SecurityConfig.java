@@ -27,11 +27,11 @@ import java.util.List;
 public class SecurityConfig {
 
   public static final String[] PUBLIC_URLS = {
-        "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api/auth/**", "/public/**", "/upload/**"
+        "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api/auth/**", "/public/**", "/upload/**", "/user/**"
   };
 
   public static final String[] AUTHENTICATED_PUBLIC_URLS = {
-        "/api/permission/resources", "/api/common-data", "/api/user/profile"
+        "/api/permission/resources", "/api/common-data", "/api/user/profile", "/api/user/profile/**"
   };
 
   private final JwtAuthenticationFilter jwtAuthenticationFilter;

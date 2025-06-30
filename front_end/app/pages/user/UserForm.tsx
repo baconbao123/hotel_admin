@@ -6,8 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import ImageUploader from "@/utils/ImageUploader";
 import { InputSwitch } from "primereact/inputswitch";
 import { MultiSelect } from "primereact/multiselect";
-import { useRoles } from "@/hooks/useCommonData";
-import "./UserForm.scss";
+import { useCommonData } from "@/hooks/useCommonData";
 import { useSelector } from "react-redux";
 import $axios from "@/axios";
 interface Props {
@@ -47,18 +46,20 @@ export default function UserForm({
   const [showError, setShowError] = useState(false);
   const [passwordsMatch, setPasswordsMatch] = useState(true);
 
-  const { roles, loading: rolesLoading, error: rolesError } = useRoles();
+  const { commonData } = useCommonData(["roles"]);
+
+  const rolesData = commonData.roles ?? [];
 
   const toast = useRef<Toast>(null);
 
-  const header = mode === "edit" ? "EDIT USER" : "ADD NEW USER";
+  const header = mode === "edit" ? "EDIT" : "ADD";
 
   const permissions = useSelector(
     (state: any) => state.permissions.permissions
   );
 
   useEffect(() => {
-    if (id && open && !rolesLoading) {
+    if (id && open) {
       loadDataById(id)
         .then((data) => {
           setFullName(data.fullName || "");
@@ -68,7 +69,7 @@ export default function UserForm({
           setAvatarUrl(data.avatarUrl || null);
           setSelectedFile(null);
 
-          const selectedRoleIds = roles
+          const selectedRoleIds = rolesData
             .filter((role) => data.roles.some((r: any) => r.roleId === role.id))
             .map((role) => role.id);
           setSelectedRoles(selectedRoleIds);
@@ -91,7 +92,7 @@ export default function UserForm({
       setSelectedFile(null);
       setSelectedRoles([]);
     }
-  }, [id, open, loadDataById, roles, rolesLoading]);
+  }, [id, open, loadDataById]);
 
   useEffect(() => {
     let timeout: NodeJS.Timeout;
@@ -235,7 +236,7 @@ export default function UserForm({
               severity="secondary"
               outlined
               disabled={submitting}
-              className="px-6 py-2 rounded-lg"
+              style={{ padding: "8px 40px" }}
             />
             <Button
               label="Save"
@@ -243,16 +244,17 @@ export default function UserForm({
               severity="success"
               disabled={submitting}
               loading={submitting}
-              className="px-6 py-2 rounded-lg"
+              className="btn_submit"
+              style={{ padding: "8px 40px" }}
             />
           </div>
         }
-        style={{ width: "50rem", maxWidth: "95vw" }}
+        style={{ width: "50%", maxWidth: "95vw" }}
         modal
         className="p-fluid rounded-lg shadow-lg bg-white"
         breakpoints={{ "960px": "85vw", "641px": "95vw" }}
       >
-        <div className="p-4">
+        <div className="pl-4 pr-4">
           <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
             <div className="col-span-12">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
@@ -369,14 +371,14 @@ export default function UserForm({
                     id="roles"
                     value={selectedRoles}
                     onChange={(e) => setSelectedRoles(e.value)}
-                    options={roles}
+                    options={rolesData}
                     optionLabel="name"
                     optionValue="id"
                     display="chip"
                     placeholder="Select Roles"
                     maxSelectedLabels={3}
                     className={`w-full ${getError("roles") ? "p-invalid" : ""}`}
-                    disabled={submitting || rolesLoading}
+                    disabled={submitting}
                   />
                   {getError("roles") && (
                     <small className="text-red-500 text-xs mt-1">

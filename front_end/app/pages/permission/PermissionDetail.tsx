@@ -45,7 +45,7 @@ export default function PermissionDetail({
   }>({});
   const toast = useRef<Toast>(null);
 
-  const getHeader = (): string => "PERMISSION DETAILS";
+  const getHeader = (): string => "DETAILS";
 
   useEffect(() => {
     if (id && open && permissionData?.roleRes) {
@@ -98,22 +98,25 @@ export default function PermissionDetail({
             />
           </div>
         }
-        style={{ maxWidth: "600px", width: "90%" }}
+        style={{ width: "50%" }}
         modal
         className="p-fluid"
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
       >
         {uniqueResources.length > 0 ? (
           uniqueResources.map((perm) => (
-            <div key={perm.resourceId} className="grid grid-cols-1 gap-3 mb-4">
-              <div className="grid grid-cols-1 gap-2">
-                <div className="flex items-center gap-2">
+            <div
+              key={perm.resourceId}
+              className="grid grid-cols-1 gap-3 mb-4 pl-4 pr-4"
+            >
+              <div className="resouce_actions">
+                <div className="w-127">
                   <label className="font-bold w-24">Resource:</label>
-                  <span>{perm.resourceName}</span>
+                  <div>{perm.resourceName}</div>
                 </div>
-                <div className="flex items-start gap-2">
+                <div>
                   <label className="font-bold w-24">Actions:</label>
-                  <span className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2">
                     {permissionData?.roleRes
                       .flatMap((role) => role.permissions)
                       .filter((p) => p.resourceId === perm.resourceId)
@@ -137,62 +140,64 @@ export default function PermissionDetail({
                           </label>
                         </div>
                       ))}
-                  </span>
+                  </div>
                 </div>
               </div>
             </div>
           ))
         ) : (
-          <p>No permissions available</p>
+          <p>-</p>
         )}
 
-        <>
-          <div className="grid grid-cols-3 gap-2 items-center mb-2">
-            <label htmlFor="createdBy" className="font-bold col-span-1">
-              Created By:
-            </label>
-            <span id="createdBy" className="col-span-2">
-              {permissionData?.createdBy || "-"}
-            </span>
-          </div>
+        {/* Info data create/update */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pl-4 pr-4">
+          {/* Left */}
+          <div className="flex flex-col gap-4">
+            <div>
+              <label htmlFor="createdName" className="font-bold block mb-1">
+                Created By:
+              </label>
+              <span id="createdName">{permissionData?.createdBy || "-"}</span>
+            </div>
 
-          <div className="grid grid-cols-3 gap-2 items-center mb-2">
-            <label htmlFor="createdAt" className="font-bold col-span-1">
-              Created At:
-            </label>
-            <span id="createdAt" className="col-span-2">
-              {permissionData?.createdAt
-                ? format(
-                    new Date(permissionData?.createdAt),
-                    "yyyy-MM-dd HH:mm:ss"
-                  )
-                : "-"}
-            </span>
+            <div>
+              <label htmlFor="createdAt" className="font-bold block mb-1">
+                Created At:
+              </label>
+              <span id="createdAt">
+                {permissionData?.createdAt
+                  ? format(
+                      new Date(permissionData?.createdAt),
+                      "yyyy-MM-dd HH:mm:ss"
+                    )
+                  : "-"}
+              </span>
+            </div>
           </div>
+          {/* Right */}
+          <div className="flex flex-col gap-4">
+            <div>
+              <label htmlFor="updatedName" className="font-bold block mb-1">
+                Updated By:
+              </label>
+              <span id="updatedName">{permissionData?.updatedBy || "-"}</span>
+            </div>
 
-          <div className="grid grid-cols-3 gap-2 items-center mb-2">
-            <label htmlFor="updatedBy" className="font-bold col-span-1">
-              Updated By:
-            </label>
-            <span id="updatedBy" className="col-span-2">
-              {permissionData?.updatedBy || "-"}
-            </span>
+            <div>
+              <label htmlFor="createdAt" className="font-bold block mb-1">
+                Update At:
+              </label>
+              <span id="createdAt">
+                {permissionData?.updatedAt
+                  ? format(
+                      new Date(permissionData?.updatedAt),
+                      "yyyy-MM-dd HH:mm:ss"
+                    )
+                  : "-"}
+              </span>
+            </div>
           </div>
-
-          <div className="grid grid-cols-3 gap-2 items-center mb-2">
-            <label htmlFor="updatedAt" className="font-bold col-span-1">
-              Updated At:
-            </label>
-            <span id="updatedAt" className="col-span-2">
-              {permissionData?.updatedAt
-                ? format(
-                    new Date(permissionData?.updatedAt),
-                    "yyyy-MM-dd HH:mm:ss"
-                  )
-                : "-"}
-            </span>
-          </div>
-        </>
+        </div>
       </Dialog>
     </div>
   );

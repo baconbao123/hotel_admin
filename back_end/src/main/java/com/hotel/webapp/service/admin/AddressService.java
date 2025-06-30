@@ -23,7 +23,7 @@ import java.util.Objects;
 @Transactional
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class AddressServiceImpl {
+public class AddressService {
   AddressRepository repository;
   StreetsRepository streetRepository;
   AuthService authService;
