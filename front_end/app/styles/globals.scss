@@ -1,6 +1,6 @@
-@import "./calendar.scss";
+@use "./calendar.scss" as *;
 
-@import "./table.scss";
+@use "./table.scss"  as *;
 
 .p-breadcrumb {
   height: 42px;
