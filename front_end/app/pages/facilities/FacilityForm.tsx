@@ -31,6 +31,7 @@ export default function FacilityForm({
   const [icon, setIcon] = useState("");
   const [type, setType] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
+
   const toast = useRef<Toast>(null);
   const { facilityTypes } = useFacilityTypes();
 
@@ -45,13 +46,13 @@ export default function FacilityForm({
       if (mode === "edit" && id && facilityTypes.length > 0) {
         try {
           const data = await loadDataById(id);
-          setName(data.entity.name || "");
-          setIcon(data.entity.icon || "");
+          console.log("Data loaded:", data);
+
+          setName(data.name || "");
+          setIcon(data.icon || "");
 
           const matched = facilityTypes.find((t) =>
-            typeof data.entity.type === "object"
-              ? t.id === data.entity.type.id
-              : t.id === data.entity.type
+            typeof data.type === "object" ? t.id === data.type.id : t.id === data.type
           );
           setType(matched || null);
         } catch (err) {
