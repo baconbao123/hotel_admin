@@ -45,11 +45,27 @@ public interface FacilitiesRepository extends BaseRepository<Facilities, Integer
   Optional<FacilityType> findFacilityTypeByName(String name);
 
   // for user - home
+  // find Facilities By HotelIds
   @Query("select mhf.hotelId, f.id, f.name, f.icon " +
         "from Facilities f  " +
         "left join MapHotelFacility mhf on mhf.facilityId = f.id " +
         "where mhf.hotelId in :hotelId and mhf.deletedAt is null")
-  List<Object[]> findFacilitiesByHotelId(List<Integer> hotelId);
+  List<Object[]> findFacilitiesByHotelIds(List<Integer> hotelId);
+
+  // find Facilities By HotelId
+  @Query("select mhf.hotelId, f.id, f.name, f.icon " +
+        "from Facilities f  " +
+        "left join MapHotelFacility mhf on mhf.facilityId = f.id " +
+        "where mhf.hotelId = :hotelId and mhf.deletedAt is null")
+  List<Object[]> findFacilitiesByHotelId(Integer hotelId);
+
+  // find Facilities By RoomId
+  @Query("select mrf.roomId, f.id, f.name, f.icon " +
+        "from Facilities f  " +
+        "left join MapRoomFacility mrf on mrf.facilityId = f.id " +
+        "where mrf.roomId = :roomId and mrf.deletedAt is null")
+  List<Object[]> findFacilitiesByRoomId(Integer roomId);
+
 
   // filters
   @Query("select f.id, f.name, f.icon " +

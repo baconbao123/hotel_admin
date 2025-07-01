@@ -18,9 +18,13 @@ public class Booking implements AuditEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer id;
+  @Column(nullable = false)
   Integer userId;
+  @Column(nullable = false)
   Integer roomId;
+  @Column(nullable = false)
   LocalDateTime checkInTime;
+  @Column(nullable = false)
   LocalDateTime checkOutTime;
   LocalDateTime actualCheckInTime;
   LocalDateTime actualCheckOutTime;
