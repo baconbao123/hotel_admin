@@ -14,8 +14,9 @@ import RoleForm from "@/pages/role/RoleForm";
 import RoleDetail from "@/pages/role/RoleDetail";
 import { SkeletonTemplate } from "@/components/common/skeleton";
 import { useSelector } from "react-redux";
-import { useAppDispatch } from "@/store";
+import { useAppDispatch, type RootState } from "@/store";
 import { fetchCommonData } from "@/store/slices/commonDataSlice";
+import Loading from "@/components/shared/Loading";
 
 export default function RoleList() {
   const [selectedId, setSelectedId] = useState<string>();
@@ -54,6 +55,10 @@ export default function RoleList() {
     closeForm,
   } = useCrud("/role");
 
+  const loading = useSelector((state: RootState) => state.loading.isLoading);
+
+  if (loading) <Loading />;
+
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -76,7 +81,7 @@ export default function RoleList() {
       if (result.isConfirmed) {
         await deleteItem(id);
         await Swal.fire("Deleted!", "", "success");
-        return true; // Delete successful
+        return true;
       }
       return false; // User canceled or denied
     } catch (error) {
@@ -229,7 +234,7 @@ export default function RoleList() {
                       tooltipOptions={{ position: "top" }}
                     />
                   )}
-                  
+
                   {hasPermission("update") && (
                     <Button
                       icon="pi pi-pencil"
@@ -260,7 +265,7 @@ export default function RoleList() {
                             const result = await dispatch(
                               fetchCommonData({
                                 types: ["roles"],
-                                forceRefresh: true,
+                                force: true,
                               })
                             );
                             if (fetchCommonData.rejected.match(result)) {

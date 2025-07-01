@@ -11,6 +11,7 @@ import { Link } from "react-router";
 import { Modal } from "./Modal";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/store";
+import useAuth from "@/hooks/useAuth";
 
 export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -20,7 +21,13 @@ export default function Navbar() {
 
   const user = useSelector((state: RootState) => state.userData);
 
-  // User info state
+  const { loading, error, fetchUserInfo } = useAuth();
+
+  useEffect(() => {
+    if (!user.id && !loading && !error) {
+      fetchUserInfo();
+    }
+  }, [loading, error, fetchUserInfo]);
 
   const handleLogoutClick = () => {
     setIsProfileOpen(false);
@@ -56,7 +63,7 @@ export default function Navbar() {
                   className="w-8 h-8 rounded-full"
                   src={`${
                     import.meta.env.VITE_REACT_APP_BACK_END_LINK_UPLOAD_USER
-                  }/${user?.avatar}`}
+                  }/${user?.avatarUrl}`}
                   alt="User profile"
                 />
                 <div className="text-sm">
@@ -64,7 +71,7 @@ export default function Navbar() {
                     {user?.fullname ?? "Austin Robertson"}
                   </p>
                   <p className="text-xs text-gray-500">
-                    {user?.role.roleName ?? "Administrator"}
+                    {user?.roles ?? "Administrator"}
                   </p>
                 </div>
               </button>
@@ -119,15 +126,15 @@ export default function Navbar() {
             <div className="flex items-center space-x-2 p-2 z-0">
               <img
                 className="w-8 h-8 rounded-full "
-                src={user?.avatar}
+                src={user?.avatarUrl}
                 alt="User profile"
               />
               <div className="text-sm">
                 <p className="font-medium text-gray-700">
-                  {user?.fullname ?? "Austin Robertson"}
+                  {user?.email ?? "Austin Robertson"}
                 </p>
                 <p className="text-xs text-gray-500">
-                  {user?.role ?? "Administrator"}
+                  {user?.roles ?? "Administrator"}
                 </p>
               </div>
             </div>

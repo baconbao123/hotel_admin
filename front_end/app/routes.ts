@@ -5,7 +5,6 @@ import {
   layout,
 } from "@react-router/dev/routes";
 
-
 export default [
   layout("./layouts/rootLayout.tsx", [
     route("/", "./pages/welcome/WelcomePage.tsx"),
@@ -20,6 +19,8 @@ export default [
       route("/streets", "./pages/street/StreetList.tsx"),
       route("/hotels", "./pages/hotel/HotelList.tsx"),
       route("/facilities", "./pages/facilities/FacilityList.tsx"),
+      route("/room/:hotelId", "./pages/rooms/RoomList.tsx"),
+      route("/booking/:roomId", "./pages/booking/BookingList.tsx"),
     ]),
   ]),
   layout("./layouts/authLayout.tsx", [

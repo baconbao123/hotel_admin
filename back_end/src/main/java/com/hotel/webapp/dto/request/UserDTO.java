@@ -27,6 +27,8 @@ public class UserDTO {
   String phoneNumber;
   String password;
 
+  Integer userTypeId;
+
   MultipartFile avatarUrl;
   String keepAvatar;
 
@@ -40,6 +42,23 @@ public class UserDTO {
   @Setter
   @FieldDefaults(level = AccessLevel.PRIVATE)
   public static class ProfileDTO {
+    @Trim
+    @FieldNotEmpty(field = "Full name")
+    String fullName;
+    @FieldAndCheckRegexp(field = "Email", force = ForceType.MANDATORY, regex = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
+    @Trim
+    String email;
+    @FieldAndCheckRegexp(field = "Phone Number", force = ForceType.MANDATORY, regex = "^(\\(\\d{3}\\)|\\d{3})-?\\d{3}-?\\d{4}$")
+    @Trim
+    String phoneNumber;
+    MultipartFile avatarUrl;
+    String keepAvatar;
+  }
+
+  @Getter
+  @Setter
+  @FieldDefaults(level = AccessLevel.PRIVATE)
+  public static class ProfileDTORes {
     @Trim
     @FieldNotEmpty(field = "Full name")
     String fullName;

@@ -25,19 +25,7 @@ import java.util.Map;
 public class HotelController {
   HotelService hotelService;
 
-//  @Permission(name = "create")
-//  @PostMapping(consumes = {"multipart/form-data"})
-//  public ApiResponse<Hotels> create(
-//        @Valid @ModelAttribute HotelDTO hotelDTO
-//        @RequestPart(name = "avatarUrl", required = false) HotelDTO.AvatarReq avatarUrl,
-//        @RequestPart(name = "imageReqs", required = false) HotelDTO.ImageReqs imageReqs,
-//        @RequestPart(name = "documentReqs", required = false) List<HotelDTO.DocumentReq> documentReqs
-//  ) {
-//    return ApiResponse.<Hotels>builder()
-//                      .result(hotelService.create(hotelDTO, avatarUrl, imageReqs, documentReqs))
-//                      .result(hotelService.create(hotelDTO))
-//                      .build();
-//  }
+
 
   @Permission(name = "create")
   @PostMapping(consumes = {"multipart/form-data"})

@@ -44,7 +44,7 @@ export default function ProfilePage() {
     <div className="max-w-3xl mx-auto px-4 py-10">
       <div className="bg-white shadow-md rounded-xl p-8">
         <div className="flex items-center space-x-6 mb-6">
-          {user.avatar && user.avatar.trim() !== "" ? (
+          {user.avatarUrl && user.avatarUrl.trim() !== "" ? (
             <Image
               width={50}
               wrapperStyle={{ display: "none" }}
@@ -55,7 +55,7 @@ export default function ProfilePage() {
               }}
               src={`${
                 import.meta.env.VITE_REACT_APP_BACK_END_LINK_UPLOAD_USER
-              }/${user.avatar}`}
+              }/${user.avatarUrl}`}
             />
           ) : (
             <Image
@@ -73,8 +73,8 @@ export default function ProfilePage() {
             <h2 className="text-2xl font-semibold text-gray-800">
               {user.fullname}
             </h2>
-            {user.role.map((r: any) => (
-              <p className="text-sm text-gray-500">{r.roleName}</p>
+            {user?.roles?.map((r: any) => (
+              <p className="text-sm text-gray-500">{r}1</p>
             ))}
           </div>
         </div>
@@ -90,10 +90,10 @@ export default function ProfilePage() {
 
           <div className="space-y-1">
             <p className="text-sm text-gray-500">Role</p>
-            {user.role.map((r: any) => (
+            {user.roles.map((r: any) => (
               <div className="flex items-center gap-2">
                 <ShieldCheckIcon className="w-5 h-5 text-gray-400" />
-                <span className="font-medium text-gray-800">{r.roleName}</span>
+                <span className="font-medium text-gray-800">{r}</span>
               </div>
             ))}
           </div>

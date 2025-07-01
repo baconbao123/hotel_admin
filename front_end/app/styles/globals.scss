@@ -1,6 +1,6 @@
-@import "./calendar.scss";
+@use "./calendar.scss";
 
-@import "./table.scss";
+@use "./table.scss";
 
 .p-breadcrumb {
   height: 42px;
@@ -8,6 +8,6 @@
 }
 
 .p-menuitem {
-    display: flex;
-    align-items: center;
+  display: flex;
+  align-items: center;
 }

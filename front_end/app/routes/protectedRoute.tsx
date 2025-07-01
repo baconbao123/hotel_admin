@@ -34,6 +34,8 @@ const ProtectedRoute = () => {
     "/streets": "Street",
     "/hotels": "Hotel",
     "/facilities": "Facilities",
+    "/room/:hotelId": "Room",
+    "/booking/:roomId": "Booking",
   };
 
   const pathSegments = location.pathname.split("/").filter(Boolean);

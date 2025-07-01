@@ -10,15 +10,15 @@ import { Skeleton } from "primereact/skeleton";
 import Swal from "sweetalert2";
 import BreadCrumbComponent from "@/components/common/breadCrumb/BreadCrumbComponent";
 import useCrud from "@/hooks/crudHook";
-import RoleForm from "@/pages/role/RoleForm";
-import RoleDetail from "@/pages/role/RoleDetail";
 import { SkeletonTemplate } from "@/components/common/skeleton";
 import { Image } from "antd";
 import noImg from "@/asset/images/no-img.png";
-import UserForm from "../user/UserForm";
 import HotelForm from "./HotelForm";
 import HotelDetail from "./HotelDetail";
 import { useSelector } from "react-redux";
+import { Link } from "react-router";
+import type { RootState } from "@/store";
+import Loading from "@/components/shared/Loading";
 
 export default function RoleList() {
   const [selectedId, setSelectedId] = useState<string>();
@@ -34,7 +34,6 @@ export default function RoleList() {
 
   const {
     data,
-    tableLoading,
     error,
     openForm,
     setOpenForm,
@@ -61,13 +60,17 @@ export default function RoleList() {
     setMounted(true);
   }, []);
 
+  const loading = useSelector((state: RootState) => state.loading.isLoading);
+
+  if (loading) <Loading />;
+
   const handlePageChange = (e: any) => updatePageData(e.page, e.rows);
   const handleSortChange = (e: any) =>
     handleSort(e.sortField || "", e.sortOrder || 0);
 
   const handleDelete = (id: string) => {
     Swal.fire({
-      title: "Delete role?",
+      title: "Delete hotel?",
       showDenyButton: true,
       showCancelButton: true,
       confirmButtonText: "Delete",
@@ -100,6 +103,19 @@ export default function RoleList() {
           padding: "0.4rem 3rem",
         }}
       />
+    </div>
+  );
+
+  const statusRoom = (row: any) => (
+    <div className="flex justify-center">
+      <Link to={`/room/${row.id}`}>
+        <Button
+          label="View Rooms"
+          severity="info"
+          text
+          style={{ color: "#0ea5e9" }}
+        />
+      </Link>
     </div>
   );
 
@@ -158,7 +174,7 @@ export default function RoleList() {
           </div>
         </div>
 
-        {tableLoading ? (
+        {loading ? (
           SkeletonTemplate("Hotel Management", 6)
         ) : (
           <DataTable
@@ -230,6 +246,12 @@ export default function RoleList() {
               header="Description"
               className="w-200"
               body={(row) => row.description || "-"}
+            />
+            <Column
+              field="id"
+              header="Rooms"
+              className="text-center w-70"
+              body={statusRoom}
             />
             <Column
               sortable

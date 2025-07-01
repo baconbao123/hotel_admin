@@ -9,6 +9,9 @@ import { MultiSelect } from "primereact/multiselect";
 import { useCommonData } from "@/hooks/useCommonData";
 import { useSelector } from "react-redux";
 import $axios from "@/axios";
+import { useAppDispatch } from "@/store";
+import { fetchCommonData } from "@/store/slices/commonDataSlice";
+import { Dropdown } from "primereact/dropdown";
 interface Props {
   id?: string;
   open: boolean;
@@ -45,10 +48,13 @@ export default function UserForm({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showError, setShowError] = useState(false);
   const [passwordsMatch, setPasswordsMatch] = useState(true);
+  const [selectedType, setSelectedType] = useState<any>(null);
+  const dispatch = useAppDispatch();
 
-  const { commonData } = useCommonData(["roles"]);
+  const { commonData } = useCommonData(["roles", "usertypes"]);
 
   const rolesData = commonData.roles ?? [];
+  const userTypes = commonData.userTypes ?? [];
 
   const toast = useRef<Toast>(null);
 
@@ -68,6 +74,9 @@ export default function UserForm({
           setStatus(data.status ?? true);
           setAvatarUrl(data.avatarUrl || null);
           setSelectedFile(null);
+
+          const userTyped = userTypes.find((u) => u.id == data.userTypeId);
+          setSelectedType(userTyped);
 
           const selectedRoleIds = rolesData
             .filter((role) => data.roles.some((r: any) => r.roleId === role.id))
@@ -91,6 +100,7 @@ export default function UserForm({
       setAvatarUrl(null);
       setSelectedFile(null);
       setSelectedRoles([]);
+      setSelectedType(null);
     }
   }, [id, open, loadDataById]);
 
@@ -134,6 +144,8 @@ export default function UserForm({
     } else if (avatarUrl) {
       formData.append("keepAvatar", "true");
     }
+
+    formData.append("userTypeId", selectedType?.id);
 
     selectedRoles.forEach((roleId) => {
       formData.append("rolesIds", roleId.toString());
@@ -413,6 +425,28 @@ export default function UserForm({
                   </div>
                 )}
 
+                <div>
+                  <label
+                    htmlFor="status"
+                    className="text-sm font-medium text-gray-700"
+                  >
+                    User Type <span className="text-red-500">*</span>
+                  </label>
+                  <Dropdown
+                    value={selectedType}
+                    onChange={(e) => setSelectedType(e.value)}
+                    options={userTypes}
+                    optionLabel="name"
+                    placeholder="Select user type"
+                    className="w-full md:w-14rem"
+                  />
+                  {getError("status") && (
+                    <small className="text-red-500 text-xs mt-1">
+                      {getError("status")}
+                    </small>
+                  )}
+                </div>
+
                 <div className="flex items-center gap-3">
                   <label
                     htmlFor="status"
@@ -440,6 +474,7 @@ export default function UserForm({
                       raised
                       label="Change Password"
                       onClick={() => setViewChangePassword(!viewChangePassword)}
+                      style={{ color: "white" }}
                     />
 
                     {viewChangePassword && (

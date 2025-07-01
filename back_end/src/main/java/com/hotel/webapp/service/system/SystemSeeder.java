@@ -6,6 +6,7 @@ import com.hotel.webapp.repository.MapResourceActionRepository;
 import com.hotel.webapp.repository.TypeHotelRepository;
 import com.hotel.webapp.repository.seeder.PaymentMethodRepository;
 import com.hotel.webapp.repository.seeder.RoomTypeRepository;
+import com.hotel.webapp.repository.seeder.UserTypeRepository;
 import com.hotel.webapp.util.ValidateDataInput;
 import com.nimbusds.jose.util.Pair;
 import jakarta.transaction.Transactional;
@@ -31,8 +32,10 @@ public class SystemSeeder {
   FacilitiesRepository facilitiesRepository;
   RoomTypeRepository roomTypeRepository;
   PaymentMethodRepository paymentMethodRepository;
+  UserTypeRepository userTypeRepository;
 
-  List<String> DEFAULT_RESOURCE = List.of("Hotel", "User", "Permissions", "Role", "Street", "Dashboard", "Facilities");
+  List<String> DEFAULT_RESOURCE = List.of("Hotel", "User", "Permissions", "Role", "Street", "Dashboard", "Facilities"
+        , "Room", "Booking");
 
   List<String> DEFAULT_ACTION = List.of("view", "create", "update", "delete", "change_password");
 
@@ -46,6 +49,8 @@ public class SystemSeeder {
   List<String> ROOM_TYPE = List.of("Standard", "Superior", "Deluxe", "Executive", "Suite");
 
   List<String> PAYMENT_METHOD = List.of("Cash", "VN Pay");
+
+  List<String> USER_TYPE = List.of("Admin", "Customer");
 
 
   @Transactional
@@ -184,6 +189,16 @@ public class SystemSeeder {
                                                              .orElseThrow(
                                                                    () -> new RuntimeException("Failed insert type"));
                              });
+    }
+
+    for (String type : USER_TYPE) {
+      userTypeRepository.findUserTypeByName(type)
+                        .orElseGet(() -> {
+                          userTypeRepository.insertUserType(type, LocalDateTime.now(), 0);
+                          return userTypeRepository.findUserTypeByName(type)
+                                                   .orElseThrow(
+                                                         () -> new RuntimeException("Failed insert type"));
+                        });
     }
   }
 

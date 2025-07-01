@@ -4,38 +4,33 @@ import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
-import { Image } from "antd";
 import { Toast } from "primereact/toast";
+import { Tag } from "primereact/tag";
+import { Skeleton } from "primereact/skeleton";
+import Swal from "sweetalert2";
 import BreadCrumbComponent from "@/components/common/breadCrumb/BreadCrumbComponent";
 import useCrud from "@/hooks/crudHook";
-import Swal from "sweetalert2";
-import { Tag } from "primereact/tag";
-import UserDetail from "./UserDetail";
-import { Skeleton } from "primereact/skeleton";
 import { SkeletonTemplate } from "@/components/common/skeleton";
-import noImg from "@/asset/images/no-img.png";
-import UserForm from "./UserForm";
 import { useSelector } from "react-redux";
-import { useAppDispatch, type RootState } from "@/store";
+import { useAppDispatch } from "@/store";
 import { fetchCommonData } from "@/store/slices/commonDataSlice";
-import Loading from "@/components/shared/Loading";
+import { Link, useParams } from "react-router";
+import BookingForm from "./BookingForm";
+import BookingDetail from "./BookingDetail";
 
-export default function UserList() {
-  const [selectedUserId, setSelectedUserId] = useState<string | undefined>(
-    undefined
-  );
-  const [mounted, setMounted] = useState(false);
-
+export default function RoomList() {
+  const [selectedId, setSelectedId] = useState<string>();
   const [formMode, setFormMode] = useState<"create" | "edit" | "view">(
     "create"
   );
-
-  const dispatch = useAppDispatch();
-  const loading = useSelector((state: RootState) => state.loading.isLoading);
-
-  if (loading) <Loading />;
-
+  const [mounted, setMounted] = useState(false);
   const toast = useRef<Toast>(null);
+
+  const permissions = useSelector(
+    (state: any) => state.permissions.permissions
+  );
+
+  const { roomId } = useParams();
 
   const {
     data,
@@ -59,7 +54,8 @@ export default function UserList() {
     filters,
     sortField,
     sortOrder,
-  } = useCrud("/user");
+    closeForm,
+  } = useCrud("booking", roomId, "booking");
 
   useEffect(() => {
     setMounted(true);
@@ -68,6 +64,8 @@ export default function UserList() {
   const handlePageChange = (e: any) => updatePageData(e.page, e.rows);
   const handleSortChange = (e: any) =>
     handleSort(e.sortField || "", e.sortOrder || 0);
+
+  const dispatch = useAppDispatch();
 
   async function handleDelete(id: string): Promise<boolean> {
     try {
@@ -96,12 +94,9 @@ export default function UserList() {
     }
   }
 
-  const permissions = useSelector(
-    (state: any) => state.permissions.permissions
-  );
-
+  // Check actions
   const hasPermission = (actionName: string) => {
-    const resource = permissions.find((p: any) => p.resourceName === "User");
+    const resource = permissions.find((p: any) => p.resourceName === "Role");
     return resource ? resource.actionNames.includes(actionName) : false;
   };
 
@@ -121,62 +116,71 @@ export default function UserList() {
     </div>
   );
 
+  const viewBooking = (row: any) => (
+    <div className="flex justify-center">
+      <Link to={`/booking/${row.id}`}>
+        <Button
+          label="View Booking"
+          severity="info"
+          text
+          style={{ color: "#0ea5e9" }}
+        />
+      </Link>
+    </div>
+  );
+
   return (
-    <div>
+    <div className="main-container">
       {mounted && <Toast ref={toast} />}
       <div className="mb-5">
         {mounted ? (
-          <BreadCrumbComponent name="UserList" />
+          <BreadCrumbComponent name="RoleList" />
         ) : (
           <Skeleton width="100%" height="34px" />
         )}
       </div>
 
-      <Card title="Users management">
+      <Card title="Booking management">
         <div className="mb-5">
           <div className="grid grid-cols-4 gap-10 card">
-            <div className="col-span-4 2xl:col-span-3 xl:col-span-3 lg:col-span-3 md:col-span-3">
-              <div className="grid gap-2 2xl:grid-cols-6 xl:grid-cols-5 lg:grid-cols-4 md:grid-cols-3 grid-cols-2">
+            <div className="col-span-4 2xl:col-span-3">
+              <div className="grid gap-2 2xl:grid-cols-6 grid-cols-2">
                 {mounted ? (
-                  <InputText
-                    placeholder="Name"
-                    className="w-full"
-                    value={filters.fullName || ""}
-                    onChange={(e) => handleSearch("fullName", e.target.value)}
-                  />
+                  <>
+                    <InputText
+                      placeholder="Name"
+                      className="w-full"
+                      value={filters.name || ""}
+                      onChange={(e) => handleSearch("name", e.target.value)}
+                    />
+                  </>
                 ) : (
-                  <Skeleton height="100%" />
-                )}
-
-                {mounted ? (
-                  <InputText
-                    placeholder="Email"
-                    className="w-full"
-                    value={filters.email || ""}
-                    onChange={(e) => handleSearch("email", e.target.value)}
-                  />
-                ) : (
-                  <Skeleton height="100%" />
+                  <>
+                    <Skeleton height="100%" />
+                  </>
                 )}
               </div>
             </div>
-
-            <div className="col-span-4 2xl:col-span-1 xl:col-span-1 lg:col-span-1 md:col-span-1">
+            <div className="col-span-4 2xl:col-span-1">
               <div className="flex flex-wrap gap-2 justify-end">
-                <Button
-                  label="Add new"
-                  className="btn_add_new"
-                  onClick={() => {
-                    setSelectedUserId(undefined);
-                    setOpenForm(true);
-                  }}
-                />
+                {hasPermission("create") && (
+                  <Button
+                    label="Add New"
+                    className="btn_add_new"
+                    onClick={() => {
+                      setSelectedId(undefined);
+                      setFormMode("create");
+                      setOpenForm(true);
+                    }}
+                  />
+                )}
               </div>
             </div>
           </div>
         </div>
+
         {tableLoading ? (
-          SkeletonTemplate("User Management", 5)
+          SkeletonTemplate("Rooms Management", 5)
         ) : (
           <DataTable
             value={data}
@@ -191,6 +195,8 @@ export default function UserList() {
             sortOrder={sortOrder as 1 | -1 | 0 | undefined}
             showGridlines
             rowHover
+            scrollable
+            scrollHeight="570px"
             lazy
             paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="From {first} to {last} of {totalRecords}"
@@ -203,59 +209,59 @@ export default function UserList() {
               />
             }
           >
-            <Column sortable field="id" header="Id" className="w-20"></Column>
+            <Column sortable field="id" header="Id" className="w-20" />
+            <Column sortable field="userName" header="User" className="w-100" />
             <Column
-              field="avatarUrl"
-              header="Avatar"
-              className="w-30"
-              body={(rowData: any) => {
-                return (
-                  <div className="flex justify-center">
-                    {rowData.avatarUrl ? (
-                      <Image
-                        src={`${
-                          import.meta.env
-                            .VITE_REACT_APP_BACK_END_LINK_UPLOAD_USER
-                        }/${rowData.avatarUrl}`}
-                        alt="User Avatar"
-                        width={50}
-                        height={50}
-                        style={{
-                          objectFit: "cover",
-                          borderRadius: "4px",
-                        }}
-                        preview
-                      />
-                    ) : (
-                      <Image src={noImg} />
-                    )}
-                  </div>
-                );
-              }}
-            ></Column>
-
-            <Column sortable field="fullName" header="Name"></Column>
-            <Column sortable field="email" header="Email"></Column>
+              sortable
+              field="roomNumber"
+              header="Room Number"
+              className="w-100"
+            />
             <Column
+              sortable
+              field="checkInTime"
+              header="Check In"
+              className="w-100"
+            />
+            <Column
+              sortable
+              field="checkOutTime"
+              header="Check Out"
+              className="w-100"
+            />
+            <Column
+              sortable
+              field="actualCheckInTime"
+              header="Actual Check In"
+              className="w-100"
+            />
+            <Column
+              sortable
+              field="actualCheckInTime"
+              header="Actual Check In"
+              className="w-100"
+            />
+            <Column
+              sortable
               field="status"
               header="Status"
-              sortable
+              className="text-center w-50"
               body={statusBody}
-              className=" w-40"
-            ></Column>
+            />
             <Column
-              header="Actions"
+              frozen={true}
+              header={() => <div className="flex justify-center">Actions</div>}
               className="w-60"
-              body={(row: any) => (
+              body={(row) => (
                 <div className="flex gap-2 justify-center">
                   {hasPermission("view") && (
                     <Button
                       icon="pi pi-eye"
-                      className="icon_view"
                       rounded
                       text
+                      className="icon_view"
                       onClick={() => {
-                        setSelectedUserId(row.id);
+                        setSelectedId(String(row.id));
                         setFormMode("view");
                         setOpenFormDetail(true);
                       }}
@@ -263,6 +269,7 @@ export default function UserList() {
                       tooltipOptions={{ position: "top" }}
                     />
                   )}
+
                   {hasPermission("update") && (
                     <Button
                       icon="pi pi-pencil"
@@ -270,7 +277,7 @@ export default function UserList() {
                       text
                       className="icon_edit"
                       onClick={() => {
-                        setSelectedUserId(row.id);
+                        setSelectedId(String(row.id));
                         setFormMode("edit");
                         setOpenForm(true);
                       }}
@@ -278,12 +285,14 @@ export default function UserList() {
                       tooltipOptions={{ position: "top" }}
                     />
                   )}
+
                   {hasPermission("delete") && (
                     <Button
                       icon="pi pi-trash"
                       rounded
                       text
                       className="icon_trash"
+                      style={{ color: "blue" }}
                       onClick={async () => {
                         try {
                           const deleted = await handleDelete(String(row.id));
@@ -298,7 +307,7 @@ export default function UserList() {
                               toast.current?.show({
                                 severity: "error",
                                 summary: "Error",
-                                detail: "Failed to refresh room data",
+                                detail: "Failed to refresh roles data",
                                 life: 3000,
                               });
                             }
@@ -317,19 +326,19 @@ export default function UserList() {
                   )}
                 </div>
               )}
-            ></Column>
+            />
           </DataTable>
         )}
       </Card>
 
       {(hasPermission("create") || hasPermission("update")) && (
-        <UserForm
-          id={selectedUserId}
+        <BookingForm
+          hotelId={roomId ?? 0}
+          id={selectedId}
           open={openForm}
           mode={formMode}
           onClose={() => {
-            setOpenForm(false);
-            setSelectedUserId(undefined);
+            closeForm();
             setFormMode("create");
           }}
           loadDataById={loadById}
@@ -340,13 +349,13 @@ export default function UserList() {
       )}
 
       {hasPermission("view") && (
-        <UserDetail
-          id={selectedUserId}
+        <BookingDetail
+          id={selectedId}
           open={openFormDetail}
           mode={formMode}
           onClose={() => {
             setOpenFormDetail(false);
-            setSelectedUserId(undefined);
+            setSelectedId(undefined);
             setFormMode("view");
           }}
           loadDataById={loadById}

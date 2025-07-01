@@ -28,6 +28,8 @@ public class UserRes {
   LocalDateTime createdAt;
   LocalDateTime updatedAt;
 
+  Integer userTypeId;
+  String userTypeName;
 
   @Getter
   @Setter
@@ -36,5 +38,28 @@ public class UserRes {
   public static class RoleRes {
     Integer roleId;
     String roleName;
+  }
+
+  @Getter
+  @Setter
+  @AllArgsConstructor
+  @FieldDefaults(level = AccessLevel.PRIVATE)
+  public static class UserProfileRes {
+    Integer id;
+    String fullName;
+    String email;
+    String phoneNumber;
+    String avatarUrl;
+    List<String> roles;
+  }
+
+  @Getter
+  @Setter
+  @AllArgsConstructor
+  @FieldDefaults(level = AccessLevel.PRIVATE)
+  public static class OwnerRes {
+    Integer id;
+    String fullName;
+    String email;
   }
 }
