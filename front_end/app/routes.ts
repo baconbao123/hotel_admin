@@ -11,7 +11,6 @@ export default [
     route("/profile", "./pages/profile/ProfilePage.tsx"),
     route("", "./routes/protectedRoute.tsx", [
       route("/dashboard", "./pages/dashboard/DashboardPage.tsx"),
-      route("/setting", "./pages/settings/SettingPage.tsx"),
       route("/user", "./pages/user/UserList.tsx"),
       route("/role", "./pages/role/RoleList.tsx"),
       route("/bookings/calendar", "./pages/hotel/BookingCalendar.tsx"),
@@ -25,7 +24,6 @@ export default [
   ]),
   layout("./layouts/authLayout.tsx", [
     route("/login", "./pages/login/LoginPage.tsx"),
-    route("/register", "./pages/register/RegisterPage.tsx"),
     route("/reset-password-profile", "./pages/profile/ResetPassword.tsx"),
   ]),
   route("/404", "./pages/error/NotFound.tsx"),

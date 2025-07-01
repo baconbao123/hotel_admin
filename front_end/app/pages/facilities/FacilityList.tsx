@@ -14,6 +14,9 @@ import { SkeletonTemplate } from "@/components/common/skeleton";
 import FacilityForm from "./FacilityForm";
 import "primeicons/primeicons.css";
 import FacilityDetail from "./FacilityDetail";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
+import Loading from "@/components/shared/Loading";
 
 export default function FacilityList() {
   const [selectedId, setSelectedId] = useState<string>();
@@ -51,6 +54,10 @@ export default function FacilityList() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const loading = useSelector((state: RootState) => state.loading.isLoading);
+
+  if (loading) <Loading />;
 
   const handlePageChange = (e: any) => updatePageData(e.page, e.rows);
   const handleSortChange = (e: any) =>
@@ -126,7 +133,7 @@ export default function FacilityList() {
         </div>
 
         {tableLoading ? (
-          SkeletonTemplate("FacilityList", 5)
+          SkeletonTemplate("Facility List", 5)
         ) : (
           <DataTable
             value={data}

@@ -76,7 +76,7 @@ public class AuthController {
     String token = authService.generatePasswordResetToken(email);
 
     String subject = "Reset Password";
-    String text = "http://localhost:5173/reset-password?token=" + token;
+    String text = "http://localhost:5173/reset-password-profile?token=" + token;
     emailService.sendEmail(email, subject, text);
 
     return ApiResponse.builder()

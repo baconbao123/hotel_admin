@@ -62,6 +62,15 @@ export default function StreetList() {
   const handleSortChange = (e: any) =>
     handleSort(e.sortField || "", e.sortOrder || 0);
 
+  const permissions = useSelector(
+    (state: any) => state.permissions.permissions
+  );
+
+  const hasPermission = (actionName: string) => {
+    const resource = permissions.find((p: any) => p.resourceName === "Role");
+    return resource ? resource.actionNames.includes(actionName) : false;
+  };
+
   const handleDelete = (id: string) => {
     Swal.fire({
       title: "Delete street?",
@@ -99,22 +108,7 @@ export default function StreetList() {
         <div className="mb-5">
           <div className="grid grid-cols-4 gap-10 card">
             <div className="col-span-4 2xl:col-span-3">
-              <div className="grid gap-2 2xl:grid-cols-6 grid-cols-2">
-                {mounted ? (
-                  <>
-                    <InputText
-                      placeholder="Name"
-                      className="w-full"
-                      value={filters.name || ""}
-                      onChange={(e) => handleSearch("name", e.target.value)}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <Skeleton height="100%" />
-                  </>
-                )}
-              </div>
+              <div className="grid gap-2 2xl:grid-cols-6 grid-cols-2"></div>
             </div>
             <div className="col-span-4 2xl:col-span-1">
               <div className="flex flex-wrap gap-2 justify-end">
@@ -182,72 +176,85 @@ export default function StreetList() {
               className="w-60"
               body={(row: any) => (
                 <div className="flex gap-2 justify-center">
-                  <Button
-                    icon="pi pi-eye"
-                    rounded
-                    text
-                    className="icon_view"
-                    onClick={() => {
-                      setSelectedId(String(row.id));
-                      setFormMode("view");
-                      setOpenFormDetail(true);
-                    }}
-                    tooltip="View"
-                    tooltipOptions={{ position: "top" }}
-                  />
-                  <Button
-                    icon="pi pi-pencil"
-                    className="icon_edit"
-                    rounded
-                    text
-                    onClick={() => {
-                      setSelectedId(String(row.id));
-                      setFormMode("edit");
-                      setOpenForm(true);
-                    }}
-                    tooltip="Edit"
-                    tooltipOptions={{ position: "top" }}
-                  />
-                  <Button
-                    icon="pi pi-trash"
-                    rounded
-                    text
-                    className="icon_trash"
-                    onClick={() => handleDelete(String(row.id))}
-                    tooltip="Delete"
-                    tooltipOptions={{ position: "top" }}
-                  />
+                  {hasPermission("view") && (
+                    <Button
+                      icon="pi pi-eye"
+                      rounded
+                      text
+                      className="icon_view"
+                      onClick={() => {
+                        setSelectedId(String(row.id));
+                        setFormMode("view");
+                        setOpenFormDetail(true);
+                      }}
+                      tooltip="View"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  )}
+
+                  {hasPermission("update") && (
+                    <Button
+                      icon="pi pi-pencil"
+                      className="icon_edit"
+                      rounded
+                      text
+                      onClick={() => {
+                        setSelectedId(String(row.id));
+                        setFormMode("edit");
+                        setOpenForm(true);
+                      }}
+                      tooltip="Edit"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  )}
+
+                  {hasPermission("delete") && (
+                    <Button
+                      icon="pi pi-trash"
+                      rounded
+                      text
+                      className="icon_trash"
+                      onClick={() => handleDelete(String(row.id))}
+                      tooltip="Delete"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  )}
                 </div>
               )}
             />
           </DataTable>
         )}
       </Card>
-      <StreetForm
-        id={selectedId}
-        open={openForm}
-        mode={formMode}
-        onClose={() => {
-          closeForm();
-          setFormMode("create");
-        }}
-        loadDataById={loadById}
-        createItem={createItem}
-        updateItem={updateItem}
-        error={error}
-      />
 
-      <StreetDetail
-        id={selectedId}
-        open={openFormDetail}
-        mode={formMode}
-        onClose={() => {
-          setOpenFormDetail(false);
-          setSelectedId(undefined);
-          setFormMode("view");
-        }}
-        loadDataById={loadById}
-      />
+      {(hasPermission("create") || hasPermission("update")) && (
+        <StreetForm
+          id={selectedId}
+          open={openForm}
+          mode={formMode}
+          onClose={() => {
+            closeForm();
+            setFormMode("create");
+          }}
+          loadDataById={loadById}
+          createItem={createItem}
+          updateItem={updateItem}
+          error={error}
+        />
+      )}
+
+      {hasPermission("view") && (
+        <StreetDetail
+          id={selectedId}
+          open={openFormDetail}
+          mode={formMode}
+          onClose={() => {
+            setOpenFormDetail(false);
+            setSelectedId(undefined);
+            setFormMode("view");
+          }}
+          loadDataById={loadById}
+        />
+      )}
     </div>
   );
 }
