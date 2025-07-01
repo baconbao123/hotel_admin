@@ -1,6 +1,6 @@
-import { Component } from 'react';
-import type { ErrorInfo ,ReactNode} from 'react';
-import { Navigate } from 'react-router';
+import { Component } from "react";
+import type { ErrorInfo, ReactNode } from "react";
+import { Navigate } from "react-router";
 
 interface Props {
   children: ReactNode;
@@ -12,7 +12,7 @@ interface State {
 
 class ErrorBoundary extends Component<Props, State> {
   public state: State = {
-    hasError: false
+    hasError: false,
   };
 
   public static getDerivedStateFromError(_: Error): State {
@@ -20,8 +20,8 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('Error:', error);
-    console.error('Error Info:', errorInfo);
+    console.error("Error:", error);
+    console.error("Error Info:", errorInfo);
   }
 
   public render() {

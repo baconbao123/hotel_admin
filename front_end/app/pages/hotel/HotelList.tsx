@@ -34,6 +34,7 @@ export default function RoleList() {
 
   const {
     data,
+    tableLoading,
     error,
     openForm,
     setOpenForm,
@@ -174,7 +175,7 @@ export default function RoleList() {
           </div>
         </div>
 
-        {loading ? (
+        {tableLoading ? (
           SkeletonTemplate("Hotel Management", 6)
         ) : (
           <DataTable
@@ -314,31 +315,35 @@ export default function RoleList() {
         )}
       </Card>
 
-      <HotelForm
-        id={selectedId}
-        open={openForm}
-        mode={formMode}
-        onClose={() => {
-          closeForm();
-          setFormMode("create");
-        }}
-        loadDataById={loadById}
-        createItem={createItem}
-        updateItem={updateItem}
-        error={error}
-      />
+      {(hasPermission("create") || hasPermission("update")) && (
+        <HotelForm
+          id={selectedId}
+          open={openForm}
+          mode={formMode}
+          onClose={() => {
+            closeForm();
+            setFormMode("create");
+          }}
+          loadDataById={loadById}
+          createItem={createItem}
+          updateItem={updateItem}
+          error={error}
+        />
+      )}
 
-      <HotelDetail
-        id={selectedId}
-        open={openFormDetail}
-        mode={formMode}
-        onClose={() => {
-          setOpenFormDetail(false);
-          setSelectedId(undefined);
-          setFormMode("view");
-        }}
-        loadDataById={loadById}
-      />
+      {hasPermission("view") && (
+        <HotelDetail
+          id={selectedId}
+          open={openFormDetail}
+          mode={formMode}
+          onClose={() => {
+            setOpenFormDetail(false);
+            setSelectedId(undefined);
+            setFormMode("view");
+          }}
+          loadDataById={loadById}
+        />
+      )}
     </div>
   );
 }

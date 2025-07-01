@@ -8,11 +8,7 @@ import "primereact/resources/primereact.min.css";
 import $axios from "@/axios"; // Import custom axios instance
 import Cookies from "js-cookie";
 import Loading from "@/components/shared/Loading";
-import { useLoading } from "@/contexts/LoadingContext";
-import { useDispatch } from "react-redux";
-import { setUser, type UserLogin } from "@/store/slices/userDataSlice";
-import { useFetchPermissions } from "@/hooks/useFetchPermissions";
-import { fetchUserResources } from "@/components/service/api";
+import { useAppDispatch } from "@/store";
 
 interface LoginForm {
   email: string;
@@ -29,7 +25,8 @@ const LoginPage = () => {
   const [passwordError, setPasswordError] = useState<string>("");
   const [loginError, setLoginError] = useState<string>("");
   const [serverError, setServerError] = useState(false);
-  const { isLoading } = useLoading();
+
+  const dispatch = useAppDispatch();
 
   const handleSubmit = async (e: any): Promise<void> => {
     e.preventDefault();
@@ -77,8 +74,6 @@ const LoginPage = () => {
 
   return (
     <div className="flex items-center justify-center p-4 relative">
-      {isLoading && <Loading fullScreen={true} />}
-
       <div className="lg:hidden">
         <i className="fas fa-hotel text-3xl text-blue-600"></i>
       </div>
@@ -172,10 +167,9 @@ const LoginPage = () => {
           <Button
             label="Sign in"
             type="submit"
-            disabled={isLoading}
-            className={`w-full ${
-              isLoading ? "bg-blue-400" : "bg-blue-600 hover:bg-blue-700"
-            } text-white py-2 rounded-lg transition-colors`}
+            className={
+              "w-full bg-blue-400 text-white py-2 rounded-lg transition-colors"
+            }
           />
 
           {loginError && (

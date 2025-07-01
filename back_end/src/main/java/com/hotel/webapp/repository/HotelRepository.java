@@ -7,6 +7,7 @@ import com.hotel.webapp.entity.TypeHotel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -73,4 +74,14 @@ public interface HotelRepository extends BaseRepository<Hotels, Integer> {
   // get hotel
   @Query("select h from  Hotels h where h.deletedAt is null")
   Page<Hotels> getHotelsInfo(Pageable pageable);
+
+  @Query("select h.id, h.name, h.addressId, h.avatar, h.description, hp.id, hp.name, hp.description, " +
+        "r.id, r.name, r.roomAvatar, r.roomArea, r.priceNight, r.priceHour, rt.name " +
+        "from Hotels h " +
+        "join HotelPolicy hp on hp.hotelId = h.id " +
+        "left join Rooms r on r.hotelId = h.id " +
+        "left join RoomType rt on rt.id = r.roomType " +
+        "where h.id = :id and r.deletedAt is null and rt.deletedAt is null " +
+        "and r.id in (select min(r2.id) from Rooms r2 where r2.hotelId = h.id group by r2.roomType)")
+  List<Object[]> findHotelDetail(@Param("id") Integer id);
 }
