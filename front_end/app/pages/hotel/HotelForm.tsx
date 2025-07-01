@@ -12,6 +12,11 @@ import GalleryUploader from "@/utils/GalleryUploader";
 import { FileUpload } from "primereact/fileupload";
 import { useCommonData } from "@/hooks/useCommonData";
 import type { RcFile } from "antd/es/upload";
+import { useAppDispatch } from "@/store";
+import {
+  fetchCommonData,
+  type CommonData,
+} from "@/store/slices/commonDataSlice";
 
 interface Props {
   id?: string;
@@ -61,6 +66,8 @@ export default function HotelForm({
     useState<LocalResponse | null>(null);
   const [selectedWard, setSelectedWard] = useState<LocalResponse | null>(null);
   const [selectedStreet, setSelectedStreet] = useState<any>(null);
+  const [hotelNote, setHotelNote] = useState("");
+
   const [streetNumber, setStreetNumber] = useState("");
   const toast = useRef<Toast>(null);
   const [documents, setDocuments] = useState<any>([
@@ -75,6 +82,12 @@ export default function HotelForm({
   const [policyId, setPolicyId] = useState("0");
   const [policyName, setPolicyName] = useState("");
   const [policyDescription, setPolicyDescription] = useState("");
+  // Owner
+  const [ownerId, setOwnerId] = useState<any>(null);
+  const [keyword, setKeyword] = useState("");
+  const [owners, setOwners] = useState<any>([]);
+  const [hasMoreOwners, setHasMoreOwners] = useState(true);
+  const [pageOwner, setPageOwner] = useState(0);
 
   const { commonData } = useCommonData([
     "provinces",
@@ -87,6 +100,33 @@ export default function HotelForm({
   const hotelTypes = commonData.hotelTypes;
   const hotelFacilities = commonData.hotelTypes;
   const hotelDocuments = commonData.documentTypes;
+  const dispatch = useAppDispatch();
+
+  // owner
+  const loadOwners = async (keyword = "", page = 0) => {
+    const result = await dispatch(
+      fetchCommonData({
+        types: ["owners"],
+        force: true,
+        params: { keyword, pageOwner: pageOwner },
+      })
+    );
+
+    const res = result.payload as CommonData;
+    const newOwners: any = res.owners || [];
+
+    if (page === 0) {
+      setOwners(newOwners);
+    } else {
+      setOwners((prev: any) => [...prev, ...newOwners]);
+    }
+
+    setHasMoreOwners(newOwners.length === 20);
+  };
+
+  useEffect(() => {
+    loadOwners();
+  }, []);
 
   const header = mode === "edit" ? "EDIT" : "ADD";
 
@@ -94,6 +134,7 @@ export default function HotelForm({
     setExistingImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // Document
   const addDocument = () => {
     setDocuments([
       ...documents,
@@ -122,6 +163,7 @@ export default function HotelForm({
     typeof error === "object" &&
     (error as Record<string, string>)[field];
 
+  // submit
   const submit = async () => {
     setSubmitting(true);
 
@@ -142,6 +184,8 @@ export default function HotelForm({
     formData.append("districtCode", selectedDistrict?.code || "");
     formData.append("provinceCode", selectedProvince?.code || "");
     formData.append("note", note || "");
+    formData.append("noteHotel", hotelNote || "");
+    formData.append("ownerId", ownerId?.id || null);
 
     // Avatar
     formData.append("avatar.keepAvatar", keepAvatar);
@@ -258,14 +302,13 @@ export default function HotelForm({
     }
   };
 
-  // Updated useEffect for loading hotel data
+  // fetch by id
   useEffect(() => {
     if (id && open) {
       loadDataById(id)
         .then(async (data) => {
           setHotelData(data);
           const result = data.result || data;
-          console.log("Hotel data from loadDataById:", result);
 
           // Set basic information
           setName(result.name || "");
@@ -310,6 +353,15 @@ export default function HotelForm({
           } else {
             setSelectedFacilies([]);
           }
+
+          // owner
+          const ownerId = owners.find(
+            (o: any) => o.id === result.ownerId || null
+          );
+
+          setOwnerId(ownerId);
+
+          setHotelNote(result.hotelNote)
 
           // Set documents
           if (result.documents && hotelDocuments) {
@@ -777,7 +829,6 @@ export default function HotelForm({
 
               <div className="mt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Hotel type */}
                   <div>
                     <label
                       htmlFor="type"
@@ -797,7 +848,6 @@ export default function HotelForm({
                       optionValue="id"
                       display="chip"
                       placeholder="Select Hotel Type"
-                      maxSelectedLabels={3}
                       className={`w-full ${
                         getError("typeIds") ? "p-invalid" : ""
                       }`}
@@ -821,7 +871,6 @@ export default function HotelForm({
                     <MultiSelect
                       value={selectedFacilies}
                       onChange={(e) => {
-                        console.log("Selected Facilities Changed:", e.value);
                         setSelectedFacilies(e.value);
                       }}
                       options={hotelFacilities || []}
@@ -829,7 +878,6 @@ export default function HotelForm({
                       optionValue="id"
                       display="chip"
                       placeholder="Select Facilities"
-                      maxSelectedLabels={3}
                       className={`w-full ${
                         getError("facilities") ? "p-invalid" : ""
                       }`}
@@ -838,6 +886,79 @@ export default function HotelForm({
                     {getError("facilities") && (
                       <small className="text-red-500 text-xs mt-1">
                         {getError("facilities")}
+                      </small>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Owner + Hotel note */}
+              <div className="mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Hotel type */}
+                  <div>
+                    <label
+                      htmlFor="type"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Owner
+                    </label>
+                    <Dropdown
+                      value={ownerId}
+                      onChange={(e) => setOwnerId(e.value)}
+                      options={owners}
+                      optionLabel="fullName"
+                      placeholder="Select owner"
+                      className="w-full md:w-14rem"
+                      filter
+                      showClear
+                      virtualScrollerOptions={{
+                        lazy: true,
+                        onLazyLoad: (e: any) => {
+                          const nextPage = Math.floor(e.first / 20);
+                          if (hasMoreOwners) {
+                            setPageOwner(nextPage);
+                            loadOwners(keyword, nextPage);
+                          }
+                        },
+                        itemSize: 36,
+                      }}
+                      onFilter={(e: any) => {
+                        const value = e.filter || "";
+                        setKeyword(value);
+                        setPageOwner(0);
+                        loadOwners(value, 0);
+                      }}
+                      filterBy="fullName"
+                    />
+
+                    {getError("typeIds") && (
+                      <small className="text-red-500 text-xs mt-1">
+                        {getError("typeIds")}
+                      </small>
+                    )}
+                  </div>
+
+                  {/* Hotel Note */}
+                  <div>
+                    <label
+                      htmlFor="facilities"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Hotel Note
+                    </label>
+                    <InputText
+                      id="name"
+                      value={hotelNote}
+                      onChange={(e) => setHotelNote(e.target.value)}
+                      disabled={submitting}
+                      className={`w-full p-2 border rounded-lg ${
+                        getError("name") ? "p-invalid" : ""
+                      }`}
+                    />
+                    {getError("name") && (
+                      <small className="text-red-500 text-xs mt-1">
+                        {getError("name")}
                       </small>
                     )}
                   </div>

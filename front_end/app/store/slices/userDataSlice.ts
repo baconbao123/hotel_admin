@@ -5,9 +5,9 @@ export interface UserLogin {
   email: string;
   fullname: string;
   phoneNumber: string;
-  avatar: string;
+  avatarUrl: string;
   loading: boolean;
-  role: [];
+  roles: [];
 }
 
 const initialState: UserLogin = {
@@ -15,9 +15,9 @@ const initialState: UserLogin = {
   email: "",
   fullname: "",
   phoneNumber: "",
-  avatar: "",
+  avatarUrl: "",
   loading: false,
-  role: [],
+  roles: [],
 };
 
 const userSlice = createSlice({
@@ -29,9 +29,9 @@ const userSlice = createSlice({
       state.email = action.payload.email || "";
       state.fullname = action.payload.fullname || "";
       state.phoneNumber = action.payload.phoneNumber || "";
-      state.avatar = action.payload.avatar || "";
+      state.avatarUrl = action.payload.avatarUrl || "";
       state.loading = false;
-      state.role = action.payload.role || [];
+      state.roles = action.payload.roles || [];
     },
     startLoading(state) {
       state.loading = true;
@@ -41,8 +41,8 @@ const userSlice = createSlice({
       state.email = initialState.email;
       state.fullname = initialState.fullname;
       state.phoneNumber = initialState.phoneNumber;
-      state.avatar = initialState.avatar;
-      state.role = initialState.role;
+      state.avatarUrl = initialState.avatarUrl;
+      state.roles = initialState.roles;
     },
   },
 });

@@ -13,6 +13,9 @@ import useCrud from "@/hooks/crudHook";
 import { SkeletonTemplate } from "@/components/common/skeleton";
 import StreetForm from "./StreetForm";
 import StreetDetail from "./StreetDetail";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
+import Loading from "@/components/shared/Loading";
 
 export default function StreetList() {
   const [selectedId, setSelectedId] = useState<string>();
@@ -50,6 +53,10 @@ export default function StreetList() {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const loading = useSelector((state: RootState) => state.loading.isLoading);
+
+  if (loading) <Loading />;
 
   const handlePageChange = (e: any) => updatePageData(e.page, e.rows);
   const handleSortChange = (e: any) =>

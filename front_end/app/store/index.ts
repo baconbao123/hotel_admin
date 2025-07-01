@@ -2,6 +2,8 @@ import { configureStore } from "@reduxjs/toolkit";
 import commonDataReducer from "./slices/commonDataSlice";
 import permissionReducer from "./slices/permissionSlice";
 import userReducer from "./slices/userDataSlice";
+import loadingReducer from "./slices/loadingSlice";
+
 import {
   type TypedUseSelectorHook,
   useDispatch,
@@ -13,9 +15,9 @@ export const store = configureStore({
     commonData: commonDataReducer,
     permissions: permissionReducer,
     userData: userReducer,
+    loading: loadingReducer,
   },
 });
-
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

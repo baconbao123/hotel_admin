@@ -74,10 +74,10 @@ public class UserController {
                       .build();
   }
 
-  @GetMapping("/profile/{id}")
-  public ApiResponse<UserRes> findProfileById(@PathVariable Integer id) {
-    return ApiResponse.<UserRes>builder()
-                      .result(userService.findUserById(id))
+  @GetMapping("/profile")
+  public ApiResponse<UserRes.UserProfileRes> findProfileLogin() {
+    return ApiResponse.<UserRes.UserProfileRes>builder()
+                      .result(userService.findProfile())
                       .build();
   }
 

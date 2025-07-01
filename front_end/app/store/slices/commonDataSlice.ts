@@ -3,10 +3,9 @@ import {
   createAsyncThunk,
   type PayloadAction,
 } from "@reduxjs/toolkit";
-import type { RootState, AppDispatch } from ".."; // Adjust import based on your store setup
 import $axios from "@/axios";
+import type { RootState } from "..";
 
-// Define the response interface (matches API response)
 export interface CommonDataResponse {
   facilityTypes?: any[];
   documentTypes?: any[];
@@ -17,9 +16,10 @@ export interface CommonDataResponse {
   hotelFacilities?: any[];
   paymentMethods?: any[];
   roomTypes?: any[];
+  owners?: any[];
+  userTypes?: any[];
 }
 
-// Define the state interface (matches request and internal usage)
 export interface CommonData {
   facilitiestype?: any[];
   hoteldocuments?: any[];
@@ -30,9 +30,10 @@ export interface CommonData {
   hotelfacilities?: any[];
   paymentmethods?: any[];
   roomtypes?: any[];
+  owners?: any[];
+  usertypes?: any[];
 }
 
-// Define the state shape
 interface CommonDataState {
   data: CommonData;
   status: "idle" | "loading" | "succeeded" | "failed";
@@ -44,7 +45,6 @@ const initialState: CommonDataState = {
   status: "idle",
 };
 
-// Mapping between request types (CommonData keys) and response types (CommonDataResponse keys)
 const typeMapping: Record<keyof CommonData, keyof CommonDataResponse> = {
   facilitiestype: "facilityTypes",
   hoteldocuments: "documentTypes",
@@ -55,9 +55,10 @@ const typeMapping: Record<keyof CommonData, keyof CommonDataResponse> = {
   hotelfacilities: "hotelFacilities",
   paymentmethods: "paymentMethods",
   roomtypes: "roomTypes",
+  owners: "owners",
+  usertypes: "userTypes",
 };
 
-// Reverse mapping for request types
 const reverseTypeMapping: Record<string, keyof CommonData> = Object.entries(
   typeMapping
 ).reduce((acc, [requestType, responseType]) => {
@@ -65,37 +66,63 @@ const reverseTypeMapping: Record<string, keyof CommonData> = Object.entries(
   return acc;
 }, {} as Record<string, keyof CommonData>);
 
-// Async thunk to fetch common data
 export const fetchCommonData = createAsyncThunk(
   "commonData/fetchCommonData",
   async (
-    { types, force = false }: { types: (keyof CommonData)[]; force?: boolean },
+    {
+      types,
+      force = false,
+      params = {},
+    }: {
+      types: (keyof CommonData)[];
+      force?: boolean;
+      params?: Record<string, any>;
+    },
     { getState, rejectWithValue }
   ) => {
     const state = getState() as RootState;
-    // Filter out types that are already in the store, unless force is true
     const typesToFetch = force
       ? types
       : types.filter((type) => !state.commonData.data[type]);
 
     if (typesToFetch.length === 0) {
-      return {}; // No need to fetch if all data is present and not forced
+      return {};
     }
 
     try {
-      const query = typesToFetch.map((type) => `types=${type}`).join("&");
-      const response = await $axios.get(`/common-data?${query}`);
+      const searchParams = new URLSearchParams();
+
+      typesToFetch.forEach((type) => {
+        searchParams.append("types", type);
+      });
+
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          searchParams.append(key, value.toString());
+        }
+      });
+
+      const response = await $axios.get(
+        `/common-data?${searchParams.toString()}`
+      );
       if (response.status !== 200) {
         throw new Error("Failed to fetch common data");
       }
 
-      // Map response data to CommonData structure
       const responseData: CommonDataResponse = response.data.result;
+      const currentData = state.commonData.data; // Get current Redux state
+
       const mappedData = Object.entries(responseData).reduce(
         (acc, [responseKey, value]) => {
           const requestKey = reverseTypeMapping[responseKey];
-          if (requestKey) {
-            acc[requestKey] = value;
+          if (requestKey && typesToFetch.includes(requestKey)) {
+            // Only update if value is a non-empty array; otherwise, keep existing data
+            if (Array.isArray(value) && value.length > 0) {
+              acc[requestKey] = value;
+            } else {
+              // Preserve existing data if it exists
+              acc[requestKey] = currentData[requestKey] || [];
+            }
           }
           return acc;
         },
@@ -109,12 +136,10 @@ export const fetchCommonData = createAsyncThunk(
   }
 );
 
-// Redux slice
 const commonDataSlice = createSlice({
   name: "commonData",
   initialState,
   reducers: {
-    // Optional: Add a reducer to clear specific data if needed
     clearCommonData: (state, action: PayloadAction<(keyof CommonData)[]>) => {
       action.payload.forEach((type) => {
         delete state.data[type];

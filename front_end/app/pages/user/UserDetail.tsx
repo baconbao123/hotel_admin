@@ -29,6 +29,7 @@ export default function UserDetail({
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [status, setStatus] = useState<string>("");
   const [roleData, setRoleData] = useState<any[]>([]);
+  const [userType, setUserType] = useState<any>("");
   const [createdData, setCreatedData] = useState("");
   const [createdAt, setCreatedAt] = useState("");
   const [updatedData, setUpdatedData] = useState("");
@@ -49,6 +50,7 @@ export default function UserDetail({
           setAvatarUrl(data.avatarUrl || null);
           setRoleData(data.roles);
           setCreatedAt(data.createdAt || "");
+          setUserType(data.userTypeName || "");
           setUpdateAt(data.updatedAt || "");
           setCreatedData(data.createdName || "");
           setUpdatedData(data.updatedName || "");
@@ -132,6 +134,12 @@ export default function UserDetail({
 
           {/* Cột phải */}
           <div className="flex flex-col gap-4">
+            <div>
+              <label htmlFor="role" className="font-bold block mb-1">
+                User Type:
+              </label>
+              <span id="role">{userType ?? "-"}</span>
+            </div>
             <div>
               <label htmlFor="role" className="font-bold block mb-1">
                 Roles:

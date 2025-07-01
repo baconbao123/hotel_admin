@@ -6,22 +6,28 @@ import com.hotel.webapp.dto.request.HotelDTO;
 import com.hotel.webapp.dto.request.RoomDTO;
 import com.hotel.webapp.entity.MapRoomFacility;
 import com.hotel.webapp.entity.RoomImages;
+import com.hotel.webapp.entity.RoomType;
 import com.hotel.webapp.entity.Rooms;
 import com.hotel.webapp.exception.AppException;
 import com.hotel.webapp.exception.ErrorCode;
 import com.hotel.webapp.repository.MapRoomFacilityRepository;
 import com.hotel.webapp.repository.RoomImagesRepository;
 import com.hotel.webapp.repository.RoomRepository;
+import com.hotel.webapp.repository.seeder.RoomTypeRepository;
 import com.hotel.webapp.service.admin.interfaces.AuthService;
 import com.hotel.webapp.service.system.StorageFileService;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -30,17 +36,20 @@ public class RoomService extends BaseServiceImpl<Rooms, Integer, RoomDTO, RoomRe
   StorageFileService storageFileService;
   MapRoomFacilityRepository mapRoomFacilityRepository;
   RoomImagesRepository roomImagesRepository;
+  RoomTypeRepository roomTypeRepository;
 
   public RoomService(
         RoomRepository repository, BaseMapper<Rooms, RoomDTO> mapper,
         AuthService authService, StorageFileService storageFileService,
         MapRoomFacilityRepository mapRoomFacilityRepository,
-        RoomImagesRepository roomImagesRepository
+        RoomImagesRepository roomImagesRepository,
+        RoomTypeRepository roomTypeRepository
   ) {
     super(repository, mapper, authService);
     this.storageFileService = storageFileService;
     this.mapRoomFacilityRepository = mapRoomFacilityRepository;
     this.roomImagesRepository = roomImagesRepository;
+    this.roomTypeRepository = roomTypeRepository;
   }
 
   @Override
@@ -149,10 +158,24 @@ public class RoomService extends BaseServiceImpl<Rooms, Integer, RoomDTO, RoomRe
     }
   }
 
+  public Page<Rooms> findRoomsByHotelId(Integer hotelId, Map<String, String> filters, Map<String, String> sort,
+        int size, int page) {
+    Map<String, Object> filterMap = removedFiltersKey(filters);
+    Map<String, Object> sortMap = removedSortedKey(sort);
+
+    Specification<Rooms> spec = buildSpecification(filterMap);
+    Pageable defaultPage = buildPageable(sortMap, page, size);
+
+    return repository.findByHotelId(hotelId, spec, defaultPage);
+  }
+
+  public List<RoomType> findRoomTypes() {
+    return roomTypeRepository.findRoomTypes();
+  }
+
+
   @Override
   protected RuntimeException createNotFoundException(Integer integer) {
     throw new AppException(ErrorCode.NOT_FOUND, "Room");
   }
-
-
 }

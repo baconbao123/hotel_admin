@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import $axios from "@/axios";
 import { ApiResponse } from "@/types/apiResponse.type";
+import { useDispatch } from "react-redux";
+import { setLoaded, setLoading } from "@/store/slices/loadingSlice";
 
 interface ErrorResponse {
   code: number;
@@ -8,21 +10,25 @@ interface ErrorResponse {
 }
 
 export default function useCrud(
-  baseUrl: string
+  baseUrl: string,
+  param1?: string,
+  param2?: string
 ) {
   const [data, setData] = useState<any[]>([]);
-  const [tableLoading, setTableLoading] = useState(true);
-  const [actionLoading, setActionLoading] = useState(false);
   const [error, setError] = useState<Object | null>(null);
   const [openForm, setOpenForm] = useState(false);
   const [openFormDetail, setOpenFormDetail] = useState(false);
   const [page, setPage] = useState(0);
+  const [tableLoading, setTableLoading] = useState(true);
   const [pageSize, setPageSize] = useState(10);
   const [totalRecords, setTotalRecords] = useState(0);
   const [sortField, setSortField] = useState<string>();
   const [sortOrder, setSortOrder] = useState<number>();
   const [filters, setFilters] = useState<Record<string, string>>({});
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const isMountedRef = useRef(true);
+
+  const dispatch = useDispatch();
 
   const parseQueryParams = useCallback(() => {
     const params = new URLSearchParams(window.location.search);
@@ -36,10 +42,23 @@ export default function useCrud(
   }, []);
 
   useEffect(() => {
+    isMountedRef.current = true;
+    const abortController = new AbortController();
     const initialFilters = parseQueryParams();
     setFilters(initialFilters);
-    loadData(initialFilters);
-  }, [baseUrl, parseQueryParams]);
+
+    loadData(initialFilters, undefined, undefined, true, page, pageSize, {
+      signal: abortController.signal,
+    }).catch((err) => {
+      if (err.name === "AbortError") return;
+      console.log(err);
+    });
+
+    return () => {
+      isMountedRef.current = false;
+      abortController.abort();
+    };
+  }, [baseUrl, param1, param2, parseQueryParams, page, pageSize]);
 
   const loadData = async (
     currentFilters: Record<string, string>,
@@ -47,9 +66,15 @@ export default function useCrud(
     sortOrderParam = sortOrder,
     showLoading = true,
     pageParam = page,
-    pageSizeParam = pageSize
+    pageSizeParam = pageSize,
+    options?: { signal?: AbortSignal }
   ) => {
-    if (showLoading) setTableLoading(true);
+    if (!isMountedRef.current) return;
+
+    if (showLoading) {
+      setTableLoading(true);
+      dispatch(setLoading());
+    }
     try {
       const query = new URLSearchParams();
       Object.entries(currentFilters).forEach(
@@ -63,7 +88,16 @@ export default function useCrud(
       query.append("page", pageParam.toString());
       query.append("size", pageSizeParam.toString());
 
-      const res = await $axios.get(`${baseUrl}?${query}`);
+      let url = baseUrl;
+      if (param1 && param2) {
+        url = `${baseUrl}/${param1}/${param2}`;
+      } else if (param1) {
+        url = `${baseUrl}/${param1}`;
+      }
+
+      const res = await $axios.get(`${url}?${query}`, {
+        signal: options?.signal,
+      });
       const apiResponse = new ApiResponse(res.data);
       setData(apiResponse.result.content || []);
       setTotalRecords(apiResponse.result.totalElements || 0);
@@ -81,48 +115,73 @@ export default function useCrud(
           : window.location.pathname
       );
     } catch (err: any) {
+      if (err.name === "AbortError") return;
       const errorResponse = err.response?.data as ErrorResponse;
       setError(errorResponse?.message || "Failed to load data");
       throw new Error(errorResponse?.message || "Failed to load data");
     } finally {
-      if (showLoading) setTableLoading(false);
+      if (showLoading) {
+        setTableLoading(false);
+        dispatch(setLoaded());
+      }
     }
   };
 
-  const updatePageData = (newPage: number, newPageSize: number) => {
-    setPage(newPage);
-    setPageSize(newPageSize);
-    loadData(filters, sortField, sortOrder, false, newPage, newPageSize);
-  };
+  const updatePageData = useCallback(
+    (newPage: number, newPageSize: number) => {
+      setPage(newPage);
+      setPageSize(newPageSize);
+      loadData(
+        filters,
+        sortField,
+        sortOrder,
+        false,
+        newPage,
+        newPageSize
+      ).catch((err) => {
+        console.log(err);
+      });
+    },
+    [filters, sortField, sortOrder]
+  );
 
-  const handleSort = (field: string, order: number) => {
-    setSortField(field);
-    setSortOrder(order);
-    loadData(filters, field, order);
-  };
+  const handleSort = useCallback(
+    (field: string, order: number) => {
+      setSortField(field);
+      setSortOrder(order);
+      loadData(filters, field, order).catch((err) => {
+        console.log(err);
+      });
+    },
+    [filters]
+  );
 
   const handleSearch = useCallback(
     (field: string, value: string) => {
       const newFilters = { ...filters, [field]: value };
       if (!value) delete newFilters[field];
       setFilters(newFilters);
+
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
-      timeoutRef.current = setTimeout(
-        () => loadData(newFilters, sortField, sortOrder, false),
-        1000
-      );
+      timeoutRef.current = setTimeout(() => {
+        loadData(newFilters, sortField, sortOrder, false).catch((err) => {
+          console.log(err);
+        });
+      }, 1000);
     },
     [filters, sortField, sortOrder]
   );
 
-  const resetFilters = () => {
+  const resetFilters = useCallback(() => {
     setFilters({});
-    loadData({});
-  };
+    loadData({}).catch((err) => {
+      console.log(err);
+    });
+  }, []);
 
   const loadById = useCallback(
     async (id: string) => {
-      setActionLoading(true);
+      dispatch(setLoading());
       try {
         const res = await $axios.get(`${baseUrl}/${id}`);
         return res.data.result;
@@ -131,14 +190,14 @@ export default function useCrud(
         setError(errorResponse?.message || "Failed to load data");
         throw new Error(errorResponse?.message || "Failed to load data");
       } finally {
-        setActionLoading(false);
+        dispatch(setLoaded());
       }
     },
     [baseUrl]
   );
 
   const createItem = async (item: object | FormData) => {
-    setActionLoading(true);
+    dispatch(setLoading());
     try {
       const config =
         item instanceof FormData
@@ -152,12 +211,12 @@ export default function useCrud(
       setError(err.response?.data?.errorMessages || "Failed to create item");
       throw new Error(err.response?.data?.message || "Failed to create item");
     } finally {
-      setActionLoading(false);
+      dispatch(setLoaded());
     }
   };
 
   const updateItem = async (id: string, item: object | FormData) => {
-    setActionLoading(true);
+    dispatch(setLoading());
     try {
       const config =
         item instanceof FormData
@@ -171,12 +230,12 @@ export default function useCrud(
       setError(err.response?.data?.message || "Failed to update item");
       throw new Error(err.response?.data?.message || "Failed to update item");
     } finally {
-      setActionLoading(false);
+      dispatch(setLoaded());
     }
   };
 
   const deleteItem = async (id: string) => {
-    setActionLoading(true);
+    dispatch(setLoading());
     try {
       const res = await $axios.delete(`${baseUrl}/${id}`);
       await loadData(filters, sortField, sortOrder, true);
@@ -186,20 +245,19 @@ export default function useCrud(
       setError(err.response?.data?.message || "Failed to delete item");
       throw new Error(err.response?.data?.message || "Failed to delete item");
     } finally {
-      setActionLoading(false);
+      dispatch(setLoaded());
     }
   };
 
-  const closeForm = () => {
+  const closeForm = useCallback(() => {
     setOpenForm(false);
     setError(null);
-  };
+  }, []);
 
   return {
     setData,
-    data,
     tableLoading,
-    actionLoading,
+    data,
     error,
     openForm,
     setOpenForm,

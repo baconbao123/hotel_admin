@@ -30,19 +30,6 @@ const LoginPage = () => {
   const [loginError, setLoginError] = useState<string>("");
   const [serverError, setServerError] = useState(false);
   const { isLoading } = useLoading();
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    const token = Cookies.get("token");
-    if (token) {
-      navigate("/");
-    }
-  }, [navigate]);
-
-  const fetchUser = async (id: number) => {
-    const res = await $axios.get(`/user/profile/${id}`);
-    return res.data.result;
-  };
 
   const handleSubmit = async (e: any): Promise<void> => {
     e.preventDefault();
@@ -71,26 +58,6 @@ const LoginPage = () => {
         });
       }
 
-      const payload = JSON.parse(
-        atob(response.data.result.token.split(".")[1])
-      );
-
-      const userId = payload.userId || 0;
-
-      const data = await fetchUser(userId);
-
-      const userData: UserLogin = {
-        id: userId,
-        email: data.email,
-        fullname: data.fullName,
-        phoneNumber: data.phoneNumber,
-        avatar: data.avatarUrl,
-        role: data.roles,
-        loading: false,
-      };
-
-      dispatch(setUser(userData));
-
       navigate("/");
     } catch (error: any) {
       if (!error.response || error.code === "ERR_NETWORK") {
@@ -101,9 +68,6 @@ const LoginPage = () => {
       const errorMessage =
         error.response?.data?.message || "Invalid email or password";
       setLoginError(errorMessage);
-
-      // Cookies.remove("token");
-      // Cookies.remove("refreshToken");
     }
   };
 

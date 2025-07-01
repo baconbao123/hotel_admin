@@ -68,17 +68,21 @@ public class HotelService extends BaseServiceImpl<Hotels, Integer, HotelDTO, Hot
   @Override
   public Hotels create(HotelDTO create) {
     var hotel = mapper.toCreate(create); // name, desc, status
-    hotel.setOwnerId(null);
+
     hotel.setNote(create.getNoteHotel());
+
+    if (create.getOwnerId() != null) {
+      hotel.setOwnerId(create.getOwnerId());
+    } else {
+      hotel.setOwnerId(null);
+    }
 
     if (create.getAvatar() != null) {
       HotelDTO.AvatarReq avatar = create.getAvatar();
       if (avatar.getAvatarUrl() != null && !avatar.getAvatarUrl().isEmpty()) {
-        // New avatar file is uploaded
         String avatarStr = storageFileService.uploadHotelImg(avatar.getAvatarUrl());
         hotel.setAvatar(avatarStr);
       } else if (avatar.getExistingAvatarUrl() != null && !avatar.getExistingAvatarUrl().isEmpty()) {
-        // Keep existing avatar URL
         hotel.setAvatar(avatar.getExistingAvatarUrl());
       }
     }
@@ -172,6 +176,7 @@ public class HotelService extends BaseServiceImpl<Hotels, Integer, HotelDTO, Hot
     return repository.save(hotel);
   }
 
+  // find hotel by id
   public HotelsRes.HotelRes findHotel(Integer id) {
     List<Object[]> hotelObjs = repository.findHotel(id);
 
@@ -267,7 +272,11 @@ public class HotelService extends BaseServiceImpl<Hotels, Integer, HotelDTO, Hot
           typeHotelRes,
           facilitiesRes,
           documentsRes,
-          policyRes
+          policyRes,
+          (String) hotelObj[19],
+          (String) hotelObj[20],
+          (Integer) hotelObj[21]
+
     );
   }
 
@@ -294,7 +303,6 @@ public class HotelService extends BaseServiceImpl<Hotels, Integer, HotelDTO, Hot
           dto.setOwnerName(user.getFullName());
         });
       }
-
 
       return dto;
     });
@@ -327,15 +335,15 @@ public class HotelService extends BaseServiceImpl<Hotels, Integer, HotelDTO, Hot
 
     hotelCrr = Hotels.builder()
                      .id(hotelCrr.getId())
-                     .ownerId(null)
+                     .ownerId(update.getOwnerId())
                      .name(update.getName())
                      .description(update.getDescription())
                      .avatar(hotelCrr.getAvatar())
                      .addressId(hotelCrr.getAddressId())
                      .policyId(hotelCrr.getPolicyId())
                      .status(update.getStatus())
-                     .approveId(null)
-                     .note(null)
+                     .approveId(hotelCrr.getApproveId())
+                     .note(update.getNoteHotel())
                      .updatedAt(LocalDateTime.now())
                      .updatedBy(getAuthId())
                      .build();

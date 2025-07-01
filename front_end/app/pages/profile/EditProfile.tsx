@@ -64,7 +64,7 @@ export default function EditProfile({ onBack }: Props) {
     name: user.fullname,
     email: user.email,
     phoneNumber: user.phoneNumber,
-    avatarUrl: user.avatar,
+    avatarUrl: user.avatarUrl,
   });
 
   const getError = (field: string) =>

@@ -6,7 +6,6 @@ import com.hotel.webapp.entity.Address;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -14,8 +13,6 @@ public interface AddressRepository extends BaseRepository<Address, Integer> {
   Optional<Address> findByIdAndDeletedAtIsNull(Integer id);
 
   // for user
-  List<Address> findByIdInAndDeletedAtIsNull(List<Integer> ids);
-
   @Query("select new " +
         "com.hotel.webapp.dto.user_response.AddressRes(a.streetNumber, s.name, p.name, d.name, w.name, a.note)" +
         "from Address a " +

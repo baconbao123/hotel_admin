@@ -19,18 +19,19 @@ public class HotelDTO {
   String description;
   @FieldNotEmpty(field = "Status")
   Boolean status;
+  Integer ownerId;
 
   //  approve
   String noteHotel;
 
   // address ----
-  @FieldNotEmpty(field = "Province code")
+  @FieldNotEmpty(field = "Province")
   String provinceCode;
-  @FieldNotEmpty(field = "District code")
+  @FieldNotEmpty(field = "District")
   String districtCode;
-  @FieldNotEmpty(field = "Ward code")
+  @FieldNotEmpty(field = "Ward")
   String wardCode;
-  @FieldNotEmpty(field = "Street id")
+  @FieldNotEmpty(field = "Street")
   Integer streetId;
   @FieldNotEmpty(field = "Street number")
   String streetNumber;

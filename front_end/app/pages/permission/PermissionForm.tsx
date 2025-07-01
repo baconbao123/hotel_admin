@@ -1,7 +1,7 @@
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import $axios from "@/axios";
@@ -31,7 +31,6 @@ export default function PermissionForm({
   onClose,
   loadDataTable,
 }: Props) {
-  const [resourceData, setResourceData] = useState<Resource[]>([]);
   const [actionData, setActionData] = useState<Resource[]>([]);
   const [selectedActions, setSelectedActions] = useState<{
     [key: number]: number[];
@@ -42,26 +41,29 @@ export default function PermissionForm({
   const getHeader = (): string => {
     return "EDIT PERMISSION";
   };
-  const { commonData } = useCommonData(["permissions"]);
 
+  const { commonData } = useCommonData(["permissions"]);
   const resourceActions = commonData.resourceActions;
+
+  const uniqueResources = useMemo(() => {
+    if (!resourceActions) return [];
+
+    return [
+      ...new Map(
+        resourceActions.map((item: Resource) => [
+          item.resourceId,
+          {
+            resourceId: item.resourceId,
+            resourceName: item.resourceName,
+          },
+        ])
+      ).values(),
+    ];
+  }, [resourceActions]);
 
   useEffect(() => {
     if (resourceActions) {
       setActionData(resourceActions);
-
-      const uniqueResources: any = [
-        ...new Map(
-          resourceActions.map((item: Resource) => [
-            item.resourceId,
-            {
-              resourceId: item.resourceId,
-              resourceName: item.resourceName,
-            },
-          ])
-        ).values(),
-      ];
-      setResourceData(uniqueResources);
     }
   }, [resourceActions]);
 
@@ -151,10 +153,8 @@ export default function PermissionForm({
                     matchingAction.actionId
                   );
                 }
-              } else {
               }
             });
-          } else {
           }
         });
         setSelectedActions(newSelectedActions);
@@ -238,7 +238,7 @@ export default function PermissionForm({
         className="p-fluid"
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
       >
-        <DataTable value={resourceData} className="mt-4 p-4">
+        <DataTable value={uniqueResources} className="mt-4 p-4">
           <Column
             field="resourceName"
             header="Resource"
@@ -260,7 +260,7 @@ export default function PermissionForm({
                       }}
                     >
                       <Checkbox
-                        id={`action-${rowData.id}-${action.id}`}
+                        id={`action-${rowData.resourceId}-${action.id}`}
                         checked={(
                           selectedActions[rowData.resourceId] || []
                         ).includes(action.actionId)}
@@ -273,7 +273,7 @@ export default function PermissionForm({
                         }
                       />
                       <label
-                        htmlFor={`action-${rowData.id}-${action.id}`}
+                        htmlFor={`action-${rowData.resourceId}-${action.id}`}
                         className="p-checkbox-label"
                       >
                         {action.actionName}

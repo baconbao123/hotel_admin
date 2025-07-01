@@ -14,6 +14,8 @@ import { InputText } from "primereact/inputtext";
 import { Skeleton } from "primereact/skeleton";
 import { SkeletonTemplate } from "@/components/common/skeleton";
 import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
+import Loading from "@/components/shared/Loading";
 
 interface Resource {
   id: number; // mapRsActionId
@@ -68,6 +70,10 @@ export default function PermissionList() {
   const permissions = useSelector(
     (state: any) => state.permissions.permissions
   );
+
+  const loading = useSelector((state: RootState) => state.loading.isLoading);
+
+  if (loading) <Loading />;
 
   useEffect(() => {
     setMounted(true);
@@ -185,7 +191,7 @@ export default function PermissionList() {
             showGridlines
             rowHover
             lazy
-            loading={tableLoading}
+            loading={loading}
             paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
             currentPageReportTemplate="From {first} to {last} of {totalRecords}"
             paginatorLeft={

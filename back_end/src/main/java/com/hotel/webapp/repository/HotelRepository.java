@@ -15,9 +15,10 @@ import java.util.List;
 public interface HotelRepository extends BaseRepository<Hotels, Integer> {
   @Query("select h.id, h.name, h.description, h.status, u1.fullName, u2.fullName, h.createdAt, h.updatedAt, " +
         "h.avatar, a.streetNumber, a.streetId, a.wardCode, w.name, a.districtCode, d.name, " +
-        "a.provinceCode, p.name, s.name, a.note " +
+        "a.provinceCode, p.name, s.name, a.note, h.note, o.fullName, o.id " +
         "from Hotels h " +
         "left join Address a on a.id = h.addressId " +
+        "left join User o on h.ownerId = o.id " +
         "join Streets s on a.streetId = s.id " +
         "join Wards w on a.wardCode = w.code " +
         "join Districts d on a.districtCode = d.code " +
