@@ -22,16 +22,16 @@ const Loading: React.FC<LoadingProps> = ({
      <svg xmlns="http://www.w3.org/2000/svg" className="lds-bluecat" width="140px" height="140px" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid">
       <g transform="rotate(0.97464 50 50)">
         <animateTransform attributeName="transform" type="rotate" values="360 50 50;0 50 50" keyTimes="0;1" dur="1.5s" repeatCount="indefinite" calcMode="spline" keySplines="0.5 0 0.5 1" begin="-0.15000000000000002s"/>
-        <circle cx="50" cy="50" r="39.891" stroke="#6994b7" stroke-width="14.4" fill="none" stroke-dasharray="0 300">
+        <circle cx="50" cy="50" r="39.891" stroke="#6994b7" strokeWidth="14.4" fill="none" strokeDasharray="0 300">
           <animate attributeName="stroke-dasharray" values="15 300;55.1413599195142 300;15 300" keyTimes="0;0.5;1" dur="1.5s" repeatCount="indefinite" calcMode="linear" keySplines="0 0.4 0.6 1;0.4 0 1 0.6" begin="-0.069s"/>
         </circle>
-        <circle cx="50" cy="50" r="39.891" stroke="#eeeeee" stroke-width="7.2" fill="none" stroke-dasharray="0 300">
+        <circle cx="50" cy="50" r="39.891" stroke="#eeeeee" strokeWidth="7.2" fill="none" strokeDasharray="0 300">
           <animate attributeName="stroke-dasharray" values="15 300;55.1413599195142 300;15 300" keyTimes="0;0.5;1" dur="1.5s" repeatCount="indefinite" calcMode="linear" keySplines="0 0.4 0.6 1;0.4 0 1 0.6" begin="-0.069s"/>
         </circle>
-        <circle cx="50" cy="50" r="32.771" stroke="#000000" stroke-width="1" fill="none" stroke-dasharray="0 300">
+        <circle cx="50" cy="50" r="32.771" stroke="#000000" strokeWidth="1" fill="none" strokeDasharray="0 300">
           <animate attributeName="stroke-dasharray" values="15 300;45.299378454348094 300;15 300" keyTimes="0;0.5;1" dur="1.5s" repeatCount="indefinite" calcMode="linear" keySplines="0 0.4 0.6 1;0.4 0 1 0.6" begin="-0.069s"/>
         </circle>
-        <circle cx="50" cy="50" r="47.171" stroke="#000000" stroke-width="1" fill="none" stroke-dasharray="0 300">
+        <circle cx="50" cy="50" r="47.171" stroke="#000000" strokeWidth="1" fill="none" strokeDasharray="0 300">
           <animate attributeName="stroke-dasharray" values="15 300;66.03388996804073 300;15 300" keyTimes="0;0.5;1" dur="1.5s" repeatCount="indefinite" calcMode="linear" keySplines="0 0.4 0.6 1;0.4 0 1 0.6" begin="-0.069s"/>
         </circle>
       </g>

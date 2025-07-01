@@ -171,10 +171,10 @@ export default function FacilityList() {
             />
 
             <Column
-              field="type"
+              field="typeName"
               header="Type"
               className="w-200"
-              body={(row) => row.type?.name || "-"}
+              body={(row) => row.typeName || "-"}
             />
             <Column
               frozen={true}

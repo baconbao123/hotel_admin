@@ -4,7 +4,6 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { Dropdown } from "primereact/dropdown";
-import $axios from "@/axios";
 import { useFacilityTypes } from "@/hooks/useCommonData";
 
 interface Props {
@@ -21,7 +20,7 @@ interface Props {
 export default function FacilityForm({
   id,
   open,
-  mode,
+  mode = "view",
   onClose,
   loadDataById,
   createItem,
@@ -32,27 +31,28 @@ export default function FacilityForm({
   const [icon, setIcon] = useState("");
   const [type, setType] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
-  const toast = useRef<Toast>(null);
-  const header = mode === "edit" ? "EDIT FACILITY" : "ADD NEW FACILITY";
 
+  const toast = useRef<Toast>(null);
   const { facilityTypes } = useFacilityTypes();
 
-  // Load facility details
+  const resetForm = () => {
+    setName("");
+    setIcon("");
+    setType(null);
+  };
+
   useEffect(() => {
-    const fetchFacility = async () => {
-      if (id && open) {
+    const fetchData = async () => {
+      if (mode === "edit" && id && facilityTypes.length > 0) {
         try {
           const data = await loadDataById(id);
-          setName(data.entity.name || "");
-          setIcon(data.entity.icon || "");
+          console.log("Data loaded:", data);
 
-          // So sánh type từ API (số) với id của danh sách dropdown
-          const matched = facilityTypes.find(
-            (t) =>
-              t.id ===
-              (typeof data.entity.type === "object"
-                ? data.entity.type.id
-                : data.entity.type)
+          setName(data.name || "");
+          setIcon(data.icon || "");
+
+          const matched = facilityTypes.find((t) =>
+            typeof data.type === "object" ? t.id === data.type.id : t.id === data.type
           );
           setType(matched || null);
         } catch (err) {
@@ -63,23 +63,24 @@ export default function FacilityForm({
             life: 3000,
           });
         }
-      } else {
-        setName("");
-        setIcon("");
-        setType(null);
+      }
+
+      if (mode === "create") {
+        resetForm();
       }
     };
 
-    if (facilityTypes.length > 0 && open) {
-      fetchFacility();
+    if (open) {
+      fetchData();
     }
-  }, [id, open, facilityTypes, loadDataById]);
+  }, [id, open, mode, facilityTypes]);
 
   const submit = async () => {
     setSubmitting(true);
     const facilityDTO = { name, icon, type: type?.id };
+
     try {
-      if (id) {
+      if (mode === "edit" && id) {
         await updateItem(id, facilityDTO);
         toast.current?.show({
           severity: "success",
@@ -96,6 +97,7 @@ export default function FacilityForm({
           life: 3000,
         });
       }
+
       onClose();
     } catch (err: any) {
       toast.current?.show({
@@ -111,6 +113,8 @@ export default function FacilityForm({
 
   const getError = (field: string) =>
     (error && typeof error === "object" && (error as any)[field]) || null;
+
+  const header = mode === "edit" ? "EDIT FACILITY" : "ADD NEW FACILITY";
 
   return (
     <div>
@@ -184,7 +188,7 @@ export default function FacilityForm({
             )}
           </div>
 
-          {/* Icon - full row, cân đối với Name/Type */}
+          {/* Icon */}
           <div className="sm:col-span-2">
             <div className="w-full sm:w-3/5 mx-auto">
               <label htmlFor="icon" className="font-medium block mb-1">
