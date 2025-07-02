@@ -34,8 +34,7 @@ public class SystemSeeder {
   PaymentMethodRepository paymentMethodRepository;
   UserTypeRepository userTypeRepository;
 
-  List<String> DEFAULT_RESOURCE = List.of("Hotel", "User", "Permissions", "Role", "Street", "Dashboard", "Facilities"
-        , "Room", "Booking");
+  List<String> DEFAULT_RESOURCE = List.of("Hotel", "User", "Permissions", "Role", "Street", "Dashboard", "Facilities");
 
   List<String> DEFAULT_ACTION = List.of("view", "create", "update", "delete", "change_password");
 
@@ -50,7 +49,7 @@ public class SystemSeeder {
 
   List<String> PAYMENT_METHOD = List.of("Cash", "VN Pay");
 
-  List<String> USER_TYPE = List.of("Admin", "Customer");
+  List<String> USER_TYPE = List.of("Admin", "Owner", "Customer");
 
 
   @Transactional
@@ -113,9 +112,18 @@ public class SystemSeeder {
     for (String resourceName : DEFAULT_RESOURCE) {
       int resourceId = resourceIds.get(resourceName);
 
-      List<String> actions = resourceName.equals("User") ?
-            DEFAULT_ACTION : DEFAULT_ACTION.stream()
-                                           .filter(a -> !a.equals("change_password")).toList();
+      List<String> actions;
+
+      if (resourceName.equals("Dashboard")) {
+        actions = List.of("view");
+      } else if (resourceName.equals("User")) {
+        actions = DEFAULT_ACTION;
+      } else {
+        actions = DEFAULT_ACTION.stream()
+                                .filter(a -> !a.equals("change_password"))
+                                .toList();
+      }
+
 
       for (String actionName : actions) {
         int actionId = actionIds.get(actionName);

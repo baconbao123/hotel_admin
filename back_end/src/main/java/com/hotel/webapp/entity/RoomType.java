@@ -18,6 +18,7 @@ public class RoomType implements AuditEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer id;
+  @Column(nullable = false)
   String name;
   @Lob
   String description;

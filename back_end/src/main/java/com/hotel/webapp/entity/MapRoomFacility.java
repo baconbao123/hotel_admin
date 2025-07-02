@@ -1,10 +1,7 @@
 package com.hotel.webapp.entity;
 
 import com.hotel.webapp.base.AuditEntity;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -21,7 +18,9 @@ public class MapRoomFacility implements AuditEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer id;
+  @Column(nullable = false)
   Integer facilityId;
+  @Column(nullable = false)
   Integer roomId;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;

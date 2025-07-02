@@ -30,6 +30,7 @@ public class Booking implements AuditEntity {
   LocalDateTime actualCheckOutTime;
   @Lob
   String note;
+  @Column(nullable = false)
   Boolean status;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;

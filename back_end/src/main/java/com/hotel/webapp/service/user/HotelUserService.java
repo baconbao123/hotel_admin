@@ -27,9 +27,10 @@ public class HotelUserService {
   HotelImagesRepository hotelImagesRepository;
 
   public HotelUserRes getData(int hotelId) {
+    // Gọi truy vấn với hotelId
     List<Object[]> hotelObjs = hotelRepository.findHotelDetail(hotelId);
     if (hotelObjs.isEmpty()) {
-      return null; // Or throw HotelNotFoundException
+      return null;
     }
 
     // Facilities - hotel
@@ -47,7 +48,7 @@ public class HotelUserService {
     // Hotel Images
     List<HotelImages> hotelImageRes = hotelImagesRepository.findAllByHotelIdAndDeletedAtIsNull(hotelId);
 
-    // Hotel details (from the first row, as hotel info is the same across rows)
+    // Hotel details (from the first row)
     Object[] firstRow = hotelObjs.get(0);
     String addressString = dataOutput.formatAddress((Integer) firstRow[2]);
     HotelUserRes.HotelRes hotelRes = new HotelUserRes.HotelRes(
@@ -65,8 +66,8 @@ public class HotelUserService {
           )
     );
 
-    // Rooms
-    List<HotelUserRes.RoomRes> roomResList = new ArrayList<>();
+    // Group rooms by RoomType
+    Map<String, List<HotelUserRes.TypeRes.RoomsRes>> typeMap = new HashMap<>();
     for (Object[] row : hotelObjs) {
       if (row[8] != null) { // Check if room data exists (r.id is not null)
         // Facilities - room
@@ -80,19 +81,32 @@ public class HotelUserService {
                          .add(new HomeRes.FacilitiesRes(facilityId, name, icon));
         }
 
-        roomResList.add(new HotelUserRes.RoomRes(
-              (Integer) row[8],      // r.id
-              (String) row[9],       // r.name
-              (String) row[10],      // r.roomAvatar
-              facilityRoomMap.getOrDefault(hotelId, Collections.emptyList()),
-              (BigDecimal) row[11],  // r.roomArea
-              (BigDecimal) row[12],  // r.priceNight
-              (BigDecimal) row[13],  // r.priceHour
-              (String) row[14]       // rt.name (as type)
-        ));
+        String typeName = (String) row[14]; // rt.name
+        if (typeName != null) {
+          HotelUserRes.TypeRes.RoomsRes roomRes = new HotelUserRes.TypeRes.RoomsRes(
+                (Integer) row[8],      // r.id
+                (String) row[9],       // r.name
+                (String) row[10],      // r.roomAvatar
+                (String) row[17],      // r.description
+                facilityRoomMap.getOrDefault((Integer) row[8], Collections.emptyList()),
+                (BigDecimal) row[11],  // r.roomArea
+                (Integer) row[15],     // r.roomNumber
+                (BigDecimal) row[12],  // r.priceNight
+                (BigDecimal) row[13],  // r.priceHour
+                typeName,              // rt.name (as type)
+                (Integer) row[16]      // r.limitPerson
+          );
+          typeMap.computeIfAbsent(typeName, k -> new ArrayList<>()).add(roomRes);
+        }
       }
     }
 
-    return new HotelUserRes(hotelRes, roomResList);
+    // Convert typeMap to List<TypeRes>
+    List<HotelUserRes.TypeRes> typeResList = new ArrayList<>();
+    for (Map.Entry<String, List<HotelUserRes.TypeRes.RoomsRes>> entry : typeMap.entrySet()) {
+      typeResList.add(new HotelUserRes.TypeRes(entry.getKey(), entry.getValue()));
+    }
+
+    return new HotelUserRes(hotelRes, typeResList);
   }
 }

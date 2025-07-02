@@ -53,6 +53,14 @@ public class RoomService extends BaseServiceImpl<Rooms, Integer, RoomDTO, RoomRe
   }
 
   @Override
+  protected void beforeCreate(Rooms entity, RoomDTO roomDTO) {
+    if (roomDTO.getRoomAvatar() != null && !roomDTO.getRoomAvatar().isEmpty()) {
+      String name = storageFileService.uploadHotelImg(roomDTO.getRoomAvatar());
+      entity.setRoomAvatar(name);
+    }
+  }
+
+  @Override
   protected void afterCreate(Rooms rooms, RoomDTO create) {
     for (Integer mhf : create.getFacilities()) {
       MapRoomFacility mapRoomFacility = new MapRoomFacility();
@@ -76,13 +84,6 @@ public class RoomService extends BaseServiceImpl<Rooms, Integer, RoomDTO, RoomRe
     }
   }
 
-  @Override
-  protected void beforeCreate(Rooms entity, RoomDTO roomDTO) {
-    if (roomDTO.getRoomAvatar() != null && !roomDTO.getRoomAvatar().isEmpty()) {
-      String name = storageFileService.uploadHotelImg(roomDTO.getRoomAvatar());
-      entity.setRoomAvatar(name);
-    }
-  }
 
   // update
   @Override

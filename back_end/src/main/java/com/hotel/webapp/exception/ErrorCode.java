@@ -11,7 +11,8 @@ import org.springframework.http.HttpStatusCode;
 @AllArgsConstructor
 public enum ErrorCode {
   // --------------------------- RUNTIME ---------------------------
-  UNCATEGORIZED_EXCEPTION(9999, "An unexpected error occurred. Please check server logs for details", HttpStatus.INTERNAL_SERVER_ERROR),
+  UNCATEGORIZED_EXCEPTION(9999, "An unexpected error occurred. Please check server logs for details",
+        HttpStatus.INTERNAL_SERVER_ERROR),
 
   // --------------------------- BAD_REQUEST ---------------------------
   COMMON_400(400, "%s", HttpStatus.BAD_REQUEST),
@@ -20,17 +21,14 @@ public enum ErrorCode {
   FIELD_EXISTED(400, "%s already exists", HttpStatus.BAD_REQUEST),
 
   // Field Invalid
-  INVALID_FIELD(400, "%s is invalid", HttpStatus.BAD_REQUEST),
-  EMAIL_INVALID(400, "Email is invalid", HttpStatus.BAD_REQUEST),
-  TOKEN_INVALID(400, "Token is invalid", HttpStatus.BAD_REQUEST),
   DONT_DELETE_SA(400, "Cannot delete SA", HttpStatus.BAD_REQUEST),
   FIELD_INVALID(422, "{field} invalid", HttpStatus.UNPROCESSABLE_ENTITY),
+  REGEX_INVALID(422, "{notice} ", HttpStatus.UNPROCESSABLE_ENTITY),
 
   // USED
   FIELD_USED(400, "%s has already been used", HttpStatus.BAD_REQUEST),
 
   // Not null
-  NOT_NULL(422, "%s must not be null", HttpStatus.BAD_REQUEST),
 
   // Exceeds
   IMG_EXCEEDS(400, "Maximum of {maxSize} images", HttpStatus.BAD_REQUEST),
@@ -41,7 +39,8 @@ public enum ErrorCode {
 
   //  NOT EMPTY
   FIELD_NOT_EMPTY(422, "{field} is required", HttpStatus.UNPROCESSABLE_ENTITY),
-  AVATAR_NOT_EMPTY(422, "Avatar is required", HttpStatus.UNPROCESSABLE_ENTITY),
+  IMAGES_SIZE_EXCEEDED(422, "{field} in invalid. Minium is 1 and maximum allowed is {0}",
+        HttpStatus.UNPROCESSABLE_ENTITY),
 
   // TOKEN
   EXPIRED_TOKEN(400, "Expired token", HttpStatus.BAD_REQUEST),

@@ -5,8 +5,6 @@ import com.hotel.webapp.dto.response.ApiResponse;
 import com.hotel.webapp.dto.response.BookingRes;
 import com.hotel.webapp.entity.Booking;
 import com.hotel.webapp.service.admin.BookingService;
-import com.hotel.webapp.validation.Permission;
-import com.hotel.webapp.validation.Resource;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -19,41 +17,41 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/booking")
-@Resource(name = "Booking")
+//@Resource(name = "Booking")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class BookingController {
   BookingService bookingService;
 
-  @Permission(name = "create")
+  //  @Permission(name = "create")
   @PostMapping
   public ApiResponse<Booking> create(
-        @Valid @RequestBody BookingDTO roomDTO
+        @Valid @RequestBody BookingDTO dto
   ) {
     return ApiResponse.<Booking>builder()
-                      .result(bookingService.create(roomDTO))
+                      .result(bookingService.create(dto))
                       .build();
   }
 
-  @Permission(name = "update")
+  //  @Permission(name = "update")
   @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ApiResponse<Booking> update(@PathVariable int id, @Valid @RequestBody BookingDTO roomDTO) {
+  public ApiResponse<Booking> update(@PathVariable int id, @Valid @RequestBody BookingDTO dto) {
     return ApiResponse.<Booking>builder()
-                      .result(bookingService.update(id, roomDTO))
+                      .result(bookingService.update(id, dto))
                       .build();
   }
 
   @DeleteMapping("/{id}")
-  @Permission(name = "delete")
+//  @Permission(name = "delete")
   public ApiResponse<Void> deleteHotel(@PathVariable int id) {
     bookingService.delete(id);
     return ApiResponse.<Void>builder()
-                      .message("Deleted room with id " + id + " successfully")
+                      .message("Deleted booking with id " + id + " successfully")
                       .build();
   }
 
   @GetMapping("/{id}")
-  @Permission(name = "view")
+//  @Permission(name = "view")
   public ApiResponse<Booking> getById(@PathVariable Integer id) {
     return ApiResponse.<Booking>builder()
                       .result(bookingService.findById(id))
@@ -61,7 +59,7 @@ public class BookingController {
   }
 
   @GetMapping("/{roomId}/booking")
-  @Permission(name = "view")
+//  @Permission(name = "view")
   public ApiResponse<Page<BookingRes>> getAll(
         @PathVariable Integer roomId,
         @RequestParam(required = false) Map<String, String> filters,

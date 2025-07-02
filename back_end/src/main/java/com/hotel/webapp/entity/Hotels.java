@@ -19,12 +19,16 @@ public class Hotels implements AuditEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer id;
   Integer ownerId;
+  @Column(nullable = false)
   String name;
   @Lob
   String description;
+  @Column(nullable = false)
   String avatar;
+  @Column(nullable = false)
   Integer addressId;
   Integer policyId;
+  @Column(nullable = false)
   Boolean status;
   Integer approveId;
   String note;

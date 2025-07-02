@@ -49,7 +49,7 @@ export default function RoomForm({
   const [selectedFacilies, setSelectedFacilies] = useState<number[]>([]);
   const [status, setStatus] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [roomAvatar, setRoomAvatar] = useState<string | null>(null);
   const [keepAvatar, setKeepAvatar] = useState("true");
   const [existingImages, setExistingImages] = useState<any[]>([]);
 
@@ -89,11 +89,11 @@ export default function RoomForm({
     formData.append("limitPerson", limit);
 
     // Avatar
-    formData.append("avatar.keepAvatar", keepAvatar);
+    formData.append("keepAvatar", keepAvatar);
     if (selectedFile) {
-      formData.append("avatar.avatarUrl", selectedFile, selectedFile.name);
-    } else if (avatarUrl) {
-      formData.append("avatar.existingAvatarUrl", avatarUrl);
+      formData.append("roomAvatar", selectedFile, selectedFile.name);
+    } else if (roomAvatar) {
+      formData.append("existingAvatarUrl", roomAvatar);
     }
 
     // Images
@@ -197,17 +197,17 @@ export default function RoomForm({
           }
 
           // Set avatar
-          if (result.avatarUrl) {
-            setAvatarUrl(result.avatarUrl);
+          if (result.roomAvatar) {
+            setRoomAvatar(result.roomAvatar);
             setKeepAvatar("true");
             console.log(
               "Avatar URL:",
               `${import.meta.env.VITE_REACT_APP_BACK_END_UPLOAD_HOTEL}/${
-                result.avatarUrl
+                result.roomAvatar
               }`
             );
           } else {
-            setAvatarUrl(null);
+            setRoomAvatar(null);
             setKeepAvatar("false");
             console.log("No avatar URL provided");
           }
@@ -246,7 +246,7 @@ export default function RoomForm({
       setSelectedType(null);
       setSelectedImgsFile([]);
       setSelectedFile(null);
-      setAvatarUrl(null);
+      setRoomAvatar(null);
       setKeepAvatar("false");
       setExistingImages([]);
     }
@@ -308,11 +308,11 @@ export default function RoomForm({
                     </label>
                     <ImageUploader
                       initialImageUrl={
-                        avatarUrl
+                        roomAvatar
                           ? `${
                               import.meta.env
                                 .VITE_REACT_APP_BACK_END_UPLOAD_HOTEL
-                            }/${avatarUrl}`
+                            }/${roomAvatar}`
                           : undefined
                       }
                       onFileChange={(file) => setSelectedFile(file)}

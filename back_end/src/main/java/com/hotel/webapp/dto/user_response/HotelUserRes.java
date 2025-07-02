@@ -16,7 +16,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class HotelUserRes {
   HotelRes hotel;
-  List<RoomRes> rooms;
+  List<TypeRes> types;
 
   @Getter
   @Setter
@@ -28,8 +28,8 @@ public class HotelUserRes {
     String address;
     String description;
     String avatar;
-    List<HomeRes.FacilitiesRes> facilities; //
-    List<HotelImages> images; //
+    List<HomeRes.FacilitiesRes> facilities;
+    List<HotelImages> images;
     Policy policy;
 
     @Getter
@@ -47,14 +47,26 @@ public class HotelUserRes {
   @Setter
   @AllArgsConstructor
   @FieldDefaults(level = AccessLevel.PRIVATE)
-  public static class RoomRes {
-    Integer id;
+  public static class TypeRes {
     String name;
-    String avatar;
-    List<HomeRes.FacilitiesRes> facilities; //
-    BigDecimal area;
-    BigDecimal priceNight;
-    BigDecimal priceHours;
-    String type;
+    List<RoomsRes> rooms;
+
+    @Getter
+    @Setter
+    @AllArgsConstructor
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class RoomsRes {
+      Integer id;
+      String name;
+      String avatarRoom;
+      String description;
+      List<HomeRes.FacilitiesRes> facilities;
+      BigDecimal area;
+      Integer roomNumber;
+      BigDecimal priceNight;
+      BigDecimal priceHours;
+      String type;
+      Integer limit;
+    }
   }
 }
