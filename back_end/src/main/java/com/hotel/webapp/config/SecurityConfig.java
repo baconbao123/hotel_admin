@@ -27,7 +27,7 @@ import java.util.List;
 public class SecurityConfig {
 
   public static final String[] PUBLIC_URLS = {
-        "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api/auth/**", "/public/**", "/upload/**", "/user/**"
+        "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api/auth/**", "/public/**", "/upload/**", "/user/**" ,
   };
 
   public static final String[] AUTHENTICATED_PUBLIC_URLS = {
@@ -77,7 +77,7 @@ public class SecurityConfig {
   @Bean
   CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(List.of("http://localhost:9898", "http://localhost:5173", "http://localhost:5174"));
+    configuration.setAllowedOrigins(List.of("http://localhost:9898", "http://localhost:5173", "http://localhost:5174 , http://localhost:8080"));
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(List.of("*"));
     configuration.setAllowCredentials(true);
