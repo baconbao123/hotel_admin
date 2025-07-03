@@ -38,9 +38,9 @@ public class UserController {
 
   @Permission(name = "update")
   @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ApiResponse<User> update(@PathVariable int id, @Valid @ModelAttribute UserDTO userDTO) throws IOException {
+  public ApiResponse<User> update(@PathVariable Integer id, @Valid @ModelAttribute UserDTO.UserUpdateDTO userDTO) throws IOException {
     return ApiResponse.<User>builder()
-                      .result(userService.update(id, userDTO))
+                      .result(userService.updateUser(id, userDTO))
                       .build();
   }
 

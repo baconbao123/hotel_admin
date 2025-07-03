@@ -28,7 +28,7 @@ public class HotelController {
 
 
   @Permission(name = "create")
-  @PostMapping(consumes = {"multipart/form-data"})
+  @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ApiResponse<Hotels> create(
         @Valid @ModelAttribute HotelDTO hotelDTO
   ) {

@@ -19,9 +19,11 @@ public class User implements AuditEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer id;
+  @Column(nullable = false)
   String fullName;
   @Column(nullable = false, unique = true)
   String email;
+  @Column(nullable = false)
   String phoneNumber;
   @Lob
   String password;

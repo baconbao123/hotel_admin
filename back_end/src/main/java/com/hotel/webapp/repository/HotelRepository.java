@@ -75,13 +75,41 @@ public interface HotelRepository extends BaseRepository<Hotels, Integer> {
   @Query("select h from  Hotels h where h.deletedAt is null")
   Page<Hotels> getHotelsInfo(Pageable pageable);
 
-  @Query("select h.id, h.name, h.addressId, h.avatar, h.description, hp.id, hp.name, hp.description, " +
-        "r.id, r.name, r.roomAvatar, r.roomArea, r.priceNight, r.priceHour, rt.name " +
-        "from Hotels h " +
-        "join HotelPolicy hp on hp.hotelId = h.id " +
-        "left join Rooms r on r.hotelId = h.id " +
-        "left join RoomType rt on rt.id = r.roomType " +
-        "where h.id = :id and r.deletedAt is null and rt.deletedAt is null " +
-        "and r.id in (select min(r2.id) from Rooms r2 where r2.hotelId = h.id group by r2.roomType)")
-  List<Object[]> findHotelDetail(@Param("id") Integer id);
+//  @Query("select h.id, h.name, h.addressId, h.avatar, h.description, hp.id, hp.name, hp.description, " +
+//        "r.id, r.name, r.roomAvatar, r.roomArea, r.priceNight, r.priceHour, rt.name, r.roomNumber, r.limitPerson, r.description " +
+//        "from Hotels h " +
+//        "join HotelPolicy hp on hp.hotelId = h.id " +
+//        "left join Rooms r on r.hotelId = h.id " +
+//        "left join RoomType rt on rt.id = r.roomType " +
+//        "left join Booking b on b.roomId = r.id " +
+//        "where h.id = :id and r.deletedAt is null and rt.deletedAt is null and b.id is null " +
+//        "and r.id in (select min(r2.id) from Rooms r2 where r2.hotelId = h.id group by r2.roomType)")
+//  List<Object[]> findHotelDetail(@Param("id") Integer id);
+
+  @Query("SELECT h.id, h.name, h.addressId, h.avatar, h.description, hp.id, hp.name, hp.description, " +
+        "r.id, r.name, r.roomAvatar, r.roomArea, r.priceNight, r.priceHour, rt.name, r.roomNumber, r.limitPerson, r.description " +
+        "FROM Hotels h " +
+        "JOIN HotelPolicy hp ON hp.hotelId = h.id " +
+        "LEFT JOIN Rooms r ON r.hotelId = h.id " +
+        "LEFT JOIN RoomType rt ON rt.id = r.roomType " +
+        "LEFT JOIN Booking b ON b.roomId = r.id AND b.status = true " +
+        "WHERE h.id = :hotelId " +
+        "AND r.deletedAt IS NULL " +
+        "AND rt.deletedAt IS NULL " +
+        "AND (b.id IS NULL OR (b.checkOutTime <= CURRENT_TIMESTAMP " +
+        "AND b.id = (SELECT MAX(b2.id) FROM Booking b2 WHERE b2.roomId = r.id AND b2.deletedAt IS NULL AND b2.status = true)))")
+  List<Object[]> findHotelDetail(@Param("hotelId") Integer hotelId);
+
+//  @Query("SELECT h.id, h.name, h.addressId, h.avatar, h.description, hp.id, hp.name, hp.description, " +
+//        "r.id, r.name, r.roomAvatar, r.roomArea, r.priceNight, r.priceHour, rt.name, r.roomNumber, r.limitPerson, r.description, " +
+//        "CASE WHEN b.id IS NULL OR (b.checkOutTime <= CURRENT_TIMESTAMP AND b.id = (SELECT MAX(b2.id) FROM Booking b2 WHERE b2.roomId = r.id AND b2.deletedAt IS NULL AND b2.status = true)) THEN true ELSE false END AS isAvailable " +
+//        "FROM Hotels h " +
+//        "JOIN HotelPolicy hp ON hp.hotelId = h.id " +
+//        "LEFT JOIN Rooms r ON r.hotelId = h.id " +
+//        "LEFT JOIN RoomType rt ON rt.id = r.roomType " +
+//        "LEFT JOIN Booking b ON b.roomId = r.id AND b.status = true " +
+//        "WHERE h.id = :hotelId " +
+//        "AND r.deletedAt IS NULL " +
+//        "AND rt.deletedAt IS NULL")
+//  List<Object[]> findHotelDetail(@Param("hotelId") Integer hotelId);
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @ControllerAdvice
@@ -38,8 +39,8 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ApiResponse> handleValidation(MethodArgumentNotValidException e) {
     Map<String, String> errorMessages = new HashMap<>();
+    ErrorCode errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
 
-    ErrorCode errorCode = null;
     for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
       String field = fieldError.getField();
       String defaultMessage = fieldError.getDefaultMessage();
@@ -53,17 +54,22 @@ public class GlobalExceptionHandler {
           errorCode = ErrorCode.FIELD_NOT_EMPTY;
           String fieldName = extractFieldName(defaultMessage, "_NOT_EMPTY");
           finalMessage = errorCode.getMessage().replace("{field}", fieldName);
-        } else if (defaultMessage != null && defaultMessage.endsWith("_INVALID_REGEX")) {
-          errorCode = ErrorCode.FIELD_INVALID;
-          String fieldName = extractFieldName(defaultMessage, "_INVALID_REGEX");
-          finalMessage = errorCode.getMessage().replace("{field}", fieldName);
-        } else if (defaultMessage != null && defaultMessage.startsWith("Maximum of")) {
-          errorCode = ErrorCode.IMG_EXCEEDS;
-          String fieldName = extractFieldName(defaultMessage, "Maximum of ");
-          finalMessage = errorCode.getMessage().replace("{maxSize}", fieldName);
+        } else if (defaultMessage != null && defaultMessage.endsWith("_SIZE_EXCEEDED")) {
+          errorCode = ErrorCode.IMAGES_SIZE_EXCEEDED;
+          String fieldName = extractFieldName(defaultMessage, "_SIZE_EXCEEDED");
+          finalMessage = errorCode.getMessage()
+                                  .replace("{field}", fieldName)
+                                  .replace("{0}", String.valueOf(
+                                        fieldError.getRejectedValue() instanceof List<?> list
+                                              ? list.size()
+                                              : "unknown"));
+        } else if (defaultMessage != null && defaultMessage.endsWith("_NOTICE")) {
+          errorCode = ErrorCode.REGEX_INVALID;
+          String fieldName = extractFieldName(defaultMessage, "_NOTICE");
+          finalMessage = errorCode.getMessage().replace("{notice}", fieldName);
         } else {
           errorCode = ErrorCode.UNCATEGORIZED_EXCEPTION;
-          finalMessage = ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage();
+          finalMessage = errorCode.getMessage();
         }
       }
 

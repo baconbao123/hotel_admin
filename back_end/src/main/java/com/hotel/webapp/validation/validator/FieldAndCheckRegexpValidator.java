@@ -14,12 +14,14 @@ public class FieldAndCheckRegexpValidator implements ConstraintValidator<FieldAn
   String regexp;
   String field;
   ForceType force;
+  String notice;
 
   @Override
   public void initialize(FieldAndCheckRegexp constraintAnnotation) {
     this.field = constraintAnnotation.field();
     this.force = constraintAnnotation.force();
     this.regexp = constraintAnnotation.regex();
+    this.notice = constraintAnnotation.notice();
   }
 
   @Override
@@ -39,7 +41,7 @@ public class FieldAndCheckRegexpValidator implements ConstraintValidator<FieldAn
 
     if (!isValid) {
       context.disableDefaultConstraintViolation();
-      context.buildConstraintViolationWithTemplate(field + "_INVALID_REGEX")
+      context.buildConstraintViolationWithTemplate(notice + "_NOTICE")
              .addConstraintViolation();
     }
 

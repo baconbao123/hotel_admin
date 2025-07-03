@@ -71,7 +71,7 @@ public class HotelService extends BaseServiceImpl<Hotels, Integer, HotelDTO, Hot
 
     hotel.setNote(create.getNoteHotel());
 
-    if (create.getOwnerId() != null) {
+    if (create.getOwnerId() != null && !create.getOwnerId().toString().trim().isEmpty()) {
       hotel.setOwnerId(create.getOwnerId());
     } else {
       hotel.setOwnerId(null);
@@ -90,6 +90,8 @@ public class HotelService extends BaseServiceImpl<Hotels, Integer, HotelDTO, Hot
     hotel.setAddressId(getAuthId());
     hotel.setCreatedAt(LocalDateTime.now());
     hotel.setCreatedBy(getAuthId());
+
+
 
     hotel = repository.save(hotel);
 

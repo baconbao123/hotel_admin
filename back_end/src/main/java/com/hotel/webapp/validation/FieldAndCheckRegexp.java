@@ -11,7 +11,7 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = {FieldAndCheckRegexpValidator.class})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface FieldAndCheckRegexp {
-  String message() default "{filed} Invalid}";
+  String message() default "";
 
   Class<?>[] groups() default {};
 
@@ -22,4 +22,7 @@ public @interface FieldAndCheckRegexp {
   ForceType force() default ForceType.OPTIONAL;
 
   String regex();
+;
+  String notice();
+
 }

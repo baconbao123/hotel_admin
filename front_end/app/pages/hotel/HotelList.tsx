@@ -208,16 +208,16 @@ export default function RoleList() {
             <Column sortable field="id" header="Id" className="w-20" />
             <Column
               sortable
-              field="avatarUrl"
+              field="roomAvatar"
               header="Avatar"
               body={(row: any) => {
                 return (
                   <div className="flex justify-center">
-                    {row.avatarUrl ? (
+                    {row.roomAvatar ? (
                       <Image
                         src={`${
                           import.meta.env.VITE_REACT_APP_BACK_END_UPLOAD_HOTEL
-                        }/${row.avatarUrl}`}
+                        }/${row.roomAvatar}`}
                         width={50}
                         height={50}
                         style={{

@@ -49,7 +49,6 @@ export default function UserForm({
   const [showError, setShowError] = useState(false);
   const [passwordsMatch, setPasswordsMatch] = useState(true);
   const [selectedType, setSelectedType] = useState<any>(null);
-  const dispatch = useAppDispatch();
 
   const { commonData } = useCommonData(["roles", "usertypes"]);
 
@@ -145,7 +144,7 @@ export default function UserForm({
       formData.append("keepAvatar", "true");
     }
 
-    formData.append("userTypeId", selectedType?.id);
+    formData.append("userTypeId", selectedType?.id ?? "");
 
     selectedRoles.forEach((roleId) => {
       formData.append("rolesIds", roleId.toString());
@@ -161,6 +160,8 @@ export default function UserForm({
           life: 3000,
         });
       } else {
+        console.log("form data: "  + formData);
+        
         await createItem(formData);
         toast.current?.show({
           severity: "success",

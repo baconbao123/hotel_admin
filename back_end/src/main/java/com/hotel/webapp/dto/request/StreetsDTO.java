@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 public class StreetsDTO {
   @FieldNotEmpty(field = "name")
   String name;
-  @FieldNotEmpty(field = "ward code")
+  @FieldNotEmpty(field = "ward")
   String wardCode;
   BigDecimal width;
   BigDecimal curbWith;

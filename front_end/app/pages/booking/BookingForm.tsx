@@ -36,9 +36,6 @@ export default function BookingForm({
   updateItem,
   error,
 }: Props) {
-  const [selectedFile, setSelectedFile] = useState<RcFile | null>(null);
-  const [selectedImgsFile, setSelectedImgsFile] = useState<RcFile[]>([]);
-  const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [roomNumber, setRoomNumber] = useState("");
   const [roomArea, setRoomArea] = useState("");
@@ -49,9 +46,6 @@ export default function BookingForm({
   const [selectedFacilies, setSelectedFacilies] = useState<number[]>([]);
   const [status, setStatus] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [keepAvatar, setKeepAvatar] = useState("true");
-  const [existingImages, setExistingImages] = useState<any[]>([]);
 
   const toast = useRef<Toast>(null);
 
@@ -61,10 +55,6 @@ export default function BookingForm({
   const hotelFacilities = commonData.hotelFacilities;
 
   const header = mode === "edit" ? "EDIT" : "ADD";
-
-  const handleRemoveExistingImage = (index: number) => {
-    setExistingImages((prev) => prev.filter((_, i) => i !== index));
-  };
 
   const getError = (field: string) =>
     error &&
@@ -77,7 +67,6 @@ export default function BookingForm({
     const formData = new FormData();
 
     // Basic info
-    formData.append("name", name);
     formData.append("description", description || "");
     formData.append("status", JSON.stringify(status));
     formData.append("roomNumber", roomNumber);
@@ -87,37 +76,12 @@ export default function BookingForm({
     formData.append("priceNight", priceNight);
     formData.append("limitPerson", limit);
 
-    // Avatar
-    formData.append("avatar.keepAvatar", keepAvatar);
-    if (selectedFile) {
-      formData.append("avatar.avatarUrl", selectedFile, selectedFile.name);
-    } else if (avatarUrl) {
-      formData.append("avatar.existingAvatarUrl", avatarUrl);
-    }
-
-    // Images
-    selectedImgsFile.forEach((file, index) => {
-      formData.append(`images[${index}].imageFile`, file, file.name);
-    });
-
-    // Existing Images
-    existingImages.forEach((img, index) => {
-      formData.append(
-        `images[${selectedImgsFile.length + index}].imageId`,
-        img.id.toString()
-      );
-      formData.append(
-        `images[${selectedImgsFile.length + index}].existingImageUrl`,
-        img.imagesUrl
-      );
-    });
-
     // Facilities
     selectedFacilies.forEach((facilityId) => {
       if (typeof facilityId === "number" && !isNaN(facilityId)) {
         formData.append("facilities", facilityId.toString());
       } else {
-        console.error("Invalid facility ID:", facilityId);
+        console.log("Invalid facility ID:", facilityId);
       }
     });
 
@@ -157,23 +121,15 @@ export default function BookingForm({
     if (id && open) {
       loadDataById(id).then(async (data) => {
         const result = data.result || data;
-        console.log("Hotel data from loadDataById:", result);
 
-        setName(result.name || "");
         setDescription(result.description || "");
         setStatus(result.status ?? true);
       });
     } else {
-      setName("");
       setDescription("");
       setSelectedFacilies([]);
       setStatus(true);
       setSelectedType(null);
-      setSelectedImgsFile([]);
-      setSelectedFile(null);
-      setAvatarUrl(null);
-      setKeepAvatar("false");
-      setExistingImages([]);
     }
   }, [id, open, loadDataById]);
 
@@ -218,76 +174,6 @@ export default function BookingForm({
               </h3>
             </div>
 
-            <div className="col-span-12 md:col-span-12">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-                <div className="col-span-12 md:col-span-6">
-                  <h4 className="text-md font-semibold text-gray-800 mb-2">
-                    Room Avatar
-                  </h4>
-                  <div className="border rounded-lg p-4 bg-gray-50">
-                    <label
-                      htmlFor="avatar"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Upload 1 image
-                    </label>
-                    <ImageUploader
-                      initialImageUrl={
-                        avatarUrl
-                          ? `${
-                              import.meta.env
-                                .VITE_REACT_APP_BACK_END_UPLOAD_HOTEL
-                            }/${avatarUrl}`
-                          : undefined
-                      }
-                      onFileChange={(file) => setSelectedFile(file)}
-                      maxFileSize={2}
-                      disabled={submitting}
-                    />
-                    {getError("avatar") && (
-                      <small className="text-red-500 text-xs mt-1">
-                        {getError("avatar")}
-                      </small>
-                    )}
-                  </div>
-                </div>
-
-                <div className="col-span-12 md:col-span-6">
-                  <h4 className="text-md font-semibold text-gray-800 mb-2">
-                    Gallery Images
-                  </h4>
-                  <div className="border rounded-lg p-4 bg-gray-50">
-                    <label
-                      htmlFor="images"
-                      className="block text-sm font-medium text-gray-700 mb-1"
-                    >
-                      Images (Up to 3)
-                    </label>
-                    <GalleryUploader
-                      onFilesChange={(files) => {
-                        setSelectedImgsFile(files);
-                      }}
-                      onRemoveExistingImage={handleRemoveExistingImage}
-                      maxFileSize={6}
-                      disabled={submitting}
-                      initialImageUrls={existingImages.map(
-                        (img) =>
-                          `${
-                            import.meta.env.VITE_REACT_APP_BACK_END_UPLOAD_HOTEL
-                          }/${img.imagesUrl}`
-                      )}
-                      maxCount={3}
-                    />
-                    {getError("images") && (
-                      <small className="text-red-500 text-xs mt-1">
-                        {getError("images")}
-                      </small>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {/* Infor */}
             <div className="col-span-12 md:col-span-12">
               {/* Name + Desc */}
@@ -299,15 +185,7 @@ export default function BookingForm({
                   >
                     Name <span className="text-red-500">*</span>
                   </label>
-                  <InputText
-                    id="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    disabled={submitting}
-                    className={`w-full p-2 border rounded-lg ${
-                      getError("name") ? "p-invalid" : ""
-                    }`}
-                  />
+
                   {getError("name") && (
                     <small className="text-red-500 text-xs mt-1">
                       {getError("name")}

@@ -107,8 +107,7 @@ public class UserService extends BaseServiceImpl<User, Integer, UserDTO, UserRep
     return user;
   }
 
-  @Override
-  public User update(Integer id, UserDTO update) {
+  public User updateUser(Integer id, UserDTO.UserUpdateDTO update) {
     var user = findById(id);
 
     // valid

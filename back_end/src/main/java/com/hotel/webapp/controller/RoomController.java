@@ -18,13 +18,13 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/room")
-@Resource(name = "Room")
+//@Resource(name = "Room")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RoomController {
   RoomService roomService;
 
-  @Permission(name = "create")
+//  @Permission(name = "create")
   @PostMapping(consumes = {"multipart/form-data"})
   public ApiResponse<Rooms> create(
         @Valid @ModelAttribute RoomDTO roomDTO
@@ -34,7 +34,7 @@ public class RoomController {
                       .build();
   }
 
-  @Permission(name = "update")
+//  @Permission(name = "update")
   @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public ApiResponse<Rooms> update(@PathVariable int id, @Valid @ModelAttribute RoomDTO roomDTO) {
     return ApiResponse.<Rooms>builder()
@@ -43,7 +43,7 @@ public class RoomController {
   }
 
   @DeleteMapping("/{id}")
-  @Permission(name = "delete")
+//  @Permission(name = "delete")
   public ApiResponse<Void> deleteHotel(@PathVariable int id) {
     roomService.delete(id);
     return ApiResponse.<Void>builder()
@@ -52,7 +52,7 @@ public class RoomController {
   }
 
   @GetMapping("/{id}")
-  @Permission(name = "view")
+//  @Permission(name = "view")
   public ApiResponse<Rooms> getById(@PathVariable Integer id) {
     return ApiResponse.<Rooms>builder()
                       .result(roomService.findById(id))
@@ -60,7 +60,7 @@ public class RoomController {
   }
 
   @GetMapping("/{hotelId}/rooms")
-  @Permission(name = "view")
+//  @Permission(name = "view")
   public ApiResponse<Page<Rooms>> getAll(
         @PathVariable Integer hotelId,
         @RequestParam(required = false) Map<String, String> filters,
