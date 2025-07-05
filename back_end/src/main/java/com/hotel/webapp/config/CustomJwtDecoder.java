@@ -1,6 +1,6 @@
 package com.hotel.webapp.config;
 
-import com.hotel.webapp.dto.request.IntrospectRequest;
+import com.hotel.webapp.dto.request.AuthReq;
 import com.hotel.webapp.service.admin.interfaces.AuthService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
@@ -28,7 +28,7 @@ public class CustomJwtDecoder implements JwtDecoder {
 
   @Override
   public Jwt decode(String token) throws JwtException {
-    var res = authService.introspect(IntrospectRequest.builder().token(token).build());
+    var res = authService.introspect(AuthReq.IntrospectRequest.builder().token(token).build());
     if (!res.isValid()) throw new JwtException("invalid token");
 
     if (Objects.isNull(nimbusJwtDecoder)) {

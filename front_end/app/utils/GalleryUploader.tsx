@@ -13,7 +13,7 @@ interface GalleryUploaderProps {
   initialImageUrls?: string[];
   onFilesChange: (files: RcFile[]) => void;
   onRemoveExistingImage?: (index: number) => void;
-  maxFileSize?: number;
+  // maxFileSize?: number;
   disabled?: boolean;
   maxCount?: number;
 }
@@ -30,7 +30,7 @@ const GalleryUploader: React.FC<GalleryUploaderProps> = ({
   initialImageUrls,
   onFilesChange,
   onRemoveExistingImage,
-  maxFileSize = 2,
+  // maxFileSize = 300,
   disabled = false,
   maxCount = 5,
 }) => {
@@ -90,7 +90,7 @@ const GalleryUploader: React.FC<GalleryUploaderProps> = ({
           return {
             ...f,
             uid: `upload-${uuidv4()}`,
-            status: f.status || "uploading", 
+            status: f.status || "uploading",
           };
         }
         return f;
@@ -136,12 +136,12 @@ const GalleryUploader: React.FC<GalleryUploaderProps> = ({
       });
       return Upload.LIST_IGNORE;
     }
-    const isLtMaxSize = file.size / 1024 / 1024 < maxFileSize;
+    const isLtMaxSize = file.size / 1024 / 1024 < 300;
     if (!isLtMaxSize) {
       toast.current?.show({
         severity: "error",
         summary: "Error",
-        detail: `Image must be smaller than ${maxFileSize}MB!`,
+        detail: `Image must be smaller than ${300}MB!`,
         life: 3000,
       });
       return Upload.LIST_IGNORE;

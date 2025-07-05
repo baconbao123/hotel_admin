@@ -16,9 +16,11 @@ import noImg from "@/asset/images/no-img.png";
 import HotelForm from "./HotelForm";
 import HotelDetail from "./HotelDetail";
 import { useSelector } from "react-redux";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import type { RootState } from "@/store";
 import Loading from "@/components/shared/Loading";
+import Cookies from "js-cookie";
+import $axios from "@/axios";
 
 export default function RoleList() {
   const [selectedId, setSelectedId] = useState<string>();
@@ -61,8 +63,9 @@ export default function RoleList() {
     setMounted(true);
   }, []);
 
-  const loading = useSelector((state: RootState) => state.loading.isLoading);
+  const navigate = useNavigate();
 
+  const loading = useSelector((state: RootState) => state.loading.isLoading);
   if (loading) <Loading />;
 
   const handlePageChange = (e: any) => updatePageData(e.page, e.rows);
@@ -107,18 +110,41 @@ export default function RoleList() {
     </div>
   );
 
-  const statusRoom = (row: any) => (
-    <div className="flex justify-center">
-      <Link to={`/room/${row.id}`}>
+  const statusRoom = (row: any) => {
+    const handleViewRooms = async () => {
+      try {
+        const token = Cookies.get("token");
+
+        const res = await $axios.get("/auth/me/permission-hotel", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (res.data === true) {
+          window.location.href = `http://localhost:5174/rooms/${row.id}`;
+        }
+      } catch (err: any) {
+        if (err.response?.status === 403) {
+          alert("You do not have access to this hotel.");
+        } else {
+          alert("An error occurred. Please try again.");
+        }
+      }
+    };
+
+    return (
+      <div className="flex justify-center">
         <Button
           label="View Rooms"
           severity="info"
           text
           style={{ color: "#0ea5e9" }}
+          onClick={handleViewRooms}
         />
-      </Link>
-    </div>
-  );
+      </div>
+    );
+  };
 
   const hasPermission = (actionName: string) => {
     const resource = permissions.find((p: any) => p.resourceName === "Hotel");

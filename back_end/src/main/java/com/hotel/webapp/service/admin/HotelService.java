@@ -92,7 +92,6 @@ public class HotelService extends BaseServiceImpl<Hotels, Integer, HotelDTO, Hot
     hotel.setCreatedBy(getAuthId());
 
 
-
     hotel = repository.save(hotel);
 
     // type
@@ -510,6 +509,7 @@ public class HotelService extends BaseServiceImpl<Hotels, Integer, HotelDTO, Hot
   public List<Facilities> findFacilities() {
     return facilitiesRepository.findAllFacilities();
   }
+
 
   @Override
   protected RuntimeException createNotFoundException(Integer integer) {

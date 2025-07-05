@@ -8,10 +8,11 @@ import com.hotel.webapp.entity.User;
 import com.hotel.webapp.exception.AppException;
 import com.hotel.webapp.exception.ErrorCode;
 import com.hotel.webapp.repository.MapResourceActionRepository;
-import com.hotel.webapp.repository.MapUserRoleRepository;
 import com.hotel.webapp.repository.PermissionsRepository;
 import com.hotel.webapp.repository.UserRepository;
 import com.hotel.webapp.service.admin.interfaces.AuthService;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jwt.SignedJWT;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -19,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -29,19 +31,21 @@ import java.util.*;
 public class PermissionService extends BaseServiceImpl<Permissions, Integer, MappingDTO, PermissionsRepository> {
   MapResourceActionRepository mapResourceActionRepository;
   UserRepository userRepository;
-  MapUserRoleRepository mapUserRoleRepository;
+  PermissionsRepository permissionsRepository;
+
 
   public PermissionService(
         AuthService authService,
         PermissionsRepository repository,
         MapResourceActionRepository mapResourceActionRepository,
-        MapUserRoleRepository mapUserRoleRepository,
-        UserRepository userRepository
+        UserRepository userRepository,
+        PermissionsRepository permissionsRepository
+
   ) {
     super(repository, authService);
     this.mapResourceActionRepository = mapResourceActionRepository;
-    this.mapUserRoleRepository = mapUserRoleRepository;
     this.userRepository = userRepository;
+    this.permissionsRepository = permissionsRepository;
   }
 
   public List<Permissions> updatePermission(MappingDTO updateDto) {
@@ -251,16 +255,22 @@ public class PermissionService extends BaseServiceImpl<Permissions, Integer, Map
     return resourceActions;
   }
 
-  //  public List<Resources> getUserResource() {
-//    Integer userId = getAuthId();
-//    User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
-//
-//    if (user.getEmail().equals("sa@gmail.com")) {
-//      return repository.getResources();
-//    }
-//
-//    return repository.getResourceByUserId(userId);
-//  }
+  public boolean checkPermissionHotel(String token) throws ParseException, JOSEException {
+    SignedJWT signedJWT = authService.verifyToken(token.replace("Bearer ", ""));
+    Integer userId = signedJWT.getJWTClaimsSet().getIntegerClaim("userId");
+
+    User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
+
+    if (user.getEmail().equals("sa@gmail.com")) {
+      return true;
+    }
+
+    if (!permissionsRepository.hasPermissionHotel(userId)) {
+      throw new AppException(ErrorCode.ACCESS_DENIED);
+    }
+
+    return true;
+  }
 
   @Override
   protected RuntimeException createNotFoundException(Integer integer) {

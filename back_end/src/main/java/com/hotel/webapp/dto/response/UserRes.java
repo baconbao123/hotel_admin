@@ -62,4 +62,14 @@ public class UserRes {
     String fullName;
     String email;
   }
+
+  @Getter
+  @Setter
+  @AllArgsConstructor
+  @FieldDefaults(level = AccessLevel.PRIVATE)
+  public static class CustomerRes {
+    Integer id;
+    String fullName;
+    String email;
+  }
 }

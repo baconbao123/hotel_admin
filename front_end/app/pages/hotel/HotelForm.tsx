@@ -185,7 +185,6 @@ export default function HotelForm({
     formData.append("provinceCode", selectedProvince?.code || "");
     formData.append("note", note || "");
     formData.append("noteHotel", hotelNote || "");
-
     formData.append("ownerId", ownerId?.id || "");
 
     // Avatar

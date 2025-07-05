@@ -389,7 +389,6 @@ export default function UserForm({
                     optionValue="id"
                     display="chip"
                     placeholder="Select Roles"
-                    maxSelectedLabels={3}
                     className={`w-full ${getError("roles") ? "p-invalid" : ""}`}
                     disabled={submitting}
                   />

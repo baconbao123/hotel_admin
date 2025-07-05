@@ -73,7 +73,7 @@ export default function RoleDetail({
             />
           </div>
         }
-        style={{ width: "40%" }}
+        style={{ width: "50%" }}
         modal
         className="p-fluid"
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
@@ -109,7 +109,7 @@ export default function RoleDetail({
 
           <div></div>
         </div>
-        
+
         {/* Info data create/update */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pl-4 pr-4">
           {/* Left */}

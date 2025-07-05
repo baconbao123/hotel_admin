@@ -22,8 +22,4 @@ public interface RoomTypeRepository extends BaseRepository<RoomType, Integer> {
   //  find-by-name
   @Query("select t from RoomType t where t.name = :name and t.deletedAt is null")
   Optional<RoomType> findRoomTypeByName(String name);
-
-  //  find-all
-  @Query("select t from RoomType t where t.deletedAt is null")
-  List<RoomType> findRoomTypes();
 }

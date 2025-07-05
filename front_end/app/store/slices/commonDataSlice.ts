@@ -18,6 +18,7 @@ export interface CommonDataResponse {
   roomTypes?: any[];
   owners?: any[];
   userTypes?: any[];
+  customers?: any[];
 }
 
 export interface CommonData {
@@ -32,6 +33,7 @@ export interface CommonData {
   roomtypes?: any[];
   owners?: any[];
   usertypes?: any[];
+  customers?: any[];
 }
 
 interface CommonDataState {
@@ -57,6 +59,7 @@ const typeMapping: Record<keyof CommonData, keyof CommonDataResponse> = {
   roomtypes: "roomTypes",
   owners: "owners",
   usertypes: "userTypes",
+  customers: "customers",
 };
 
 const reverseTypeMapping: Record<string, keyof CommonData> = Object.entries(

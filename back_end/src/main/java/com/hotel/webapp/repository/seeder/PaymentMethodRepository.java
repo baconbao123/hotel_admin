@@ -23,8 +23,5 @@ public interface PaymentMethodRepository extends BaseRepository<PaymentMethod, I
   @Query("select t from PaymentMethod t where t.name = :name and t.deletedAt is null")
   Optional<PaymentMethod> findPaymentMethodByName(String name);
 
-  //  find-all
-  @Query("select t from PaymentMethod t where t.deletedAt is null")
-  List<PaymentMethod> findAllPayment();
 }
 

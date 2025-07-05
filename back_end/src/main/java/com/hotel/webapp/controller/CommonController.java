@@ -24,8 +24,6 @@ public class CommonController {
   PermissionService permissionService;
   HotelService hotelService;
   UserService userService;
-  PaymentService paymentService;
-  RoomService roomService;
 
   @GetMapping("/common-data")
   public ApiResponse<AttributeDataResponse> getCommonData(
@@ -57,12 +55,6 @@ public class CommonController {
           break;
         case "hotelfacilities":
           builder.hotelFacilities(hotelService.findFacilities());
-          break;
-        case "paymentmethods":
-          builder.paymentMethods(paymentService.findAllPayment());
-          break;
-        case "roomtypes":
-          builder.roomTypes(roomService.findRoomTypes());
           break;
         case "owners":
           builder.owners(userService.findOwner(keyword, pageOwner != null ? pageOwner : 0));

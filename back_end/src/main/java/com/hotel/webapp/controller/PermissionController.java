@@ -7,6 +7,7 @@ import com.hotel.webapp.entity.Permissions;
 import com.hotel.webapp.service.admin.PermissionService;
 import com.hotel.webapp.validation.Permission;
 import com.hotel.webapp.validation.Resource;
+import com.nimbusds.jose.JOSEException;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +15,7 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
@@ -55,16 +57,10 @@ public class PermissionController {
   }
 
   @GetMapping("/resources")
-    public ApiResponse<List<PermissionRes.ResourceActions>> getResourceByUser() {
-      return ApiResponse.<List<PermissionRes.ResourceActions>>builder()
-                        .result(permissionService.getUserResource())
-                        .build();
-    }
+  public ApiResponse<List<PermissionRes.ResourceActions>> getResourceByUser() {
+    return ApiResponse.<List<PermissionRes.ResourceActions>>builder()
+                      .result(permissionService.getUserResource())
+                      .build();
+  }
 
-//  @GetMapping("/resources")
-//  public ApiResponse<List<Resources>> getResourceByUser() {
-//    return ApiResponse.<List<Resources>>builder()
-//                      .result(permissionService.getUserResource())
-//                      .build();
-//  }
 }

@@ -1,9 +1,6 @@
 package com.hotel.webapp.dto.response;
 
-import lombok.AccessLevel;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 @Getter
@@ -13,4 +10,14 @@ import lombok.experimental.FieldDefaults;
 public class AuthResponse {
   String token;
   String refreshToken;
+
+  @Getter
+  @Setter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  @FieldDefaults(level = AccessLevel.PRIVATE)
+  public static class IntrospectRes {
+    boolean isValid;
+  }
 }

@@ -1,10 +1,7 @@
 package com.hotel.webapp.service.admin;
 
 import com.hotel.webapp.dto.request.AuthReq;
-import com.hotel.webapp.dto.request.IntrospectRequest;
-import com.hotel.webapp.dto.request.TokenRefreshReq;
 import com.hotel.webapp.dto.response.AuthResponse;
-import com.hotel.webapp.dto.response.IntrospectRes;
 import com.hotel.webapp.entity.Role;
 import com.hotel.webapp.entity.User;
 import com.hotel.webapp.exception.AppException;
@@ -84,7 +81,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public AuthResponse refreshToken(TokenRefreshReq tokenRefreshReq) {
+  public AuthResponse refreshToken(AuthReq.TokenRefreshReq tokenRefreshReq) {
     var refreshToken = tokenRefreshReq.getRefreshToken();
 
     var user = userRepository.findByRefreshToken(refreshToken)
@@ -104,7 +101,7 @@ public class AuthServiceImpl implements AuthService {
   }
 
   @Override
-  public IntrospectRes introspect(IntrospectRequest request) {
+  public AuthResponse.IntrospectRes introspect(AuthReq.IntrospectRequest request) {
     var token = request.getToken();
     boolean isValid = true;
 
@@ -114,10 +111,10 @@ public class AuthServiceImpl implements AuthService {
       isValid = false;
     }
 
-    return IntrospectRes.builder().isValid(isValid).build();
+    return AuthResponse.IntrospectRes.builder().isValid(isValid).build();
   }
 
-  private SignedJWT verifyToken(String token) throws JOSEException, ParseException {
+  public SignedJWT verifyToken(String token) throws JOSEException, ParseException {
     JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
 
     SignedJWT signedJWT = SignedJWT.parse(token);

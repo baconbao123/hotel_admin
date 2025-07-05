@@ -3,6 +3,7 @@ package com.hotel.webapp.repository;
 import com.hotel.webapp.base.BaseRepository;
 import com.hotel.webapp.dto.response.LocalResponse;
 import com.hotel.webapp.entity.Hotels;
+import com.hotel.webapp.entity.Rooms;
 import com.hotel.webapp.entity.TypeHotel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -86,6 +87,7 @@ public interface HotelRepository extends BaseRepository<Hotels, Integer> {
 //        "and r.id in (select min(r2.id) from Rooms r2 where r2.hotelId = h.id group by r2.roomType)")
 //  List<Object[]> findHotelDetail(@Param("id") Integer id);
 
+  // find by id for admin
   @Query("SELECT h.id, h.name, h.addressId, h.avatar, h.description, hp.id, hp.name, hp.description, " +
         "r.id, r.name, r.roomAvatar, r.roomArea, r.priceNight, r.priceHour, rt.name, r.roomNumber, r.limitPerson, r.description " +
         "FROM Hotels h " +
@@ -99,17 +101,9 @@ public interface HotelRepository extends BaseRepository<Hotels, Integer> {
         "AND (b.id IS NULL OR (b.checkOutTime <= CURRENT_TIMESTAMP " +
         "AND b.id = (SELECT MAX(b2.id) FROM Booking b2 WHERE b2.roomId = r.id AND b2.deletedAt IS NULL AND b2.status = true)))")
   List<Object[]> findHotelDetail(@Param("hotelId") Integer hotelId);
-
-//  @Query("SELECT h.id, h.name, h.addressId, h.avatar, h.description, hp.id, hp.name, hp.description, " +
-//        "r.id, r.name, r.roomAvatar, r.roomArea, r.priceNight, r.priceHour, rt.name, r.roomNumber, r.limitPerson, r.description, " +
-//        "CASE WHEN b.id IS NULL OR (b.checkOutTime <= CURRENT_TIMESTAMP AND b.id = (SELECT MAX(b2.id) FROM Booking b2 WHERE b2.roomId = r.id AND b2.deletedAt IS NULL AND b2.status = true)) THEN true ELSE false END AS isAvailable " +
-//        "FROM Hotels h " +
-//        "JOIN HotelPolicy hp ON hp.hotelId = h.id " +
-//        "LEFT JOIN Rooms r ON r.hotelId = h.id " +
-//        "LEFT JOIN RoomType rt ON rt.id = r.roomType " +
-//        "LEFT JOIN Booking b ON b.roomId = r.id AND b.status = true " +
-//        "WHERE h.id = :hotelId " +
-//        "AND r.deletedAt IS NULL " +
-//        "AND rt.deletedAt IS NULL")
-//  List<Object[]> findHotelDetail(@Param("hotelId") Integer hotelId);
+//
+//  @Query("select r from Rooms r " +
+//        "join Hotels h on h.id = r.hotelId " +
+//        "")
+//  List<Rooms> viewRoomByHotelId(@Param("hotelId") Integer hotelId);
 }

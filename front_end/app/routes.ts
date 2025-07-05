@@ -9,8 +9,6 @@ export default [
   layout("./layouts/rootLayout.tsx", [
     route("/", "./pages/welcome/WelcomePage.tsx"),
     route("/profile", "./pages/profile/ProfilePage.tsx"),
-    route("/room/:hotelId", "./pages/rooms/RoomList.tsx"),
-    route("/booking/:roomId", "./pages/booking/BookingList.tsx"),
     route("", "./routes/protectedRoute.tsx", [
       route("/dashboard", "./pages/dashboard/DashboardPage.tsx"),
       route("/user", "./pages/user/UserList.tsx"),

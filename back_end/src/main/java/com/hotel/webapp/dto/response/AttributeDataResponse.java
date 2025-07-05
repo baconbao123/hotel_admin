@@ -24,5 +24,5 @@ public class AttributeDataResponse {
   List<RoomType> roomTypes;
   List<UserRes.OwnerRes> owners;
   List<UserType> userTypes;
-
+  List<UserRes.CustomerRes> customers;
 }

@@ -2,7 +2,6 @@ package com.hotel.webapp.repository;
 
 import com.hotel.webapp.base.BaseRepository;
 import com.hotel.webapp.entity.Permissions;
-import com.hotel.webapp.entity.Resources;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
@@ -58,7 +57,7 @@ public interface PermissionsRepository extends BaseRepository<Permissions, Integ
         "WHERE p.roleId = :roleId AND p.deletedAt IS NULL")
   List<Object[]> getPermissionsByRoleId(@Param("roleId") Integer roleId);
 
-  // check permission when use resource + action
+  // check permission by token login when use resource + action
   @Query("select count(p) > 0 from Permissions p " +
         "join Role r on p.roleId = r.id " +
         "join MapResourcesAction mra on p.mapResourcesActionId = mra.id and mra.deletedAt is null " +
@@ -71,6 +70,16 @@ public interface PermissionsRepository extends BaseRepository<Permissions, Integ
         @Param("userId") Integer userId,
         @Param("resource") String resource,
         @Param("action") String action);
+
+  // check permission hotel when view room in admin
+  @Query("select count(p) > 0 from Permissions p " +
+        "join Role r on p.roleId = r.id " +
+        "join MapResourcesAction mra on p.mapResourcesActionId = mra.id and mra.deletedAt is null " +
+        "join MapUserRoles mur on r.id = mur.roleId and mur.deletedAt is null " +
+        "join User u on mur.userId = u.id " +
+        "join Resources res on mra.resourceId = res.id " +
+        "where u.id = :userId and lower(res.name) = 'Hotel' and p.deletedAt is null")
+  boolean hasPermissionHotel(@Param("userId") Integer userId);
 
   @Query("select re.name, a.name from Resources re " +
         "join MapUserRoles mur on mur.userId = :userId and mur.deletedAt is null " +

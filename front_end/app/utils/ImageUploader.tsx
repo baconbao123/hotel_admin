@@ -11,7 +11,7 @@ type RcFile = import("antd/es/upload").RcFile;
 interface ImageUploaderProp {
   initialImageUrl?: string;
   onFileChange: (file: RcFile | null) => void;
-  maxFileSize?: number;
+  // maxFileSize?: number;
   disabled?: boolean;
 }
 
@@ -26,7 +26,7 @@ const getBase64 = (file: FileType): Promise<string> =>
 const ImageUploader: React.FC<ImageUploaderProp> = ({
   initialImageUrl,
   onFileChange,
-  maxFileSize = 2,
+  // maxFileSize = 100,
   disabled = false,
 }) => {
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -55,7 +55,6 @@ const ImageUploader: React.FC<ImageUploaderProp> = ({
   }, [initialImageUrl]);
 
   const handlePreview = async (file: UploadFile) => {
-    console.log("handlePreview: file =", file);
     if (!file.url && !file.preview) {
       file.preview = await getBase64(file.originFileObj as FileType);
     }
@@ -70,8 +69,7 @@ const ImageUploader: React.FC<ImageUploaderProp> = ({
     setFileList(newFileList);
     if (newFileList.length > 0 && newFileList[0].originFileObj) {
       const file = newFileList[0].originFileObj as RcFile;
-      console.log("Selected file:", file.name);
-      hasUploadedFile.current = true; // Mark that a file has been uploaded
+      hasUploadedFile.current = true;
       onFileChange(file);
       getBase64(file).then((base64) => {
         console.log("Base64 generated for preview");
@@ -86,8 +84,7 @@ const ImageUploader: React.FC<ImageUploaderProp> = ({
         ]);
       });
     } else {
-      console.log("No file selected, clearing preview");
-      hasUploadedFile.current = false; // Reset when file is removed
+      hasUploadedFile.current = false;
       onFileChange(null);
       setPreviewImage("");
       setFileList([]);
@@ -106,12 +103,12 @@ const ImageUploader: React.FC<ImageUploaderProp> = ({
       });
       return false;
     }
-    const isLtMaxSize = file.size / 1024 / 1024 < maxFileSize;
+    const isLtMaxSize = file.size / 1024 / 1024 < 100;
     if (!isLtMaxSize) {
       toast.current?.show({
         severity: "error",
         summary: "Error",
-        detail: `Image must be smaller than ${maxFileSize}MB!`,
+        detail: `Image must be smaller than ${100}MB!`,
         life: 3000,
       });
       return false;

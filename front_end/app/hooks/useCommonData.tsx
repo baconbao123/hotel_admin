@@ -20,6 +20,7 @@ const typeMapping: Partial<Record<keyof CommonData, keyof CommonDataResponse>> =
     roomtypes: "roomTypes",
     owners: "owners",
     usertypes: "userTypes",
+    customers: "customers"
   };
 
 export const useCommonData = (

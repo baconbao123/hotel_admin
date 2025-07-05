@@ -67,7 +67,7 @@ export default function StreetList() {
   );
 
   const hasPermission = (actionName: string) => {
-    const resource = permissions.find((p: any) => p.resourceName === "Role");
+    const resource = permissions.find((p: any) => p.resourceName === "Street");
     return resource ? resource.actionNames.includes(actionName) : false;
   };
 
@@ -108,19 +108,38 @@ export default function StreetList() {
         <div className="mb-5">
           <div className="grid grid-cols-4 gap-10 card">
             <div className="col-span-4 2xl:col-span-3">
-              <div className="grid gap-2 2xl:grid-cols-6 grid-cols-2"></div>
+              <div className="grid gap-2 2xl:grid-cols-6 grid-cols-2">
+                {mounted ? (
+                  <>
+                    <InputText
+                      placeholder="Name"
+                      className="w-full"
+                      value={filters.name || ""}
+                      onChange={(e) => handleSearch("name", e.target.value)}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <Skeleton height="100%" />
+                  </>
+                )}
+              </div>
             </div>
             <div className="col-span-4 2xl:col-span-1">
               <div className="flex flex-wrap gap-2 justify-end">
-                <Button
-                  label="Add new"
-                  className="btn_add_new"
-                  onClick={() => {
-                    setSelectedId(undefined);
-                    setFormMode("create");
-                    setOpenForm(true);
-                  }}
-                />
+                {hasPermission("create") && (
+                  <Button
+                    label="Add new"
+                    className="btn_add_new"
+                    onClick={() => {
+                      console.log("hehehe");
+
+                      setSelectedId(undefined);
+                      setFormMode("create");
+                      setOpenForm(true);
+                    }}
+                  />
+                )}
               </div>
             </div>
           </div>
