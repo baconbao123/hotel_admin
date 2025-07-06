@@ -2,11 +2,10 @@ import { useState, useEffect, useRef } from "react";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import { Toast } from "primereact/toast";
 import { Dropdown } from "primereact/dropdown";
-import $axios from "@/axios";
-import { useCommonData } from "@/hooks/useCommonData";
-
+import $axios from "~/axios";
+import { useCommonData } from "~/hook/useCommonData";
+import { toast } from "react-toastify";
 interface Props {
   id?: string;
   open: boolean;
@@ -46,8 +45,7 @@ export default function StreetForm({
     useState<LocalResponse | null>(null);
   const [selectedWard, setSelectedWard] = useState<LocalResponse | null>(null);
 
-  const toast = useRef<Toast>(null);
-  const header = mode === "edit" ? "EDIT" : "ADD";
+  const header = mode === "edit" ? "EDIT STREET" : "ADD STREET";
 
   const { commonData } = useCommonData(["provinces"]);
 
@@ -74,12 +72,10 @@ export default function StreetForm({
           setWardData([]);
           setSelectedWard(null);
         } catch (error: any) {
-          toast.current?.show({
-            severity: "error",
-            summary: "Error",
-            detail: error.response?.data?.message || "Failed to load districts",
-            life: 3000,
-          });
+
+          toast.error("Failed to load districts", {
+            autoClose: 3000,
+          })
         }
       };
       fetchDistricts();
@@ -110,12 +106,9 @@ export default function StreetForm({
             setSelectedWard(null);
           }
         } catch (error: any) {
-          toast.current?.show({
-            severity: "error",
-            summary: "Error",
-            detail: error.response?.data?.message || "Failed to load wards",
-            life: 3000,
-          });
+          toast.error("Failed to load wards", {
+            autoClose: 3000,
+          })
         }
       };
       fetchWards();
@@ -124,8 +117,6 @@ export default function StreetForm({
       setSelectedWard(null);
     }
   }, [selectedDistrict, streetData]);
-
-  // Load street data for edit mode
   useEffect(() => {
     if (id && open && mode === "edit") {
       loadDataById(id)
@@ -167,33 +158,23 @@ export default function StreetForm({
                   setSelectedDistrict(district);
                 }
               } else {
-                toast.current?.show({
-                  severity: "warn",
-                  summary: "Warning",
-                  detail: "Ward information not found",
-                  life: 3000,
+                toast.warn("Ward information not found", {
+                  autoClose: 3000
                 });
               }
             } catch (error: any) {
-              toast.current?.show({
-                severity: "error",
-                summary: "Error",
-                detail:
-                  error.response?.data?.message ||
-                  "Failed to load ward information",
-                life: 3000,
-              });
+                toast.error(  error.response?.data?.message ||
+                  "Failed to load ward information", {
+                  autoClose: 3000
+                });
             }
           }
         })
         .catch((error) => {
-          toast.current?.show({
-            severity: "error",
-            summary: "Error",
-            detail:
-              error.response?.data?.message || "Failed to load street data",
-            life: 3000,
-          });
+            toast.error(  error.response?.data?.message ||
+              "Failed to load street data", {
+              autoClose: 3000
+            });
         });
     } else {
       setName("");
@@ -221,28 +202,19 @@ export default function StreetForm({
     try {
       if (mode === "edit" && id) {
         await updateItem(id, streetsDTO);
-        toast.current?.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Street updated",
-          life: 3000,
-        });
+        toast.success("Street updated", {
+            autoClose: 3000
+          });
       } else {
         await createItem(streetsDTO);
-        toast.current?.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Street created",
-          life: 3000,
+        toast.success("Street created", {
+          autoClose: 3000
         });
       }
       onClose();
     } catch (err: any) {
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail: err.response?.data?.message || "Failed to save street",
-        life: 3000,
+      toast.error("Failed to save street", {
+          autoClose: 3000
       });
     } finally {
       setSubmitting(false);
@@ -254,9 +226,10 @@ export default function StreetForm({
     typeof error === "object" &&
     (error as Record<string, string>)[field];
 
+
+
   return (
     <div>
-      <Toast ref={toast} />
       <Dialog
         visible={open}
         onHide={onClose}
@@ -274,7 +247,6 @@ export default function StreetForm({
             <Button
               label="Save"
               onClick={submit}
-              severity="success"
               className="btn_submit"
               loading={submitting}
               style={{ padding: "8px 40px" }}
@@ -390,7 +362,7 @@ export default function StreetForm({
                     options={provinces}
                     optionLabel="name"
                     placeholder="Select a Province"
-                    className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                    className={`w-full  border rounded-lg focus:ring-2 focus:ring-blue-500 ${
                       getError("province") ? "p-invalid" : ""
                     }`}
                     disabled={mode === "view" || submitting}
@@ -419,7 +391,7 @@ export default function StreetForm({
                     options={districtData}
                     optionLabel="name"
                     placeholder="Select a District"
-                    className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                    className={`w-full border rounded-lg focus:ring-2 focus:ring-blue-500 ${
                       getError("district") ? "p-invalid" : ""
                     }`}
                     disabled={
@@ -450,7 +422,7 @@ export default function StreetForm({
                     options={wardData}
                     optionLabel="name"
                     placeholder="Select a Ward"
-                    className={`w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-500 ${
+                    className={`w-full border rounded-lg focus:ring-2 focus:ring-blue-500 ${
                       getError("ward") ? "p-invalid" : ""
                     }`}
                     disabled={
@@ -459,9 +431,9 @@ export default function StreetForm({
                     tooltip="Select the ward of the location"
                     tooltipOptions={{ position: "top" }}
                   />
-                  {getError("ward") && (
+                  {getError("wardCode") && (
                     <small className="text-red-600 text-xs mt-1 block">
-                      {getError("ward")}
+                      {getError("wardCode")}
                     </small>
                   )}
                 </div>
@@ -473,3 +445,7 @@ export default function StreetForm({
     </div>
   );
 }
+function sesetDistrictData(arg0: never[]) {
+  throw new Error("Function not implemented.");
+}
+

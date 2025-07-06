@@ -1,17 +1,16 @@
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
-import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
-import ImageUploader from "@/utils/ImageUploader";
+import ImageUploader from "~/utils/ImageUploader";
 import { InputSwitch } from "primereact/inputswitch";
 import { MultiSelect } from "primereact/multiselect";
-import { useCommonData } from "@/hooks/useCommonData";
+import { useCommonData } from "~/hook/useCommonData";
 import { useSelector } from "react-redux";
-import $axios from "@/axios";
-import { useAppDispatch } from "@/store";
-import { fetchCommonData } from "@/store/slices/commonDataSlice";
+import $axios from "~/axios";
+import { useAppDispatch, type RootState } from "~/store";
 import { Dropdown } from "primereact/dropdown";
+import { toast } from "react-toastify";
 interface Props {
   id?: string;
   open: boolean;
@@ -49,18 +48,18 @@ export default function UserForm({
   const [showError, setShowError] = useState(false);
   const [passwordsMatch, setPasswordsMatch] = useState(true);
   const [selectedType, setSelectedType] = useState<any>(null);
+  const dispatch = useAppDispatch();
 
   const { commonData } = useCommonData(["roles", "usertypes"]);
 
   const rolesData = commonData.roles ?? [];
   const userTypes = commonData.userTypes ?? [];
 
-  const toast = useRef<Toast>(null);
 
-  const header = mode === "edit" ? "EDIT" : "ADD";
+  const header = mode === "edit" ? "EDIT USER" : "ADD USER";
 
   const permissions = useSelector(
-    (state: any) => state.permissions.permissions
+    (state: RootState) => state.permissionSlice.permissions
   );
 
   useEffect(() => {
@@ -83,12 +82,8 @@ export default function UserForm({
           setSelectedRoles(selectedRoleIds);
         })
         .catch((error: any) => {
-          toast.current?.show({
-            severity: "error",
-            summary: "Error",
-            detail: error.response?.data?.message || "Failed to load user data",
-            life: 3000,
-          });
+          toast.error(error.response?.data?.message || "Failed to load user data", {autoClose: 3000})
+
         });
     } else {
       setFullName("");
@@ -144,7 +139,7 @@ export default function UserForm({
       formData.append("keepAvatar", "true");
     }
 
-    formData.append("userTypeId", selectedType?.id ?? "");
+    formData.append("userTypeId", selectedType?.id);
 
     selectedRoles.forEach((roleId) => {
       formData.append("rolesIds", roleId.toString());
@@ -153,31 +148,16 @@ export default function UserForm({
     try {
       if (id) {
         await updateItem(id, formData);
-        toast.current?.show({
-          severity: "success",
-          summary: "Success",
-          detail: "User updated successfully",
-          life: 3000,
-        });
+        toast.success("User updated successfully", {autoClose: 3000})
+
       } else {
-        console.log("form data: "  + formData);
-        
         await createItem(formData);
-        toast.current?.show({
-          severity: "success",
-          summary: "Success",
-          detail: "User created successfully",
-          life: 3000,
-        });
+        toast.success( "User created successfully", {autoClose: 3000})
+
       }
       onClose();
     } catch (err: any) {
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail: err.message || "Failed to save user",
-        life: 3000,
-      });
+      toast.error(err.message || "Failed to save user", {autoClose: 3000})
     } finally {
       setSubmitting(false);
     }
@@ -196,12 +176,7 @@ export default function UserForm({
 
   const handleChangePassword = async () => {
     if (!passwordsMatch) {
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Password don't match",
-        life: 3000,
-      });
+      toast.error( "Password don't match", {autoClose: 3000})
 
       return;
     }
@@ -215,20 +190,11 @@ export default function UserForm({
         setNewPassword("");
         setConfirmPassword("");
         setViewChangePassword(false);
-        toast.current?.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Password updated successfully",
-          life: 3000,
-        });
+        toast.success( "Password updated successfully", {autoClose: 3000})
       }
     } catch (err: any) {
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail: err.message || "Failed to change password",
-        life: 3000,
-      });
+
+      toast.error( err.message || "Failed to change password", {autoClose: 3000})
     } finally {
       setSubmitting(false);
     }
@@ -236,13 +202,22 @@ export default function UserForm({
 
   return (
     <div>
-      <Toast ref={toast} />
       <Dialog
         visible={open}
         onHide={onClose}
         header={header}
         footer={
           <div className="flex justify-center gap-2">
+            {hasPermission('change_password') && mode === "edit" && (
+              <Button
+                severity="secondary"
+                raised
+                label="Change Password"
+                onClick={() => setViewChangePassword(!viewChangePassword)}
+                style={{ color: "white" }}
+              />
+
+            )}
             <Button
               label="Close"
               onClick={onClose}
@@ -254,12 +229,12 @@ export default function UserForm({
             <Button
               label="Save"
               onClick={submit}
-              severity="success"
               disabled={submitting}
               loading={submitting}
               className="btn_submit"
               style={{ padding: "8px 40px" }}
             />
+   
           </div>
         }
         style={{ width: "50%", maxWidth: "95vw" }}
@@ -292,7 +267,7 @@ export default function UserForm({
                     : undefined
                 }
                 onFileChange={(file) => setSelectedFile(file)}
-                maxFileSize={2}
+                maxFileSize={100}
                 disabled={submitting}
               />
               {getError("avatar") && (
@@ -389,6 +364,7 @@ export default function UserForm({
                     optionValue="id"
                     display="chip"
                     placeholder="Select Roles"
+                    maxSelectedLabels={3}
                     className={`w-full ${getError("roles") ? "p-invalid" : ""}`}
                     disabled={submitting}
                   />
@@ -469,14 +445,7 @@ export default function UserForm({
 
                 {id && hasPermission("change_password") && (
                   <div className="mt-3">
-                    <Button
-                      severity="secondary"
-                      raised
-                      label="Change Password"
-                      onClick={() => setViewChangePassword(!viewChangePassword)}
-                      style={{ color: "white" }}
-                    />
-
+          
                     {viewChangePassword && (
                       <Dialog
                         header="Change Password"
@@ -501,7 +470,6 @@ export default function UserForm({
                             <Button
                               label="Save"
                               onClick={handleChangePassword}
-                              severity="success"
                               disabled={submitting}
                               loading={submitting}
                               className="px-6 py-2 rounded-lg"

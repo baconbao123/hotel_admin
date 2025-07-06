@@ -2,10 +2,13 @@ import React, { useEffect, useRef, useState } from "react";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import { Toast } from "primereact/toast";
 import { InputSwitch } from "primereact/inputswitch";
-import { useAppDispatch } from "@/store"; // Import useAppDispatch from your store
-import { fetchCommonData } from "@/store/slices/commonDataSlice"; // Adjust path if needed
+
+import { fetchCommonData } from "~/store/slice/commonDataSlice";  // Adjust path if needed
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "~/store";
+import { toast } from "react-toastify";
+
 
 interface Props {
   id?: string;
@@ -33,10 +36,9 @@ export default function RoleForm({
   const [status, setStatus] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   
-  const toast = useRef<Toast>(null);
-  const dispatch = useAppDispatch();
+  const dispatch: AppDispatch = useDispatch();
 
-  const header = mode === "edit" ? "EDIT" : "ADD";
+  const header = mode === "edit" ? "EDIT ROLE" : "ADD NEW ROLE";
 
   const submit = async () => {
     setSubmitting(true);
@@ -44,31 +46,22 @@ export default function RoleForm({
     try {
       if (id) {
         await updateItem(id, roleDTO);
-        toast.current?.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Role updated",
-          life: 3000,
-        });
+           toast.success("Updated successfully", {
+                          autoClose: 3000,
+                      });
         await dispatch(fetchCommonData({ types: ["roles"], force: true }));
       } else {
         await createItem(roleDTO);
-        toast.current?.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Role created",
-          life: 3000,
-        });
+        toast.success("Created successfully", {
+                          autoClose: 3000,
+                      });
 
         await dispatch(fetchCommonData({ types: ["roles"], force: true }));
       }
       onClose();
     } catch (err: any) {
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail: err.message || "Failed to save role",
-        life: 3000,
+      toast.error(err.message || "Failed to save role", {
+                  autoClose: 3000,
       });
     } finally {
       setSubmitting(false);
@@ -90,12 +83,11 @@ export default function RoleForm({
           setStatus(data.entity.status ?? true);
         })
         .catch(() =>
-          toast.current?.show({
-            severity: "error",
-            summary: "Error",
-            detail: "Failed to load role",
-            life: 3000,
-          })
+         
+        toast.error("Failed to load role", {
+          autoClose: 3000,
+        })
+      
         );
     } else {
       setName("");
@@ -106,7 +98,6 @@ export default function RoleForm({
 
   return (
     <div>
-      <Toast ref={toast} />
       <Dialog
         visible={open}
         onHide={onClose}
@@ -125,7 +116,6 @@ export default function RoleForm({
               label="Save"
               onClick={submit}
               disabled={submitting}
-              severity="success"
               className="btn_submit"
               loading={submitting}
               style={{ padding: "8px 40px" }}

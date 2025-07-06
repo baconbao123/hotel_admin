@@ -2,11 +2,11 @@ import { useState, useEffect, useRef } from "react";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import { Toast } from "primereact/toast";
 import { Dropdown } from "primereact/dropdown";
-import { useCommonData } from "@/hooks/useCommonData";
-import { useAppDispatch } from "@/store"; // Import useAppDispatch from your store
-import { fetchCommonData } from "@/store/slices/commonDataSlice"; // Adjust path if needed
+import { useCommonData } from "~/hook/useCommonData";
+import { useAppDispatch } from "~/store"; // Import useAppDispatch from your store
+import { fetchCommonData } from "~/store/slice/commonDataSlice"; // Adjust path if needed
+import { toast } from "react-toastify";
 interface Props {
   id?: string;
   open: boolean;
@@ -37,7 +37,6 @@ export default function FacilityForm({
 
   const facilitiesData = commonData.facilityTypes ?? [];
 
-  const toast = useRef<Toast>(null);
   const dispatch = useAppDispatch();
 
   const resetForm = () => {
@@ -63,11 +62,9 @@ export default function FacilityForm({
           );
           setType(matched || null);
         } catch (err) {
-          toast.current?.show({
-            severity: "error",
-            summary: "Error",
-            detail: "Failed to load facility data",
-            life: 3000,
+
+          toast.error("Failed to load facility data", {
+          autoClose:3000
           });
         }
       }
@@ -89,33 +86,24 @@ export default function FacilityForm({
     try {
       if (mode === "edit" && id) {
         await updateItem(id, facilityDTO);
-        toast.current?.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Facility updated",
-          life: 3000,
+        toast.success("Facility updated", {
+          autoClose:3000
         });
         await dispatch(
           fetchCommonData({ types: ["facilitiestype"], force: true })
         );
       } else {
         await createItem(facilityDTO);
-        toast.current?.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Facility created",
-          life: 3000,
+        toast.success("Facility created", {
+          autoClose:3000
         });
       }
 
       onClose();
     } catch (err: any) {
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail: err.message || "Failed to save facility",
-        life: 3000,
-      });
+        toast.error( err.message || "Failed to save facility", {
+          autoClose:3000
+        });
     } finally {
       setSubmitting(false);
     }
@@ -128,7 +116,6 @@ export default function FacilityForm({
 
   return (
     <div>
-      <Toast ref={toast} />
       <Dialog
         visible={open}
         onHide={onClose}

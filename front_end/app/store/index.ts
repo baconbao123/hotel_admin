@@ -1,8 +1,4 @@
 import { configureStore } from "@reduxjs/toolkit";
-import commonDataReducer from "./slices/commonDataSlice";
-import permissionReducer from "./slices/permissionSlice";
-import userReducer from "./slices/userDataSlice";
-import loadingReducer from "./slices/loadingSlice";
 
 import {
   type TypedUseSelectorHook,
@@ -10,12 +6,17 @@ import {
   useSelector,
 } from "react-redux";
 
+import commonSlince from './slice/commonSlince'
+import userDataSlice from './slice/userDataSlice'
+import permissionSlice from './slice/permissionSlice'
+import commonDataReducer from "./slice/commonDataSlice";
+
 export const store = configureStore({
   reducer: {
-    commonData: commonDataReducer,
-    permissions: permissionReducer,
-    userData: userReducer,
-    loading: loadingReducer,
+    commonSlince: commonSlince,
+    userDataSlice: userDataSlice,
+    permissionSlice: permissionSlice,
+    commonData: commonDataReducer
   },
 });
 

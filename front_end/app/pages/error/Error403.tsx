@@ -33,7 +33,7 @@ export default function NotFound() {
            The requested is Internal Server Error.
           </p>
           <Link
-            to="/"
+            to="/dashboard"
             className="inline-block px-6 py-2 bg-white text-blue-600 rounded-lg 
               font-medium transition-all hover:bg-blue-50 hover:shadow-lg"
           >

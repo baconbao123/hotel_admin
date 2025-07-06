@@ -2,21 +2,23 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import { Toast } from "primereact/toast";
 import { InputSwitch } from "primereact/inputswitch";
-import $axios from "@/axios";
+import $axios from "~/axios";
 import { Dropdown } from "primereact/dropdown";
 import { MultiSelect } from "primereact/multiselect";
-import ImageUploader from "@/utils/ImageUploader";
-import GalleryUploader from "@/utils/GalleryUploader";
+import ImageUploader from "~/utils/ImageUploader";
+import GalleryUploader from "~/utils/GalleryUploader";
 import { FileUpload } from "primereact/fileupload";
-import { useCommonData } from "@/hooks/useCommonData";
+import { useCommonData } from "~/hook/useCommonData";
+
 import type { RcFile } from "antd/es/upload";
-import { useAppDispatch } from "@/store";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "~/store";
 import {
   fetchCommonData,
   type CommonData,
-} from "@/store/slices/commonDataSlice";
+} from "~/store/slice/commonDataSlice";
+import { toast } from "react-toastify";
 
 interface Props {
   id?: string;
@@ -69,7 +71,6 @@ export default function HotelForm({
   const [hotelNote, setHotelNote] = useState("");
 
   const [streetNumber, setStreetNumber] = useState("");
-  const toast = useRef<Toast>(null);
   const [documents, setDocuments] = useState<any>([
     {
       documentId: null,
@@ -98,9 +99,10 @@ export default function HotelForm({
 
   const provinces = commonData.provinces;
   const hotelTypes = commonData.hotelTypes;
-  const hotelFacilities = commonData.hotelFacilities;
+  const hotelFacilities = commonData.hotelTypes;
   const hotelDocuments = commonData.documentTypes;
-  const dispatch = useAppDispatch();
+
+  const dispatch: AppDispatch = useDispatch();
 
   // owner
   const loadOwners = async (keyword = "", page = 0) => {
@@ -185,7 +187,7 @@ export default function HotelForm({
     formData.append("provinceCode", selectedProvince?.code || "");
     formData.append("note", note || "");
     formData.append("noteHotel", hotelNote || "");
-    formData.append("ownerId", ownerId?.id || "");
+    formData.append("ownerId", ownerId?.id || null);
 
     // Avatar
     formData.append("avatar.keepAvatar", keepAvatar);
@@ -274,30 +276,19 @@ export default function HotelForm({
     try {
       if (id) {
         await updateItem(id, formData);
-        toast.current?.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Hotel updated successfully",
-          life: 3000,
+        toast.success("Hotel updated successfully", {
+          autoClose: 3000,
         });
       } else {
-        console.log(formData);
-
         await createItem(formData);
-        toast.current?.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Hotel created successfully",
-          life: 3000,
+        toast.success("Hotel created successfully", {
+          autoClose: 3000,
         });
       }
       onClose();
     } catch (err: any) {
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail: err.response?.data?.message || "Failed to save hotel",
-        life: 3000,
+      toast.error(err.response?.data?.message || "Failed to save hotel", {
+        autoClose: 3000,
       });
     } finally {
       setSubmitting(false);
@@ -363,7 +354,7 @@ export default function HotelForm({
 
           setOwnerId(ownerId);
 
-          setHotelNote(result.hotelNote);
+          setHotelNote(result.hotelNote)
 
           // Set documents
           if (result.documents && hotelDocuments) {
@@ -500,13 +491,9 @@ export default function HotelForm({
             }
           } catch (error: any) {
             console.error("Address fetch error:", error);
-            toast.current?.show({
-              severity: "error",
-              summary: "Error",
-              detail:
-                error.response?.data?.message || "Failed to load address data",
-              life: 3000,
-            });
+          toast.error( error.response?.data?.message || "Failed to load address data", {
+            autoClose: 3000
+          })
             setDistrictData([]);
             setSelectedDistrict(null);
             setWardData([]);
@@ -517,12 +504,9 @@ export default function HotelForm({
         })
         .catch((err) => {
           console.error("Error loading hotel data:", err);
-          toast.current?.show({
-            severity: "error",
-            summary: "Error",
-            detail: err.response?.data?.message || "Failed to load hotel data",
-            life: 3000,
-          });
+          toast.error(err.response?.data?.message || "Failed to load districts", {
+            autoClose: 3000
+          })
         });
     } else {
       // Reset form for create mode
@@ -582,12 +566,9 @@ export default function HotelForm({
             }
           }
         } catch (error: any) {
-          toast.current?.show({
-            severity: "error",
-            summary: "Error",
-            detail: error.response?.data?.message || "Failed to load districts",
-            life: 3000,
-          });
+          toast.error(error.response?.data?.message || "Failed to load districts", {
+            autoClose: 3000
+          })
         }
       };
       fetchDistricts();
@@ -618,12 +599,10 @@ export default function HotelForm({
             setSelectedWard(ward);
           }
         } catch (error: any) {
-          toast.current?.show({
-            severity: "error",
-            summary: "Error",
-            detail: error.response?.data?.message || "Failed to load wards",
-            life: 3000,
-          });
+
+          toast.error(error.response?.data?.message || "Failed to load wards", {
+            autoClose: 3000
+          })
         }
       };
       fetchWards();
@@ -651,11 +630,9 @@ export default function HotelForm({
             setSelectedStreet(street);
           }
         } catch (error: any) {
-          toast.current?.show({
-            severity: "error",
-            summary: "Error",
-            detail: error.response?.data?.message || "Failed to load streets",
-          });
+          toast.error(error.response?.data?.message || "Failed to load streets", {
+            autoClose: 3000
+          })
         }
       };
       fetchStreets();
@@ -667,7 +644,6 @@ export default function HotelForm({
 
   return (
     <div>
-      <Toast ref={toast} />
       <Dialog
         visible={open}
         onHide={onClose}
@@ -685,7 +661,6 @@ export default function HotelForm({
             <Button
               label="Save"
               onClick={submit}
-              severity="success"
               disabled={submitting}
               loading={submitting}
               className="btn_submit"
@@ -729,7 +704,7 @@ export default function HotelForm({
                           : undefined
                       }
                       onFileChange={(file) => setSelectedFile(file)}
-                      maxFileSize={2}
+                      maxFileSize={100}
                       disabled={submitting}
                     />
                     {getError("avatar") && (
@@ -760,7 +735,7 @@ export default function HotelForm({
                         setSelectedImgsFile(files);
                       }}
                       onRemoveExistingImage={handleRemoveExistingImage}
-                      maxFileSize={6}
+                      maxFileSize={100}
                       disabled={submitting}
                       initialImageUrls={existingImages.map(
                         (img) =>

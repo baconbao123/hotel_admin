@@ -1,43 +1,48 @@
-import "./app.css";
-import "@/asset/images/styles/main.scss";
-import { Provider } from "react-redux";
-import { store } from "./store";
-
+// root.tsx
 import {
-  Links,
   Meta,
   Outlet,
   Scripts,
   ScrollRestoration,
-  useRouteError,
 } from "react-router";
+import { Provider } from "react-redux";
+import "./app.css"; 
+import "~/asset/styles/main.scss"; 
 
-function ErrorBoundary() {
-  const error = useRouteError();
-  console.log("ErrorBoundary caught:", error); // Add logging for debugging
+import { store } from "./store";
+import { PrimeReactProvider } from 'primereact/api';
+import Loading from "~/components/common/Loading";
+import { useSelector } from "react-redux";
+import type { RootState } from './store';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import "primereact/resources/themes/lara-light-blue/theme.css";
+import "primereact/resources/primereact.min.css";
+import "primeicons/primeicons.css";
+
+import "primereact/resources/themes/lara-light-cyan/theme.css";
+
+function LayoutWithState() {
+  const loading = useSelector((state: RootState) => state.commonSlince.loading);
   return (
-    <div className="error-container">
-      <h1>Oops! Something went wrong</h1>
-      <p>{error?.toString() || "Unknown error occurred"}</p>
-    </div>
+    <>
+     <ToastContainer />
+      {loading && <Loading />}
+      <Outlet />
+    </>
   );
 }
 
-function AppContent() {
-  return <Outlet />;
-}
-
-export function Layout({ children }: { children: React.ReactNode }) {
+function HtmlShell({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
-        <Links />
       </head>
       <body>
-        {children} {/* Remove LoadingProvider from here */}
+        {children}
         <ScrollRestoration />
         <Scripts />
       </body>
@@ -48,11 +53,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <Provider store={store}>
-      <Layout>
-        <AppContent />
-      </Layout>
+      <PrimeReactProvider>
+        <HtmlShell>
+          <LayoutWithState />
+        </HtmlShell>
+      </PrimeReactProvider>
     </Provider>
   );
 }
-
-export { ErrorBoundary };

@@ -76,9 +76,10 @@ export default function UserDetail({
         footer={
           <div className="flex justify-center gap-2">
             <Button
+              severity="secondary"
+              outlined
               label="Close"
               onClick={onClose}
-              severity="secondary"
               style={{ padding: "8px 40px" }}
             />
           </div>
@@ -110,21 +111,21 @@ export default function UserDetail({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-4 pr-4">
           {/* Left */}
           <div className="flex flex-col gap-4">
-            <div>
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="name" className="font-bold block mb-1">
                 Fullname:
               </label>
               <span id="name">{fullName || "-"}</span>
             </div>
 
-            <div>
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="email" className="font-bold block mb-1">
                 Email:
               </label>
               <span id="email">{email || "-"}</span>
             </div>
 
-            <div>
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="phone" className="font-bold block mb-1">
                 Phone number:
               </label>
@@ -134,13 +135,13 @@ export default function UserDetail({
 
           {/* Cột phải */}
           <div className="flex flex-col gap-4">
-            <div>
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="role" className="font-bold block mb-1">
                 User Type:
               </label>
               <span id="role">{userType ?? "-"}</span>
             </div>
-            <div>
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="role" className="font-bold block mb-1">
                 Roles:
               </label>
@@ -155,7 +156,7 @@ export default function UserDetail({
               </span>
             </div>
 
-            <div>
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="status" className="font-bold block mb-1">
                 Status:
               </label>
@@ -171,44 +172,45 @@ export default function UserDetail({
 
         {/* Info data create/update */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pl-4 pr-4">
-          {/* Created By and Created At */}
-          <div className="grid grid-cols-3 gap-2 items-center mb-2">
-            <label htmlFor="createdBy" className="font-bold text-gray-700">
-              Created By:
-            </label>
-            <span id="createdBy" className="text-gray-900">
-              {createdData || "-"}
-            </span>
-          </div>
-          <div className="grid grid-cols-3 gap-2 items-center mb-2">
-            <label htmlFor="createdAt" className="font-bold text-gray-700">
-              Created At:
-            </label>
-            <span id="createdAt" className="text-gray-900 whitespace-nowrap">
-              {createdAt
-                ? format(new Date(createdAt), "yyyy-MM-dd HH:mm:ss")
-                : "-"}
-            </span>
-          </div>
+          {/* Left */}
+          <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
+              <label htmlFor="createdName" className="font-bold block mb-1">
+                Created By:
+              </label>
+              <span id="createdName">{createdData || "-"}</span>
+            </div>
 
-          {/* Updated By and Update At */}
-          <div className="grid grid-cols-3 gap-2 items-center mb-2">
-            <label htmlFor="updatedBy" className="font-bold text-gray-700">
-              Updated By:
-            </label>
-            <span id="updatedBy" className="text-gray-900">
-              {updatedData || "-"}
-            </span>
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
+              <label htmlFor="createdAt" className="font-bold block mb-1">
+                Created At:
+              </label>
+              <span id="createdAt">
+                {createdAt
+                  ? format(new Date(createdAt), "yyyy-MM-dd HH:mm:ss")
+                  : "-"}
+              </span>
+            </div>
           </div>
-          <div className="grid grid-cols-3 gap-2 items-center mb-2">
-            <label htmlFor="updateAt" className="font-bold text-gray-700">
-              Updated At:
-            </label>
-            <span id="createdAt" className="text-gray-900 whitespace-nowrap">
-              {updateAt
-                ? format(new Date(updateAt), "yyyy-MM-dd HH:mm:ss")
-                : "-"}
-            </span>
+          {/* Right */}
+          <div className="flex flex-col gap-4">
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
+              <label htmlFor="updatedName" className="font-bold block mb-1">
+                Updated By:
+              </label>
+              <span id="updatedName">{updatedData || "-"}</span>
+            </div>
+
+            <div  className="grid grid-cols-3 gap-2 items-center mb-2">
+              <label htmlFor="createdAt" className="font-bold block mb-1">
+                Update At:
+              </label>
+              <span id="createdAt">
+                {updateAt
+                  ? format(new Date(updateAt), "yyyy-MM-dd HH:mm:ss")
+                  : "-"}
+              </span>
+            </div>
           </div>
         </div>
       </Dialog>

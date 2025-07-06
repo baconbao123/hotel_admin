@@ -4,26 +4,30 @@ import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
-import { Toast } from "primereact/toast";
 import { Tag } from "primereact/tag";
 import { Skeleton } from "primereact/skeleton";
 import Swal from "sweetalert2";
-import BreadCrumbComponent from "@/components/common/breadCrumb/BreadCrumbComponent";
-import useCrud from "@/hooks/crudHook";
-import { SkeletonTemplate } from "@/components/common/skeleton";
+import BreadCrumbComponent from "~/components/common/breadCrumb/BreadCrumbComponent";
+import useCrud from "~/hook/crudHook";
+import { SkeletonTemplate } from "~/components/common/skeleton";
 import StreetForm from "./StreetForm";
 import StreetDetail from "./StreetDetail";
 import { useSelector } from "react-redux";
-import type { RootState } from "@/store";
-import Loading from "@/components/shared/Loading";
-
+import type { RootState } from "~/store";
+import { toast } from "react-toastify";
+import type { Route } from "./+types/StreetList";
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Street" },
+    { name: "description", content: "Hotel Admin Street" },
+  ];
+}
 export default function StreetList() {
   const [selectedId, setSelectedId] = useState<string>();
   const [formMode, setFormMode] = useState<"create" | "edit" | "view">(
     "create"
   );
   const [mounted, setMounted] = useState(false);
-  const toast = useRef<Toast>(null);
 
   const {
     data,
@@ -37,7 +41,7 @@ export default function StreetList() {
     updatePageData,
     handleSort,
     handleSearch,
-    resetFilters,
+    refresh,
     createItem,
     updateItem,
     deleteItem,
@@ -48,54 +52,43 @@ export default function StreetList() {
     sortField,
     sortOrder,
     closeForm,
-  } = useCrud("/local");
+    permissionPage
+  } = useCrud("/local", undefined, undefined, 'Street');
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  const loading = useSelector((state: RootState) => state.loading.isLoading);
-
-  if (loading) <Loading />;
-
   const handlePageChange = (e: any) => updatePageData(e.page, e.rows);
   const handleSortChange = (e: any) =>
     handleSort(e.sortField || "", e.sortOrder || 0);
 
-  const permissions = useSelector(
-    (state: any) => state.permissions.permissions
-  );
+  async function handleDelete(id: string): Promise<boolean> {
+    try {
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+      });
 
-  const hasPermission = (actionName: string) => {
-    const resource = permissions.find((p: any) => p.resourceName === "Street");
-    return resource ? resource.actionNames.includes(actionName) : false;
-  };
-
-  const handleDelete = (id: string) => {
-    Swal.fire({
-      title: "Delete street?",
-      showDenyButton: true,
-      showCancelButton: true,
-      confirmButtonText: "Delete",
-    }).then((result) => {
       if (result.isConfirmed) {
-        deleteItem(id)
-          .then(() => Swal.fire("Deleted!", "", "success"))
-          .catch(() =>
-            toast.current?.show({
-              severity: "error",
-              summary: "Error",
-              detail: "Failed to delete role",
-              life: 3000,
-            })
-          );
+        await deleteItem(id);
+        return true;
       }
-    });
-  };
+      return false; // User canceled or denied
+    } catch (error) {
+      console.error("Error during delete operation:", error);
+      toast.error('Delete failed', {
+        autoClose: 3000
+      });
+      return false; // Delete failed due to error
+    }
+  }
+
 
   return (
     <div className="main-container">
-      {mounted && <Toast ref={toast} />}
       <div className="mb-5">
         {mounted ? (
           <BreadCrumbComponent name="StreetList" />
@@ -108,38 +101,19 @@ export default function StreetList() {
         <div className="mb-5">
           <div className="grid grid-cols-4 gap-10 card">
             <div className="col-span-4 2xl:col-span-3">
-              <div className="grid gap-2 2xl:grid-cols-6 grid-cols-2">
-                {mounted ? (
-                  <>
-                    <InputText
-                      placeholder="Name"
-                      className="w-full"
-                      value={filters.name || ""}
-                      onChange={(e) => handleSearch("name", e.target.value)}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <Skeleton height="100%" />
-                  </>
-                )}
-              </div>
+              <div className="grid gap-2 2xl:grid-cols-6 grid-cols-2"></div>
             </div>
             <div className="col-span-4 2xl:col-span-1">
               <div className="flex flex-wrap gap-2 justify-end">
-                {hasPermission("create") && (
-                  <Button
-                    label="Add new"
-                    className="btn_add_new"
-                    onClick={() => {
-                      console.log("hehehe");
-
-                      setSelectedId(undefined);
-                      setFormMode("create");
-                      setOpenForm(true);
-                    }}
-                  />
-                )}
+                <Button
+                  label="Add new"
+                  className="btn_add_new"
+                  onClick={() => {
+                    setSelectedId(undefined);
+                    setFormMode("create");
+                    setOpenForm(true);
+                  }}
+                />
               </div>
             </div>
           </div>
@@ -171,7 +145,7 @@ export default function StreetList() {
                 severity="secondary"
                 icon="pi pi-refresh"
                 text
-                onClick={resetFilters}
+                onClick={refresh}
               />
             }
           >
@@ -195,7 +169,7 @@ export default function StreetList() {
               className="w-60"
               body={(row: any) => (
                 <div className="flex gap-2 justify-center">
-                  {hasPermission("view") && (
+                  {permissionPage.view && (
                     <Button
                       icon="pi pi-eye"
                       rounded
@@ -211,7 +185,7 @@ export default function StreetList() {
                     />
                   )}
 
-                  {hasPermission("update") && (
+                  {permissionPage.update && (
                     <Button
                       icon="pi pi-pencil"
                       className="icon_edit"
@@ -227,7 +201,7 @@ export default function StreetList() {
                     />
                   )}
 
-                  {hasPermission("delete") && (
+                  {permissionPage.delete && (
                     <Button
                       icon="pi pi-trash"
                       rounded
@@ -245,7 +219,7 @@ export default function StreetList() {
         )}
       </Card>
 
-      {(hasPermission("create") || hasPermission("update")) && (
+      {(permissionPage.create || permissionPage.update) && (
         <StreetForm
           id={selectedId}
           open={openForm}
@@ -261,7 +235,7 @@ export default function StreetList() {
         />
       )}
 
-      {hasPermission("view") && (
+      {permissionPage.view && (
         <StreetDetail
           id={selectedId}
           open={openFormDetail}

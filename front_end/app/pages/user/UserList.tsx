@@ -5,20 +5,27 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { Image } from "antd";
-import { Toast } from "primereact/toast";
-import BreadCrumbComponent from "@/components/common/breadCrumb/BreadCrumbComponent";
-import useCrud from "@/hooks/crudHook";
+import BreadCrumbComponent from "~/components/common/breadCrumb/BreadCrumbComponent";
+import useCrud from "~/hook/crudHook";
 import Swal from "sweetalert2";
 import { Tag } from "primereact/tag";
 import UserDetail from "./UserDetail";
 import { Skeleton } from "primereact/skeleton";
-import { SkeletonTemplate } from "@/components/common/skeleton";
+import { SkeletonTemplate } from "~/components/common/skeleton";
 import noImg from "@/asset/images/no-img.png";
 import UserForm from "./UserForm";
 import { useSelector } from "react-redux";
-import { useAppDispatch, type RootState } from "@/store";
-import { fetchCommonData } from "@/store/slices/commonDataSlice";
-import Loading from "@/components/shared/Loading";
+import { useAppDispatch, type RootState } from "~/store";
+import { fetchCommonData } from "~/store/slice/commonDataSlice";
+import { toast } from "react-toastify";
+import type { Route } from "./+types/UserList";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "User" },
+    { name: "description", content: "Hotel Admin User" },
+  ];
+}
 
 export default function UserList() {
   const [selectedUserId, setSelectedUserId] = useState<string | undefined>(
@@ -31,11 +38,7 @@ export default function UserList() {
   );
 
   const dispatch = useAppDispatch();
-  const loading = useSelector((state: RootState) => state.loading.isLoading);
 
-  if (loading) <Loading />;
-
-  const toast = useRef<Toast>(null);
 
   const {
     data,
@@ -49,7 +52,7 @@ export default function UserList() {
     updatePageData,
     handleSort,
     handleSearch,
-    resetFilters,
+    refresh,
     createItem,
     updateItem,
     deleteItem,
@@ -59,7 +62,8 @@ export default function UserList() {
     filters,
     sortField,
     sortOrder,
-  } = useCrud("/user");
+    permissionPage
+  } = useCrud("/user", undefined, undefined, 'User');
 
   useEffect(() => {
     setMounted(true);
@@ -72,38 +76,26 @@ export default function UserList() {
   async function handleDelete(id: string): Promise<boolean> {
     try {
       const result = await Swal.fire({
-        title: "Delete role?",
-        showDenyButton: true,
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
         showCancelButton: true,
-        confirmButtonText: "Delete",
+        confirmButtonText: "Yes",
       });
 
       if (result.isConfirmed) {
         await deleteItem(id);
-        await Swal.fire("Deleted!", "", "success");
         return true;
       }
-      return false;
+      return false; // User canceled or denied
     } catch (error) {
       console.error("Error during delete operation:", error);
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to delete role",
-        life: 3000,
+      toast.error('Delete failed', {
+        autoClose: 3000
       });
-      return false;
+      return false; // Delete failed due to error
     }
   }
 
-  const permissions = useSelector(
-    (state: any) => state.permissions.permissions
-  );
-
-  const hasPermission = (actionName: string) => {
-    const resource = permissions.find((p: any) => p.resourceName === "User");
-    return resource ? resource.actionNames.includes(actionName) : false;
-  };
 
   const statusBody = (row: any) => (
     <div className="flex justify-center">
@@ -123,7 +115,6 @@ export default function UserList() {
 
   return (
     <div>
-      {mounted && <Toast ref={toast} />}
       <div className="mb-5">
         {mounted ? (
           <BreadCrumbComponent name="UserList" />
@@ -199,7 +190,7 @@ export default function UserList() {
                 severity="secondary"
                 icon="pi pi-refresh"
                 text
-                onClick={resetFilters}
+                onClick={refresh}
               />
             }
           >
@@ -248,7 +239,7 @@ export default function UserList() {
               className="w-60"
               body={(row: any) => (
                 <div className="flex gap-2 justify-center">
-                  {hasPermission("view") && (
+                  {permissionPage.view && (
                     <Button
                       icon="pi pi-eye"
                       className="icon_view"
@@ -263,7 +254,7 @@ export default function UserList() {
                       tooltipOptions={{ position: "top" }}
                     />
                   )}
-                  {hasPermission("update") && (
+                  {permissionPage.update && (
                     <Button
                       icon="pi pi-pencil"
                       rounded
@@ -278,7 +269,7 @@ export default function UserList() {
                       tooltipOptions={{ position: "top" }}
                     />
                   )}
-                  {hasPermission("delete") && (
+                  {permissionPage.delete && (
                     <Button
                       icon="pi pi-trash"
                       rounded
@@ -295,11 +286,8 @@ export default function UserList() {
                               })
                             );
                             if (fetchCommonData.rejected.match(result)) {
-                              toast.current?.show({
-                                severity: "error",
-                                summary: "Error",
-                                detail: "Failed to refresh room data",
-                                life: 3000,
+                              toast.error("Failed to refresh room data", {
+                                autoClose: 3000
                               });
                             }
                             await updatePageData(page, pageSize);
@@ -322,7 +310,7 @@ export default function UserList() {
         )}
       </Card>
 
-      {(hasPermission("create") || hasPermission("update")) && (
+      {(permissionPage.create || permissionPage.update) && (
         <UserForm
           id={selectedUserId}
           open={openForm}
@@ -339,7 +327,7 @@ export default function UserList() {
         />
       )}
 
-      {hasPermission("view") && (
+      {permissionPage.view && (
         <UserDetail
           id={selectedUserId}
           open={openFormDetail}

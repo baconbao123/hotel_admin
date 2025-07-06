@@ -3,7 +3,7 @@ import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { format } from "date-fns";
-import $axios from "@/axios";
+import $axios from "~/axios";
 
 interface Props {
   id?: string;
