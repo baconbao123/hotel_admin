@@ -32,7 +32,7 @@ export default function NotFound() {
             The requested page does not exist
           </p>
           <Link
-            to="/"
+            to="/dashboard"
             className="inline-block px-8 py-3 bg-white text-blue-600 rounded-lg 
               font-medium transition-all hover:bg-opacity-90 hover:shadow-lg"
           >

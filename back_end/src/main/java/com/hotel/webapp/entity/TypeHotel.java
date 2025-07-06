@@ -18,8 +18,8 @@ public class TypeHotel implements AuditEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer id;
+  @Column(nullable = false)
   String name;
-  @Column(unique = true)
   String colName;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;

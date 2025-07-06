@@ -5,17 +5,27 @@ import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { Image } from "antd";
-import { Toast } from "primereact/toast";
-import BreadCrumbComponent from "@/components/common/breadCrumb/BreadCrumbComponent";
-import useCrud from "@/hooks/crudHook";
+import BreadCrumbComponent from "~/components/common/breadCrumb/BreadCrumbComponent";
+import useCrud from "~/hook/crudHook";
 import Swal from "sweetalert2";
 import { Tag } from "primereact/tag";
 import UserDetail from "./UserDetail";
 import { Skeleton } from "primereact/skeleton";
-import { SkeletonTemplate } from "@/components/common/skeleton";
+import { SkeletonTemplate } from "~/components/common/skeleton";
 import noImg from "@/asset/images/no-img.png";
 import UserForm from "./UserForm";
 import { useSelector } from "react-redux";
+import { useAppDispatch, type RootState } from "~/store";
+import { fetchCommonData } from "~/store/slice/commonDataSlice";
+import { toast } from "react-toastify";
+import type { Route } from "./+types/UserList";
+
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "User" },
+    { name: "description", content: "Hotel Admin User" },
+  ];
+}
 
 export default function UserList() {
   const [selectedUserId, setSelectedUserId] = useState<string | undefined>(
@@ -27,7 +37,8 @@ export default function UserList() {
     "create"
   );
 
-  const toast = useRef<Toast>(null);
+  const dispatch = useAppDispatch();
+
 
   const {
     data,
@@ -41,7 +52,7 @@ export default function UserList() {
     updatePageData,
     handleSort,
     handleSearch,
-    resetFilters,
+    refresh,
     createItem,
     updateItem,
     deleteItem,
@@ -51,7 +62,8 @@ export default function UserList() {
     filters,
     sortField,
     sortOrder,
-  } = useCrud("/user");
+    permissionPage
+  } = useCrud("/user", undefined, undefined, 'User');
 
   useEffect(() => {
     setMounted(true);
@@ -61,56 +73,48 @@ export default function UserList() {
   const handleSortChange = (e: any) =>
     handleSort(e.sortField || "", e.sortOrder || 0);
 
-  const handleDelete = (id: string) => {
-    Swal.fire({
-      title: "Do you want to delete user?",
-      showDenyButton: true,
-      showCancelButton: true,
-      confirmButtonText: "Delete",
-    }).then((result) => {
+  async function handleDelete(id: string): Promise<boolean> {
+    try {
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+      });
+
       if (result.isConfirmed) {
-        deleteItem(id)
-          .then(() => {
-            Swal.fire("Deleted!", "", "success");
-          })
-          .catch(() => {
-            toast.current?.show({
-              severity: "error",
-              summary: "Error",
-              detail: "Failed to delete user",
-              life: 3000,
-            });
-          });
+        await deleteItem(id);
+        return true;
       }
-    });
-  };
+      return false; // User canceled or denied
+    } catch (error) {
+      console.error("Error during delete operation:", error);
+      toast.error('Delete failed', {
+        autoClose: 3000
+      });
+      return false; // Delete failed due to error
+    }
+  }
 
-  const permissions = useSelector(
-    (state: any) => state.permissions.permissions
-  );
-
-  const hasPermission = (actionName: string) => {
-    const resource = permissions.find((p: any) => p.resourceName === "User");
-    return resource ? resource.actionNames.includes(actionName) : false;
-  };
 
   const statusBody = (row: any) => (
-    <Tag
-      rounded
-      value={row.status ? "Active" : "Inactive"}
-      severity={row.status ? "success" : "danger"}
-      style={{
-        maxWidth: "5rem",
-        display: "flex",
-        justifyContent: "center",
-        padding: "0.4rem 3rem",
-      }}
-    />
+    <div className="flex justify-center">
+      <Tag
+        rounded
+        value={row.status ? "Active" : "Inactive"}
+        severity={row.status ? "success" : "danger"}
+        style={{
+          maxWidth: "5rem",
+          display: "flex",
+          justifyContent: "center",
+          padding: "0.4rem 3rem",
+        }}
+      />
+    </div>
   );
 
   return (
     <div>
-      {mounted && <Toast ref={toast} />}
       <div className="mb-5">
         {mounted ? (
           <BreadCrumbComponent name="UserList" />
@@ -186,7 +190,7 @@ export default function UserList() {
                 severity="secondary"
                 icon="pi pi-refresh"
                 text
-                onClick={resetFilters}
+                onClick={refresh}
               />
             }
           >
@@ -235,7 +239,7 @@ export default function UserList() {
               className="w-60"
               body={(row: any) => (
                 <div className="flex gap-2 justify-center">
-                  {hasPermission("view") && (
+                  {permissionPage.view && (
                     <Button
                       icon="pi pi-eye"
                       className="icon_view"
@@ -250,7 +254,7 @@ export default function UserList() {
                       tooltipOptions={{ position: "top" }}
                     />
                   )}
-                  {hasPermission("update") && (
+                  {permissionPage.update && (
                     <Button
                       icon="pi pi-pencil"
                       rounded
@@ -265,13 +269,36 @@ export default function UserList() {
                       tooltipOptions={{ position: "top" }}
                     />
                   )}
-                  {hasPermission("delete") && (
+                  {permissionPage.delete && (
                     <Button
                       icon="pi pi-trash"
                       rounded
                       text
                       className="icon_trash"
-                      onClick={() => handleDelete(String(row.id))}
+                      onClick={async () => {
+                        try {
+                          const deleted = await handleDelete(String(row.id));
+                          if (deleted) {
+                            const result = await dispatch(
+                              fetchCommonData({
+                                types: ["roles"],
+                                force: true,
+                              })
+                            );
+                            if (fetchCommonData.rejected.match(result)) {
+                              toast.error("Failed to refresh room data", {
+                                autoClose: 3000
+                              });
+                            }
+                            await updatePageData(page, pageSize);
+                          }
+                        } catch (error) {
+                          console.error(
+                            "Error during delete operation:",
+                            error
+                          );
+                        }
+                      }}
                       tooltip="Delete"
                       tooltipOptions={{ position: "top" }}
                     />
@@ -283,7 +310,7 @@ export default function UserList() {
         )}
       </Card>
 
-      {(hasPermission("create") || hasPermission("update")) && (
+      {(permissionPage.create || permissionPage.update) && (
         <UserForm
           id={selectedUserId}
           open={openForm}
@@ -300,7 +327,7 @@ export default function UserList() {
         />
       )}
 
-      {hasPermission("view") && (
+      {permissionPage.view && (
         <UserDetail
           id={selectedUserId}
           open={openFormDetail}

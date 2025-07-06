@@ -32,7 +32,5 @@ public class FacilitiesRes {
     LocalDateTime updatedAt;
     String createdName;
     String updatedName;
-
-
   }
 }

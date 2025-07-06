@@ -37,7 +37,7 @@ public class HomeService {
     List<Integer> hotelIds = hotels.stream().map(Hotels::getId).toList();
 
     // facilities
-    List<Object[]> facilitiesByHotels = facilitiesRepository.findFacilitiesByHotelId(hotelIds);
+    List<Object[]> facilitiesByHotels = facilitiesRepository.findFacilitiesByHotelIds(hotelIds);
 
     Map<Integer, List<HomeRes.FacilitiesRes>> facilityMap = new HashMap<>();
 

@@ -4,33 +4,32 @@ import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
-import { Toast } from "primereact/toast";
 import { Tag } from "primereact/tag";
 import { Skeleton } from "primereact/skeleton";
 import Swal from "sweetalert2";
-import BreadCrumbComponent from "@/components/common/breadCrumb/BreadCrumbComponent";
-import useCrud from "@/hooks/crudHook";
-import RoleForm from "@/pages/role/RoleForm";
-import RoleDetail from "@/pages/role/RoleDetail";
-import { SkeletonTemplate } from "@/components/common/skeleton";
+import BreadCrumbComponent from "~/components/common/breadCrumb/BreadCrumbComponent";
+import useCrud from "~/hook/crudHook";
+import { SkeletonTemplate } from "~/components/common/skeleton";
 import { Image } from "antd";
 import noImg from "@/asset/images/no-img.png";
-import UserForm from "../user/UserForm";
 import HotelForm from "./HotelForm";
 import HotelDetail from "./HotelDetail";
-import { useSelector } from "react-redux";
+import { Link } from "react-router";
+import type { Route } from "./+types/HotelList";
 
-export default function RoleList() {
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Hotel" },
+    { name: "description", content: "Hotel Admin Hotel" },
+  ];
+}
+
+export default function HotelList() {
   const [selectedId, setSelectedId] = useState<string>();
   const [formMode, setFormMode] = useState<"create" | "edit" | "view">(
     "create"
   );
   const [mounted, setMounted] = useState(false);
-  const toast = useRef<Toast>(null);
-
-  const permissions = useSelector(
-    (state: any) => state.permissions.permissions
-  );
 
   const {
     data,
@@ -44,7 +43,7 @@ export default function RoleList() {
     updatePageData,
     handleSort,
     handleSearch,
-    resetFilters,
+    refresh,
     createItem,
     updateItem,
     deleteItem,
@@ -55,11 +54,13 @@ export default function RoleList() {
     sortField,
     sortOrder,
     closeForm,
-  } = useCrud("/hotel");
+    permissionPage
+  } = useCrud("/hotel", undefined, undefined, 'Hotel');
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
 
   const handlePageChange = (e: any) => updatePageData(e.page, e.rows);
   const handleSortChange = (e: any) =>
@@ -67,7 +68,7 @@ export default function RoleList() {
 
   const handleDelete = (id: string) => {
     Swal.fire({
-      title: "Delete role?",
+      title: "Delete hotel?",
       showDenyButton: true,
       showCancelButton: true,
       confirmButtonText: "Delete",
@@ -75,14 +76,6 @@ export default function RoleList() {
       if (result.isConfirmed) {
         deleteItem(id)
           .then(() => Swal.fire("Deleted!", "", "success"))
-          .catch(() =>
-            toast.current?.show({
-              severity: "error",
-              summary: "Error",
-              detail: "Failed to delete role",
-              life: 3000,
-            })
-          );
       }
     });
   };
@@ -103,16 +96,21 @@ export default function RoleList() {
     </div>
   );
 
-  const hasPermission = (actionName: string) => {
-    const resource = permissions.find((p: any) => p.resourceName === "Hotel");
-    console.log(permissions);
-
-    return resource ? resource.actionNames.includes(actionName) : false;
-  };
+  const statusRoom = (row: any) => (
+    <div className="flex justify-center">
+      <Link to={`/room/${row.id}`}>
+        <Button
+          label="View Rooms"
+          severity="info"
+          text
+          style={{ color: "#0ea5e9" }}
+        />
+      </Link>
+    </div>
+  );
 
   return (
     <div className="main-container">
-      {mounted && <Toast ref={toast} />}
       <div className="mb-5">
         {mounted ? (
           <BreadCrumbComponent name="HotelList" />
@@ -144,7 +142,8 @@ export default function RoleList() {
             </div>
             <div className="col-span-4 2xl:col-span-1">
               <div className="flex flex-wrap gap-2 justify-end">
-                <Button
+                {permissionPage.create && (
+                     <Button
                   label="Add new"
                   className="btn_add_new"
                   onClick={() => {
@@ -153,6 +152,8 @@ export default function RoleList() {
                     setOpenForm(true);
                   }}
                 />
+                )}
+             
               </div>
             </div>
           </div>
@@ -184,7 +185,7 @@ export default function RoleList() {
                 severity="secondary"
                 icon="pi pi-refresh"
                 text
-                onClick={resetFilters}
+                onClick={refresh}
               />
             }
           >
@@ -232,6 +233,12 @@ export default function RoleList() {
               body={(row) => row.description || "-"}
             />
             <Column
+              field="id"
+              header="Rooms"
+              className="text-center w-70"
+              body={statusRoom}
+            />
+            <Column
               sortable
               field="status"
               header="Status"
@@ -244,7 +251,7 @@ export default function RoleList() {
               className="w-60"
               body={(row) => (
                 <div className="flex gap-2 justify-center">
-                  {hasPermission("view") && (
+                  {permissionPage.view && (
                     <Button
                       icon="pi pi-eye"
                       className="icon_view"
@@ -259,7 +266,7 @@ export default function RoleList() {
                       tooltipOptions={{ position: "top" }}
                     />
                   )}
-                  {hasPermission("update") && (
+                  {permissionPage.update && (
                     <Button
                       icon="pi pi-pencil"
                       rounded
@@ -274,7 +281,7 @@ export default function RoleList() {
                       tooltipOptions={{ position: "top" }}
                     />
                   )}
-                  {hasPermission("delete") && (
+                  {permissionPage.delete && (
                     <Button
                       icon="pi pi-trash"
                       rounded
@@ -292,31 +299,35 @@ export default function RoleList() {
         )}
       </Card>
 
-      <HotelForm
-        id={selectedId}
-        open={openForm}
-        mode={formMode}
-        onClose={() => {
-          closeForm();
-          setFormMode("create");
-        }}
-        loadDataById={loadById}
-        createItem={createItem}
-        updateItem={updateItem}
-        error={error}
-      />
+      {(permissionPage.create || permissionPage.update) && (
+        <HotelForm
+          id={selectedId}
+          open={openForm}
+          mode={formMode}
+          onClose={() => {
+            closeForm();
+            setFormMode("create");
+          }}
+          loadDataById={loadById}
+          createItem={createItem}
+          updateItem={updateItem}
+          error={error}
+        />
+      )}
 
-      <HotelDetail
-        id={selectedId}
-        open={openFormDetail}
-        mode={formMode}
-        onClose={() => {
-          setOpenFormDetail(false);
-          setSelectedId(undefined);
-          setFormMode("view");
-        }}
-        loadDataById={loadById}
-      />
+      {permissionPage.view && (
+        <HotelDetail
+          id={selectedId}
+          open={openFormDetail}
+          mode={formMode}
+          onClose={() => {
+            setOpenFormDetail(false);
+            setSelectedId(undefined);
+            setFormMode("view");
+          }}
+          loadDataById={loadById}
+        />
+      )}
     </div>
   );
 }

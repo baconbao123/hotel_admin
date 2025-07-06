@@ -27,7 +27,6 @@ public class Payment implements AuditEntity {
   BigDecimal amount;
   String note;
   Boolean status;
-  Integer type;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;
   Integer createdBy;

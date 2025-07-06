@@ -2,8 +2,6 @@ package com.hotel.webapp.controller;
 
 import com.hotel.webapp.dto.response.ApiResponse;
 import com.hotel.webapp.dto.response.AttributeDataResponse;
-import com.hotel.webapp.repository.seeder.PaymentMethodRepository;
-import com.hotel.webapp.repository.seeder.RoomTypeRepository;
 import com.hotel.webapp.service.admin.*;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -25,12 +23,13 @@ public class CommonController {
   FacilitiesService facilitiesService;
   PermissionService permissionService;
   HotelService hotelService;
-  PaymentMethodRepository paymentMethodRepository;
-  RoomTypeRepository roomTypeRepository;
+  UserService userService;
 
   @GetMapping("/common-data")
   public ApiResponse<AttributeDataResponse> getCommonData(
-        @RequestParam List<String> types
+        @RequestParam List<String> types,
+        @RequestParam(required = false) String keyword,
+        @RequestParam(required = false) Integer pageOwner
   ) {
     AttributeDataResponse.AttributeDataResponseBuilder builder = AttributeDataResponse.builder();
 
@@ -57,11 +56,11 @@ public class CommonController {
         case "hotelfacilities":
           builder.hotelFacilities(hotelService.findFacilities());
           break;
-        case "paymentmethods":
-          builder.paymentMethods(paymentMethodRepository.findAllPayment());
+        case "owners":
+          builder.owners(userService.findOwner(keyword, pageOwner != null ? pageOwner : 0));
           break;
-        case "roomtypes":
-          builder.roomTypes(roomTypeRepository.findRoomTypes());
+        case "usertypes":
+          builder.userTypes(userService.findUserTypes());
           break;
         default:
           break;

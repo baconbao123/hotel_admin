@@ -1,9 +1,6 @@
 package com.hotel.webapp.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -20,7 +17,9 @@ public class HotelImages {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer id;
+  @Column(nullable = false)
   String name;
+  @Column(nullable = false)
   Integer hotelId;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;

@@ -64,6 +64,11 @@ public class HotelsRes {
     // policies ---
     PolicyRes policies;
 
+    // hotel
+    String hotelNote;
+    String ownerName;
+    Integer ownerId;
+
     @Getter
     @Setter
     @AllArgsConstructor

@@ -4,18 +4,27 @@ import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
-import { Toast } from "primereact/toast";
 import { Tag } from "primereact/tag";
 import { Skeleton } from "primereact/skeleton";
 import Swal from "sweetalert2";
-import BreadCrumbComponent from "@/components/common/breadCrumb/BreadCrumbComponent";
-import useCrud from "@/hooks/crudHook";
-import RoleForm from "@/pages/role/RoleForm";
-import RoleDetail from "@/pages/role/RoleDetail";
-import { SkeletonTemplate } from "@/components/common/skeleton";
+import BreadCrumbComponent from "~/components/common/breadCrumb/BreadCrumbComponent";
+import useCrud from "~/hook/crudHook";
+import RoleForm from "~/pages/role/RoleForm";
+import RoleDetail from "~/pages/role/RoleDetail";
+import { SkeletonTemplate } from "~/components/common/skeleton";
 import { useSelector } from "react-redux";
-import { useAppDispatch } from "@/store";
-import { fetchCommonData } from "@/store/slices/commonDataSlice";
+import { type RootState } from "~/store";
+import { useDispatch } from "react-redux"; 
+import { fetchCommonData } from "~/store/slice/commonDataSlice";
+import type { AppDispatch } from "~/store";
+import type { Route } from "./+types/RoleList";
+import { toast } from "react-toastify";
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Role" },
+    { name: "description", content: "Hotel Admin Role" },
+  ];
+}
 
 export default function RoleList() {
   const [selectedId, setSelectedId] = useState<string>();
@@ -23,11 +32,8 @@ export default function RoleList() {
     "create"
   );
   const [mounted, setMounted] = useState(false);
-  const toast = useRef<Toast>(null);
+  const loadPermisison = useSelector((state: RootState) =>  state.permissionSlice.loadPermisison)
 
-  const permissions = useSelector(
-    (state: any) => state.permissions.permissions
-  );
 
   const {
     data,
@@ -41,7 +47,7 @@ export default function RoleList() {
     updatePageData,
     handleSort,
     handleSearch,
-    resetFilters,
+    refresh,
     createItem,
     updateItem,
     deleteItem,
@@ -52,7 +58,8 @@ export default function RoleList() {
     sortField,
     sortOrder,
     closeForm,
-  } = useCrud("/role");
+    permissionPage
+  } = useCrud("/role", undefined, undefined, 'Role');
 
   useEffect(() => {
     setMounted(true);
@@ -61,41 +68,30 @@ export default function RoleList() {
   const handlePageChange = (e: any) => updatePageData(e.page, e.rows);
   const handleSortChange = (e: any) =>
     handleSort(e.sortField || "", e.sortOrder || 0);
-
-  const dispatch = useAppDispatch();
+  const dispatch: AppDispatch = useDispatch();
 
   async function handleDelete(id: string): Promise<boolean> {
     try {
       const result = await Swal.fire({
-        title: "Delete role?",
-        showDenyButton: true,
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
         showCancelButton: true,
-        confirmButtonText: "Delete",
+        confirmButtonText: "Yes",
       });
 
       if (result.isConfirmed) {
         await deleteItem(id);
-        await Swal.fire("Deleted!", "", "success");
-        return true; // Delete successful
+        return true;
       }
       return false; // User canceled or denied
     } catch (error) {
       console.error("Error during delete operation:", error);
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail: "Failed to delete role",
-        life: 3000,
+      toast.error('Delete failed', {
+        autoClose: 3000
       });
       return false; // Delete failed due to error
     }
   }
-
-  // Check actions
-  const hasPermission = (actionName: string) => {
-    const resource = permissions.find((p: any) => p.resourceName === "Role");
-    return resource ? resource.actionNames.includes(actionName) : false;
-  };
 
   const statusBody = (row: any) => (
     <div className="flex justify-center">
@@ -115,7 +111,6 @@ export default function RoleList() {
 
   return (
     <div className="main-container">
-      {mounted && <Toast ref={toast} />}
       <div className="mb-5">
         {mounted ? (
           <BreadCrumbComponent name="RoleList" />
@@ -147,7 +142,7 @@ export default function RoleList() {
             </div>
             <div className="col-span-4 2xl:col-span-1">
               <div className="flex flex-wrap gap-2 justify-end">
-                {hasPermission("create") && (
+                {permissionPage.create && (
                   <Button
                     label="Add New"
                     className="btn_add_new"
@@ -167,6 +162,7 @@ export default function RoleList() {
           SkeletonTemplate("Role Management", 5)
         ) : (
           <DataTable
+            key={JSON.stringify(permissionPage)}
             value={data}
             paginator
             rows={pageSize}
@@ -189,7 +185,7 @@ export default function RoleList() {
                 severity="secondary"
                 icon="pi pi-refresh"
                 text
-                onClick={resetFilters}
+                onClick={refresh}
               />
             }
           >
@@ -214,7 +210,7 @@ export default function RoleList() {
               className="w-60"
               body={(row) => (
                 <div className="flex gap-2 justify-center">
-                  {hasPermission("view") && (
+                  {permissionPage.view && (
                     <Button
                       icon="pi pi-eye"
                       rounded
@@ -229,8 +225,8 @@ export default function RoleList() {
                       tooltipOptions={{ position: "top" }}
                     />
                   )}
-                  
-                  {hasPermission("update") && (
+
+                  {permissionPage.update && (
                     <Button
                       icon="pi pi-pencil"
                       rounded
@@ -246,7 +242,7 @@ export default function RoleList() {
                     />
                   )}
 
-                  {hasPermission("delete") && (
+                  {permissionPage.delete && (
                     <Button
                       icon="pi pi-trash"
                       rounded
@@ -260,16 +256,13 @@ export default function RoleList() {
                             const result = await dispatch(
                               fetchCommonData({
                                 types: ["roles"],
-                                forceRefresh: true,
+                                force: true,
                               })
                             );
                             if (fetchCommonData.rejected.match(result)) {
-                              toast.current?.show({
-                                severity: "error",
-                                summary: "Error",
-                                detail: "Failed to refresh roles data",
-                                life: 3000,
-                              });
+                              toast.success('Failed to refresh roles data', {
+                              autoClose: 3000,
+                            });
                             }
                             await updatePageData(page, pageSize);
                           }
@@ -291,7 +284,7 @@ export default function RoleList() {
         )}
       </Card>
 
-      {(hasPermission("create") || hasPermission("update")) && (
+      {(permissionPage.create || permissionPage.update)  && (
         <RoleForm
           id={selectedId}
           open={openForm}
@@ -307,7 +300,7 @@ export default function RoleList() {
         />
       )}
 
-      {hasPermission("view") && (
+      {permissionPage.view  && loadPermisison && (
         <RoleDetail
           id={selectedId}
           open={openFormDetail}

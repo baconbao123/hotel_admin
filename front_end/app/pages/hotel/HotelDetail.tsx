@@ -36,6 +36,9 @@ export default function HotelDetail({
   const [provinceName, setProvinceName] = useState("");
   const [streetName, setStreetName] = useState("");
   const [note, setNote] = useState("");
+  const [hotelNote, setHotelNote] = useState("");
+  const [ownerName, setOwnerName] = useState("");
+
   const [images, setImages] = useState<{ id: number; imagesUrl: string }[]>([]);
   const [typeHotels, setTypeHotels] = useState<{ id: number; name: string }[]>(
     []
@@ -85,6 +88,8 @@ export default function HotelDetail({
           setProvinceName(data.provinceName || "");
           setStreetName(data.streetName || "");
           setNote(data.note || "");
+          setHotelNote(data.hotelNote || "");
+          setOwnerName(data.ownerName || "");
           setImages(data.images || []);
           setTypeHotels(data.typeHotels || []);
           setFacilities(data.facilities || []);
@@ -134,7 +139,7 @@ export default function HotelDetail({
               <div className="flex items-center space-x-4">
                 <span className="font-semibold text-gray-700">Avatar</span>
                 <Image
-                  width={100}
+                  width={80}
                   src={
                     avatarUrl
                       ? `${
@@ -183,6 +188,22 @@ export default function HotelDetail({
               </div>
               <div className="flex items-center space-x-4">
                 <label className="font-semibold w-1/3 text-gray-700">
+                  Owner Name:
+                </label>
+                <span className="w-2/3 text-gray-900">{ownerName ?? "-"}</span>
+              </div>
+              <div className="flex items-center space-x-4">
+                <label className="font-semibold w-1/3 text-gray-700">
+                  Hotel Note:
+                </label>
+                <span className="w-2/3 text-gray-900">
+                  {hotelNote && hotelNote.toString().trim()
+                    ? hotelNote.toString().trim()
+                    : "-"}
+                </span>
+              </div>
+              <div className="flex items-center space-x-4">
+                <label className="font-semibold w-1/3 text-gray-700">
                   Status:
                 </label>
                 <span className="w-2/3">
@@ -198,13 +219,13 @@ export default function HotelDetail({
             {/* Right Column: Images + Address */}
             <div className="space-y-4">
               {/* Images */}
-              {images.length > 0 && (
-                <div className="flex items-center gap-4">
-                  <span className="font-semibold text-gray-700 w-24 text-left">
-                    Images
-                  </span>
-                  <div className="flex flex-wrap gap-2">
-                    {images.map((img) => (
+              <div className="flex items-center gap-4">
+                <span className="font-semibold text-gray-700 w-24 text-left">
+                  Images
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {images.length > 0 &&
+                    images.map((img) => (
                       <Image
                         key={img.id}
                         width={80}
@@ -214,9 +235,16 @@ export default function HotelDetail({
                         className="rounded-lg object-cover"
                       />
                     ))}
-                  </div>
+
+                  {images.length === 0 && (
+                    <Image
+                      width={80}
+                      src={noImg}
+                      className="rounded-lg object-cover"
+                    />
+                  )}
                 </div>
-              )}
+              </div>
 
               {/* Address Info */}
               <div className="flex items-center space-x-4">

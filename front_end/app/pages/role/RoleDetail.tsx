@@ -30,7 +30,7 @@ export default function RoleDetail({
 
   const toast = useRef<Toast>(null);
 
-  const header = mode === "view" ? "DETAILS" : "ADD";
+  const header = mode === "view" ? "DETAILS ROLE" : "";
 
   useEffect(() => {
     if (id && open) {
@@ -111,17 +111,17 @@ export default function RoleDetail({
         </div>
         
         {/* Info data create/update */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pl-4 pr-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-4 pr-4 mt-2">
           {/* Left */}
           <div className="flex flex-col gap-4">
-            <div>
+            <div  className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="createdName" className="font-bold block mb-1">
                 Created By:
               </label>
               <span id="createdName">{createdData || "-"}</span>
             </div>
 
-            <div>
+            <div  className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="createdAt" className="font-bold block mb-1">
                 Created At:
               </label>
@@ -134,14 +134,14 @@ export default function RoleDetail({
           </div>
           {/* Right */}
           <div className="flex flex-col gap-4">
-            <div>
+            <div  className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="updatedName" className="font-bold block mb-1">
                 Updated By:
               </label>
               <span id="updatedName">{updatedData || "-"}</span>
             </div>
 
-            <div>
+            <div  className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="createdAt" className="font-bold block mb-1">
                 Update At:
               </label>

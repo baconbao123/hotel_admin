@@ -84,7 +84,7 @@ const data: BreadCrumbGroup[] = [
         label: "Street Management",
         className: "text-gray-700",
         template: "",
-        link: "/streets",
+        link: "/street",
       },
     ],
   },
@@ -108,7 +108,7 @@ const data: BreadCrumbGroup[] = [
     ],
   },
   {
-    name: "Facilities",
+    name: "FacilityList",
     data: [
       {
         icon: "pi pi-home",

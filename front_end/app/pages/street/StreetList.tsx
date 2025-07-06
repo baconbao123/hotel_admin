@@ -4,23 +4,30 @@ import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
-import { Toast } from "primereact/toast";
 import { Tag } from "primereact/tag";
 import { Skeleton } from "primereact/skeleton";
 import Swal from "sweetalert2";
-import BreadCrumbComponent from "@/components/common/breadCrumb/BreadCrumbComponent";
-import useCrud from "@/hooks/crudHook";
-import { SkeletonTemplate } from "@/components/common/skeleton";
+import BreadCrumbComponent from "~/components/common/breadCrumb/BreadCrumbComponent";
+import useCrud from "~/hook/crudHook";
+import { SkeletonTemplate } from "~/components/common/skeleton";
 import StreetForm from "./StreetForm";
 import StreetDetail from "./StreetDetail";
-
+import { useSelector } from "react-redux";
+import type { RootState } from "~/store";
+import { toast } from "react-toastify";
+import type { Route } from "./+types/StreetList";
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Street" },
+    { name: "description", content: "Hotel Admin Street" },
+  ];
+}
 export default function StreetList() {
   const [selectedId, setSelectedId] = useState<string>();
   const [formMode, setFormMode] = useState<"create" | "edit" | "view">(
     "create"
   );
   const [mounted, setMounted] = useState(false);
-  const toast = useRef<Toast>(null);
 
   const {
     data,
@@ -34,7 +41,7 @@ export default function StreetList() {
     updatePageData,
     handleSort,
     handleSearch,
-    resetFilters,
+    refresh,
     createItem,
     updateItem,
     deleteItem,
@@ -45,7 +52,8 @@ export default function StreetList() {
     sortField,
     sortOrder,
     closeForm,
-  } = useCrud("/local");
+    permissionPage
+  } = useCrud("/local", undefined, undefined, 'Street');
 
   useEffect(() => {
     setMounted(true);
@@ -55,31 +63,32 @@ export default function StreetList() {
   const handleSortChange = (e: any) =>
     handleSort(e.sortField || "", e.sortOrder || 0);
 
-  const handleDelete = (id: string) => {
-    Swal.fire({
-      title: "Delete street?",
-      showDenyButton: true,
-      showCancelButton: true,
-      confirmButtonText: "Delete",
-    }).then((result) => {
+  async function handleDelete(id: string): Promise<boolean> {
+    try {
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+      });
+
       if (result.isConfirmed) {
-        deleteItem(id)
-          .then(() => Swal.fire("Deleted!", "", "success"))
-          .catch(() =>
-            toast.current?.show({
-              severity: "error",
-              summary: "Error",
-              detail: "Failed to delete role",
-              life: 3000,
-            })
-          );
+        await deleteItem(id);
+        return true;
       }
-    });
-  };
+      return false; // User canceled or denied
+    } catch (error) {
+      console.error("Error during delete operation:", error);
+      toast.error('Delete failed', {
+        autoClose: 3000
+      });
+      return false; // Delete failed due to error
+    }
+  }
+
 
   return (
     <div className="main-container">
-      {mounted && <Toast ref={toast} />}
       <div className="mb-5">
         {mounted ? (
           <BreadCrumbComponent name="StreetList" />
@@ -92,22 +101,7 @@ export default function StreetList() {
         <div className="mb-5">
           <div className="grid grid-cols-4 gap-10 card">
             <div className="col-span-4 2xl:col-span-3">
-              <div className="grid gap-2 2xl:grid-cols-6 grid-cols-2">
-                {mounted ? (
-                  <>
-                    <InputText
-                      placeholder="Name"
-                      className="w-full"
-                      value={filters.name || ""}
-                      onChange={(e) => handleSearch("name", e.target.value)}
-                    />
-                  </>
-                ) : (
-                  <>
-                    <Skeleton height="100%" />
-                  </>
-                )}
-              </div>
+              <div className="grid gap-2 2xl:grid-cols-6 grid-cols-2"></div>
             </div>
             <div className="col-span-4 2xl:col-span-1">
               <div className="flex flex-wrap gap-2 justify-end">
@@ -151,7 +145,7 @@ export default function StreetList() {
                 severity="secondary"
                 icon="pi pi-refresh"
                 text
-                onClick={resetFilters}
+                onClick={refresh}
               />
             }
           >
@@ -175,72 +169,85 @@ export default function StreetList() {
               className="w-60"
               body={(row: any) => (
                 <div className="flex gap-2 justify-center">
-                  <Button
-                    icon="pi pi-eye"
-                    rounded
-                    text
-                    className="icon_view"
-                    onClick={() => {
-                      setSelectedId(String(row.id));
-                      setFormMode("view");
-                      setOpenFormDetail(true);
-                    }}
-                    tooltip="View"
-                    tooltipOptions={{ position: "top" }}
-                  />
-                  <Button
-                    icon="pi pi-pencil"
-                    className="icon_edit"
-                    rounded
-                    text
-                    onClick={() => {
-                      setSelectedId(String(row.id));
-                      setFormMode("edit");
-                      setOpenForm(true);
-                    }}
-                    tooltip="Edit"
-                    tooltipOptions={{ position: "top" }}
-                  />
-                  <Button
-                    icon="pi pi-trash"
-                    rounded
-                    text
-                    className="icon_trash"
-                    onClick={() => handleDelete(String(row.id))}
-                    tooltip="Delete"
-                    tooltipOptions={{ position: "top" }}
-                  />
+                  {permissionPage.view && (
+                    <Button
+                      icon="pi pi-eye"
+                      rounded
+                      text
+                      className="icon_view"
+                      onClick={() => {
+                        setSelectedId(String(row.id));
+                        setFormMode("view");
+                        setOpenFormDetail(true);
+                      }}
+                      tooltip="View"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  )}
+
+                  {permissionPage.update && (
+                    <Button
+                      icon="pi pi-pencil"
+                      className="icon_edit"
+                      rounded
+                      text
+                      onClick={() => {
+                        setSelectedId(String(row.id));
+                        setFormMode("edit");
+                        setOpenForm(true);
+                      }}
+                      tooltip="Edit"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  )}
+
+                  {permissionPage.delete && (
+                    <Button
+                      icon="pi pi-trash"
+                      rounded
+                      text
+                      className="icon_trash"
+                      onClick={() => handleDelete(String(row.id))}
+                      tooltip="Delete"
+                      tooltipOptions={{ position: "top" }}
+                    />
+                  )}
                 </div>
               )}
             />
           </DataTable>
         )}
       </Card>
-      <StreetForm
-        id={selectedId}
-        open={openForm}
-        mode={formMode}
-        onClose={() => {
-          closeForm();
-          setFormMode("create");
-        }}
-        loadDataById={loadById}
-        createItem={createItem}
-        updateItem={updateItem}
-        error={error}
-      />
 
-      <StreetDetail
-        id={selectedId}
-        open={openFormDetail}
-        mode={formMode}
-        onClose={() => {
-          setOpenFormDetail(false);
-          setSelectedId(undefined);
-          setFormMode("view");
-        }}
-        loadDataById={loadById}
-      />
+      {(permissionPage.create || permissionPage.update) && (
+        <StreetForm
+          id={selectedId}
+          open={openForm}
+          mode={formMode}
+          onClose={() => {
+            closeForm();
+            setFormMode("create");
+          }}
+          loadDataById={loadById}
+          createItem={createItem}
+          updateItem={updateItem}
+          error={error}
+        />
+      )}
+
+      {permissionPage.view && (
+        <StreetDetail
+          id={selectedId}
+          open={openFormDetail}
+          mode={formMode}
+          onClose={() => {
+            setOpenFormDetail(false);
+            setSelectedId(undefined);
+            setFormMode("view");
+          }}
+          loadDataById={loadById}
+        />
+      )}
     </div>
   );
 }

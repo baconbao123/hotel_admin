@@ -2,16 +2,23 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import { Toast } from "primereact/toast";
 import { InputSwitch } from "primereact/inputswitch";
-import $axios from "@/axios";
+import $axios from "~/axios";
 import { Dropdown } from "primereact/dropdown";
 import { MultiSelect } from "primereact/multiselect";
-import ImageUploader from "@/utils/ImageUploader";
-import GalleryUploader from "@/utils/GalleryUploader";
+import ImageUploader from "~/utils/ImageUploader";
+import GalleryUploader from "~/utils/GalleryUploader";
 import { FileUpload } from "primereact/fileupload";
-import { useCommonData } from "@/hooks/useCommonData";
+import { useCommonData } from "~/hook/useCommonData";
+
 import type { RcFile } from "antd/es/upload";
+import { useDispatch } from "react-redux";
+import type { AppDispatch } from "~/store";
+import {
+  fetchCommonData,
+  type CommonData,
+} from "~/store/slice/commonDataSlice";
+import { toast } from "react-toastify";
 
 interface Props {
   id?: string;
@@ -61,8 +68,9 @@ export default function HotelForm({
     useState<LocalResponse | null>(null);
   const [selectedWard, setSelectedWard] = useState<LocalResponse | null>(null);
   const [selectedStreet, setSelectedStreet] = useState<any>(null);
+  const [hotelNote, setHotelNote] = useState("");
+
   const [streetNumber, setStreetNumber] = useState("");
-  const toast = useRef<Toast>(null);
   const [documents, setDocuments] = useState<any>([
     {
       documentId: null,
@@ -75,6 +83,12 @@ export default function HotelForm({
   const [policyId, setPolicyId] = useState("0");
   const [policyName, setPolicyName] = useState("");
   const [policyDescription, setPolicyDescription] = useState("");
+  // Owner
+  const [ownerId, setOwnerId] = useState<any>(null);
+  const [keyword, setKeyword] = useState("");
+  const [owners, setOwners] = useState<any>([]);
+  const [hasMoreOwners, setHasMoreOwners] = useState(true);
+  const [pageOwner, setPageOwner] = useState(0);
 
   const { commonData } = useCommonData([
     "provinces",
@@ -88,12 +102,41 @@ export default function HotelForm({
   const hotelFacilities = commonData.hotelTypes;
   const hotelDocuments = commonData.documentTypes;
 
+  const dispatch: AppDispatch = useDispatch();
+
+  // owner
+  const loadOwners = async (keyword = "", page = 0) => {
+    const result = await dispatch(
+      fetchCommonData({
+        types: ["owners"],
+        force: true,
+        params: { keyword, pageOwner: pageOwner },
+      })
+    );
+
+    const res = result.payload as CommonData;
+    const newOwners: any = res.owners || [];
+
+    if (page === 0) {
+      setOwners(newOwners);
+    } else {
+      setOwners((prev: any) => [...prev, ...newOwners]);
+    }
+
+    setHasMoreOwners(newOwners.length === 20);
+  };
+
+  useEffect(() => {
+    loadOwners();
+  }, []);
+
   const header = mode === "edit" ? "EDIT" : "ADD";
 
   const handleRemoveExistingImage = (index: number) => {
     setExistingImages((prev) => prev.filter((_, i) => i !== index));
   };
 
+  // Document
   const addDocument = () => {
     setDocuments([
       ...documents,
@@ -122,6 +165,7 @@ export default function HotelForm({
     typeof error === "object" &&
     (error as Record<string, string>)[field];
 
+  // submit
   const submit = async () => {
     setSubmitting(true);
 
@@ -142,6 +186,8 @@ export default function HotelForm({
     formData.append("districtCode", selectedDistrict?.code || "");
     formData.append("provinceCode", selectedProvince?.code || "");
     formData.append("note", note || "");
+    formData.append("noteHotel", hotelNote || "");
+    formData.append("ownerId", ownerId?.id || null);
 
     // Avatar
     formData.append("avatar.keepAvatar", keepAvatar);
@@ -230,42 +276,32 @@ export default function HotelForm({
     try {
       if (id) {
         await updateItem(id, formData);
-        toast.current?.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Hotel updated successfully",
-          life: 3000,
+        toast.success("Hotel updated successfully", {
+          autoClose: 3000,
         });
       } else {
         await createItem(formData);
-        toast.current?.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Hotel created successfully",
-          life: 3000,
+        toast.success("Hotel created successfully", {
+          autoClose: 3000,
         });
       }
       onClose();
     } catch (err: any) {
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail: err.response?.data?.message || "Failed to save hotel",
-        life: 3000,
+      toast.error(err.response?.data?.message || "Failed to save hotel", {
+        autoClose: 3000,
       });
     } finally {
       setSubmitting(false);
     }
   };
 
-  // Updated useEffect for loading hotel data
+  // fetch by id
   useEffect(() => {
     if (id && open) {
       loadDataById(id)
         .then(async (data) => {
           setHotelData(data);
           const result = data.result || data;
-          console.log("Hotel data from loadDataById:", result);
 
           // Set basic information
           setName(result.name || "");
@@ -310,6 +346,15 @@ export default function HotelForm({
           } else {
             setSelectedFacilies([]);
           }
+
+          // owner
+          const ownerId = owners.find(
+            (o: any) => o.id === result.ownerId || null
+          );
+
+          setOwnerId(ownerId);
+
+          setHotelNote(result.hotelNote)
 
           // Set documents
           if (result.documents && hotelDocuments) {
@@ -446,13 +491,9 @@ export default function HotelForm({
             }
           } catch (error: any) {
             console.error("Address fetch error:", error);
-            toast.current?.show({
-              severity: "error",
-              summary: "Error",
-              detail:
-                error.response?.data?.message || "Failed to load address data",
-              life: 3000,
-            });
+          toast.error( error.response?.data?.message || "Failed to load address data", {
+            autoClose: 3000
+          })
             setDistrictData([]);
             setSelectedDistrict(null);
             setWardData([]);
@@ -463,12 +504,9 @@ export default function HotelForm({
         })
         .catch((err) => {
           console.error("Error loading hotel data:", err);
-          toast.current?.show({
-            severity: "error",
-            summary: "Error",
-            detail: err.response?.data?.message || "Failed to load hotel data",
-            life: 3000,
-          });
+          toast.error(err.response?.data?.message || "Failed to load districts", {
+            autoClose: 3000
+          })
         });
     } else {
       // Reset form for create mode
@@ -528,12 +566,9 @@ export default function HotelForm({
             }
           }
         } catch (error: any) {
-          toast.current?.show({
-            severity: "error",
-            summary: "Error",
-            detail: error.response?.data?.message || "Failed to load districts",
-            life: 3000,
-          });
+          toast.error(error.response?.data?.message || "Failed to load districts", {
+            autoClose: 3000
+          })
         }
       };
       fetchDistricts();
@@ -564,12 +599,10 @@ export default function HotelForm({
             setSelectedWard(ward);
           }
         } catch (error: any) {
-          toast.current?.show({
-            severity: "error",
-            summary: "Error",
-            detail: error.response?.data?.message || "Failed to load wards",
-            life: 3000,
-          });
+
+          toast.error(error.response?.data?.message || "Failed to load wards", {
+            autoClose: 3000
+          })
         }
       };
       fetchWards();
@@ -597,11 +630,9 @@ export default function HotelForm({
             setSelectedStreet(street);
           }
         } catch (error: any) {
-          toast.current?.show({
-            severity: "error",
-            summary: "Error",
-            detail: error.response?.data?.message || "Failed to load streets",
-          });
+          toast.error(error.response?.data?.message || "Failed to load streets", {
+            autoClose: 3000
+          })
         }
       };
       fetchStreets();
@@ -613,7 +644,6 @@ export default function HotelForm({
 
   return (
     <div>
-      <Toast ref={toast} />
       <Dialog
         visible={open}
         onHide={onClose}
@@ -631,7 +661,6 @@ export default function HotelForm({
             <Button
               label="Save"
               onClick={submit}
-              severity="success"
               disabled={submitting}
               loading={submitting}
               className="btn_submit"
@@ -675,7 +704,7 @@ export default function HotelForm({
                           : undefined
                       }
                       onFileChange={(file) => setSelectedFile(file)}
-                      maxFileSize={2}
+                      maxFileSize={100}
                       disabled={submitting}
                     />
                     {getError("avatar") && (
@@ -706,7 +735,7 @@ export default function HotelForm({
                         setSelectedImgsFile(files);
                       }}
                       onRemoveExistingImage={handleRemoveExistingImage}
-                      maxFileSize={6}
+                      maxFileSize={100}
                       disabled={submitting}
                       initialImageUrls={existingImages.map(
                         (img) =>
@@ -777,7 +806,6 @@ export default function HotelForm({
 
               <div className="mt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Hotel type */}
                   <div>
                     <label
                       htmlFor="type"
@@ -797,7 +825,6 @@ export default function HotelForm({
                       optionValue="id"
                       display="chip"
                       placeholder="Select Hotel Type"
-                      maxSelectedLabels={3}
                       className={`w-full ${
                         getError("typeIds") ? "p-invalid" : ""
                       }`}
@@ -821,7 +848,6 @@ export default function HotelForm({
                     <MultiSelect
                       value={selectedFacilies}
                       onChange={(e) => {
-                        console.log("Selected Facilities Changed:", e.value);
                         setSelectedFacilies(e.value);
                       }}
                       options={hotelFacilities || []}
@@ -829,7 +855,6 @@ export default function HotelForm({
                       optionValue="id"
                       display="chip"
                       placeholder="Select Facilities"
-                      maxSelectedLabels={3}
                       className={`w-full ${
                         getError("facilities") ? "p-invalid" : ""
                       }`}
@@ -838,6 +863,79 @@ export default function HotelForm({
                     {getError("facilities") && (
                       <small className="text-red-500 text-xs mt-1">
                         {getError("facilities")}
+                      </small>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Owner + Hotel note */}
+              <div className="mt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Hotel type */}
+                  <div>
+                    <label
+                      htmlFor="type"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Owner
+                    </label>
+                    <Dropdown
+                      value={ownerId}
+                      onChange={(e) => setOwnerId(e.value)}
+                      options={owners}
+                      optionLabel="fullName"
+                      placeholder="Select owner"
+                      className="w-full md:w-14rem"
+                      filter
+                      showClear
+                      virtualScrollerOptions={{
+                        lazy: true,
+                        onLazyLoad: (e: any) => {
+                          const nextPage = Math.floor(e.first / 20);
+                          if (hasMoreOwners) {
+                            setPageOwner(nextPage);
+                            loadOwners(keyword, nextPage);
+                          }
+                        },
+                        itemSize: 36,
+                      }}
+                      onFilter={(e: any) => {
+                        const value = e.filter || "";
+                        setKeyword(value);
+                        setPageOwner(0);
+                        loadOwners(value, 0);
+                      }}
+                      filterBy="fullName"
+                    />
+
+                    {getError("typeIds") && (
+                      <small className="text-red-500 text-xs mt-1">
+                        {getError("typeIds")}
+                      </small>
+                    )}
+                  </div>
+
+                  {/* Hotel Note */}
+                  <div>
+                    <label
+                      htmlFor="facilities"
+                      className="block text-sm font-medium text-gray-700 mb-1"
+                    >
+                      Hotel Note
+                    </label>
+                    <InputText
+                      id="name"
+                      value={hotelNote}
+                      onChange={(e) => setHotelNote(e.target.value)}
+                      disabled={submitting}
+                      className={`w-full p-2 border rounded-lg ${
+                        getError("name") ? "p-invalid" : ""
+                      }`}
+                    />
+                    {getError("name") && (
+                      <small className="text-red-500 text-xs mt-1">
+                        {getError("name")}
                       </small>
                     )}
                   </div>

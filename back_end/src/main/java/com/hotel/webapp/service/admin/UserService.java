@@ -4,17 +4,25 @@ import com.hotel.webapp.base.BaseServiceImpl;
 import com.hotel.webapp.dto.request.UserDTO;
 import com.hotel.webapp.dto.response.UserRes;
 import com.hotel.webapp.entity.MapUserRoles;
+import com.hotel.webapp.entity.Role;
 import com.hotel.webapp.entity.User;
+import com.hotel.webapp.entity.UserType;
 import com.hotel.webapp.exception.AppException;
 import com.hotel.webapp.exception.ErrorCode;
 import com.hotel.webapp.repository.MapUserRoleRepository;
+import com.hotel.webapp.repository.RoleRepository;
 import com.hotel.webapp.repository.UserRepository;
+import com.hotel.webapp.repository.seeder.UserTypeRepository;
 import com.hotel.webapp.service.admin.interfaces.AuthService;
 import com.hotel.webapp.service.system.StorageFileService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -30,18 +38,27 @@ public class UserService extends BaseServiceImpl<User, Integer, UserDTO, UserRep
   MapUserRoleRepository mapUserRoleRepository;
   StorageFileService storageFileService;
   PasswordEncoder passwordEncoder;
+  MapUserRoleRepository userRoleRepository;
+  RoleRepository roleRepository;
+  UserTypeRepository userTypeRepository;
 
   public UserService(
         UserRepository repository,
         AuthService authService,
         MapUserRoleRepository mapUserRoleRepository,
         StorageFileService storageFileService,
-        PasswordEncoder passwordEncoder
+        PasswordEncoder passwordEncoder,
+        MapUserRoleRepository userRoleRepository,
+        RoleRepository roleRepository,
+        UserTypeRepository userTypeRepository
   ) {
     super(repository, null, authService);
     this.mapUserRoleRepository = mapUserRoleRepository;
     this.storageFileService = storageFileService;
     this.passwordEncoder = passwordEncoder;
+    this.userRoleRepository = userRoleRepository;
+    this.roleRepository = roleRepository;
+    this.userTypeRepository = userTypeRepository;
   }
 
   @Override
@@ -57,6 +74,7 @@ public class UserService extends BaseServiceImpl<User, Integer, UserDTO, UserRep
                    .fullName(create.getFullName())
                    .email(create.getEmail())
                    .password(passwordEncoder.encode(create.getPassword()))
+                   .userType(create.getUserTypeId())
                    .phoneNumber(create.getPhoneNumber())
                    .createdAt(LocalDateTime.now())
                    .createdBy(authService.getAuthLogin())
@@ -70,8 +88,7 @@ public class UserService extends BaseServiceImpl<User, Integer, UserDTO, UserRep
       user.setAvatarUrl("");
     }
 
-//    user.setPassword(passwordEncoder.encode(create.getPassword()));
-
+    user.setUserType(user.getUserType());
     repository.save(user);
 
     if (create.getRolesIds() != null) {
@@ -90,8 +107,7 @@ public class UserService extends BaseServiceImpl<User, Integer, UserDTO, UserRep
     return user;
   }
 
-  @Override
-  public User update(Integer id, UserDTO update) {
+  public User updateUser(Integer id, UserDTO.UserUpdateDTO update) {
     var user = findById(id);
 
     // valid
@@ -103,6 +119,7 @@ public class UserService extends BaseServiceImpl<User, Integer, UserDTO, UserRep
                .fullName(update.getFullName())
                .email(update.getEmail())
                .password(user.getPassword())
+               .userType(update.getUserTypeId())
                .avatarUrl(user.getAvatarUrl())
                .phoneNumber(update.getPhoneNumber())
                .createdBy(user.getCreatedBy())
@@ -156,6 +173,16 @@ public class UserService extends BaseServiceImpl<User, Integer, UserDTO, UserRep
     }
   }
 
+  // find-all owner id
+  public List<UserRes.OwnerRes> findOwner(String keyWord, int page) {
+    Pageable defaultPage = PageRequest.of(page, 20);
+    List<Object[]> ownerObjs = repository.findOwners(keyWord, defaultPage);
+    return ownerObjs.stream()
+                    .map(o -> new UserRes.OwnerRes((Integer) o[0], (String) o[1], (String) o[2]))
+                    .toList();
+  }
+
+  // find by id
   public UserRes findUserById(Integer id) {
     List<Object[]> userObjList = repository.getUserById(id);
 
@@ -196,7 +223,9 @@ public class UserService extends BaseServiceImpl<User, Integer, UserDTO, UserRep
           (String) userObj[6], // createdName
           (String) userObj[7], // updatedName
           (LocalDateTime) userObj[8], // createdAt
-          (LocalDateTime) userObj[9] // updatedAt
+          (LocalDateTime) userObj[9], // updatedAt
+          (Integer) userObj[10],
+          (String) userObj[11]
     );
   }
 
@@ -231,12 +260,41 @@ public class UserService extends BaseServiceImpl<User, Integer, UserDTO, UserRep
     return repository.save(user);
   }
 
+  // find profile
+  public UserRes.UserProfileRes findProfile() {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    var username = auth.getName();
 
+    User user = repository.findByEmail(username)
+                          .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Not Found Profile"));
+
+    var userRoles = userRoleRepository.findAllByUserIdAndDeletedAtIsNull(user.getId());
+
+
+    List<String> roles = userRoles.stream()
+                                  .map(ur -> roleRepository.findRolesByDeletedAtIsNull(ur.getRoleId())
+                                                           .orElseThrow(() -> new AppException(ErrorCode.COMMON_400,
+                                                                 "Something went wrong with account")))
+                                  .map(Role::getName)
+                                  .toList();
+
+    return new UserRes.UserProfileRes(
+          user.getId(),
+          user.getFullName(),
+          user.getEmail(),
+          user.getPhoneNumber(),
+          user.getAvatarUrl(),
+          roles
+    );
+  }
+
+  // check email already existed
   @Transactional
   public boolean existsByEmail(String email) {
     return repository.existsByEmail(email);
   }
 
+  // change password - admin
   @Transactional
   public void changePassword(String email, String newPassword) {
     var user = repository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
@@ -244,12 +302,19 @@ public class UserService extends BaseServiceImpl<User, Integer, UserDTO, UserRep
     repository.save(user);
   }
 
+  // check match password
   public boolean matchPassword(String email, String oldPassword) {
     var user = repository.findByEmail(email)
                          .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
 
     return passwordEncoder.matches(oldPassword, user.getPassword());
   }
+
+  // find user type
+  public List<UserType> findUserTypes() {
+    return userTypeRepository.findUserTypes();
+  }
+
 
   @Override
   protected RuntimeException createNotFoundException(Integer integer) {

@@ -20,4 +20,23 @@ public class AuthReq {
   String password;
   @NotNull
   Boolean remember = false;
+
+  @Getter
+  @Setter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  @FieldDefaults(level = AccessLevel.PRIVATE)
+  public static class IntrospectRequest {
+    String token;
+  }
+
+  @Getter
+  @Setter
+  @AllArgsConstructor
+  @NoArgsConstructor
+  @FieldDefaults(level = AccessLevel.PRIVATE)
+  public static class TokenRefreshReq {
+    String refreshToken;
+  }
 }

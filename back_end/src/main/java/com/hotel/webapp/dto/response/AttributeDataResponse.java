@@ -22,4 +22,7 @@ public class AttributeDataResponse {
   List<Facilities> hotelFacilities;
   List<PaymentMethod> paymentMethods;
   List<RoomType> roomTypes;
+  List<UserRes.OwnerRes> owners;
+  List<UserType> userTypes;
+  List<UserRes.CustomerRes> customers;
 }

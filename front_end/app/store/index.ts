@@ -1,21 +1,24 @@
 import { configureStore } from "@reduxjs/toolkit";
-import commonDataReducer from "./slices/commonDataSlice";
-import permissionReducer from "./slices/permissionSlice";
-import userReducer from "./slices/userDataSlice";
+
 import {
   type TypedUseSelectorHook,
   useDispatch,
   useSelector,
 } from "react-redux";
 
+import commonSlince from './slice/commonSlince'
+import userDataSlice from './slice/userDataSlice'
+import permissionSlice from './slice/permissionSlice'
+import commonDataReducer from "./slice/commonDataSlice";
+
 export const store = configureStore({
   reducer: {
-    commonData: commonDataReducer,
-    permissions: permissionReducer,
-    userData: userReducer,
+    commonSlince: commonSlince,
+    userDataSlice: userDataSlice,
+    permissionSlice: permissionSlice,
+    commonData: commonDataReducer
   },
 });
-
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;

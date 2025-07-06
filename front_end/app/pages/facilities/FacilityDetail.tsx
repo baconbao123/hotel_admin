@@ -3,7 +3,7 @@ import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { format } from "date-fns";
-import $axios from "@/axios";
+import $axios from "~/axios";
 
 interface Props {
   id?: string;
@@ -64,10 +64,10 @@ export default function FacilityDetail({
         footer={
           <div className="flex justify-center gap-2">
             <Button
-              outlined
               label="Close"
               onClick={onClose}
               severity="secondary"
+              outlined
               style={{ padding: "8px 40px" }}
             />
           </div>
