@@ -139,7 +139,7 @@ export default function UserForm({
       formData.append("keepAvatar", "true");
     }
 
-    formData.append("userTypeId", selectedType?.id);
+    formData.append("userTypeId", selectedType?.id || "");
 
     selectedRoles.forEach((roleId) => {
       formData.append("rolesIds", roleId.toString());

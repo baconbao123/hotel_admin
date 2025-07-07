@@ -354,7 +354,7 @@ export default function HotelForm({
 
           setOwnerId(ownerId);
 
-          setHotelNote(result.hotelNote)
+          setHotelNote(result.hotelNote);
 
           // Set documents
           if (result.documents && hotelDocuments) {
@@ -491,9 +491,12 @@ export default function HotelForm({
             }
           } catch (error: any) {
             console.error("Address fetch error:", error);
-          toast.error( error.response?.data?.message || "Failed to load address data", {
-            autoClose: 3000
-          })
+            toast.error(
+              error.response?.data?.message || "Failed to load address data",
+              {
+                autoClose: 3000,
+              }
+            );
             setDistrictData([]);
             setSelectedDistrict(null);
             setWardData([]);
@@ -504,9 +507,12 @@ export default function HotelForm({
         })
         .catch((err) => {
           console.error("Error loading hotel data:", err);
-          toast.error(err.response?.data?.message || "Failed to load districts", {
-            autoClose: 3000
-          })
+          toast.error(
+            err.response?.data?.message || "Failed to load districts",
+            {
+              autoClose: 3000,
+            }
+          );
         });
     } else {
       // Reset form for create mode
@@ -566,9 +572,12 @@ export default function HotelForm({
             }
           }
         } catch (error: any) {
-          toast.error(error.response?.data?.message || "Failed to load districts", {
-            autoClose: 3000
-          })
+          toast.error(
+            error.response?.data?.message || "Failed to load districts",
+            {
+              autoClose: 3000,
+            }
+          );
         }
       };
       fetchDistricts();
@@ -599,10 +608,9 @@ export default function HotelForm({
             setSelectedWard(ward);
           }
         } catch (error: any) {
-
           toast.error(error.response?.data?.message || "Failed to load wards", {
-            autoClose: 3000
-          })
+            autoClose: 3000,
+          });
         }
       };
       fetchWards();
@@ -630,9 +638,12 @@ export default function HotelForm({
             setSelectedStreet(street);
           }
         } catch (error: any) {
-          toast.error(error.response?.data?.message || "Failed to load streets", {
-            autoClose: 3000
-          })
+          toast.error(
+            error.response?.data?.message || "Failed to load streets",
+            {
+              autoClose: 3000,
+            }
+          );
         }
       };
       fetchStreets();
@@ -972,12 +983,12 @@ export default function HotelForm({
                             rel="noopener noreferrer"
                             className="text-blue-500 hover:underline"
                             onError={() =>
-                              toast.current?.show({
-                                severity: "error",
-                                summary: "Error",
-                                detail: `Failed to load document: ${doc.documentName}`,
-                                life: 3000,
-                              })
+                              toast.error(
+                                `Failed to load document: ${doc.documentName}`,
+                                {
+                                  autoClose: 3000,
+                                }
+                              )
                             }
                           >
                             {doc.documentName} ({doc.typeName})

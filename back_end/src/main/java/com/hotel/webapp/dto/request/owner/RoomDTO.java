@@ -1,4 +1,4 @@
-package com.hotel.webapp.dto.request;
+package com.hotel.webapp.dto.request.owner;
 
 import com.hotel.webapp.validation.FieldNotEmpty;
 import com.hotel.webapp.validation.MultipartFileCheckEmptyAndSize;
@@ -19,31 +19,29 @@ public class RoomDTO {
   String name;
 
   String keepAvatar;
-  @MultipartFileCheckEmptyAndSize(field = "avatar", value = 1)
   MultipartFile roomAvatar;
-  String existingAvatarUrl;
 
   @FieldNotEmpty(field = "Hotel")
   Integer hotelId;
   @FieldNotEmpty(field = "Room number")
   Integer roomNumber;
-  @FieldNotEmpty(field = "Area")
+  @FieldNotEmpty(field = "Room Area")
   BigDecimal roomArea;
-  @FieldNotEmpty(field = "Room Type")
+  @FieldNotEmpty(field = "Room TYpe")
   Integer roomType;
   @FieldNotEmpty(field = "Price Hours")
   BigDecimal priceHour;
   @FieldNotEmpty(field = "Price Night")
   BigDecimal priceNight;
-  @FieldNotEmpty(field = "Limit")
+  @FieldNotEmpty(field = "Limit Person")
   Integer limitPerson;
   String description;
   @FieldNotEmpty(field = "status")
   Boolean status;
 
-  @FieldNotEmpty(field = "Facilities")
+  @FieldNotEmpty(field = "facilities")
   List<Integer> facilities;
 
-  @MultipartFileCheckEmptyAndSize(field = "images", value = 3, force = false)
-  List<HotelDTO.ImagesReq> images;
+  @MultipartFileCheckEmptyAndSize(field = "Images", value = 3, force = false)
+  List<ImagesReq> images;
 }

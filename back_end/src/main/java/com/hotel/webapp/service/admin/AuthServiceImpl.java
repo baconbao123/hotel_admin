@@ -58,6 +58,8 @@ public class AuthServiceImpl implements AuthService {
 
   @Override
   public AuthResponse authenticate(AuthReq authReq) {
+    log.error("check service err");
+
     var user = userRepository.findByEmail(authReq.getEmail())
                              .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
     boolean authenticated = passwordEncoder.matches(authReq.getPassword(), user.getPassword());
