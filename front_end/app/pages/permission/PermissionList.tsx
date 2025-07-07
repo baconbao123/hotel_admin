@@ -3,17 +3,25 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
-import { Toast } from "primereact/toast";
-import BreadCrumbComponent from "@/components/common/breadCrumb/BreadCrumbComponent";
+import BreadCrumbComponent from "~/components/common/breadCrumb/BreadCrumbComponent";
 import Swal from "sweetalert2";
-import PermissionForm from "@/pages/permission/PermissionForm";
+import PermissionForm from "~/pages/permission/PermissionForm";
 import "@/pages/permission/Permission.scss";
-import useCrud from "@/hooks/crudHook";
-import PermissionDetail from "./PermissionDetail";
+import useCrud from "~/hook/crudHook";
+import PermissionDetail from "~/pages/permission/PermissionDetail";
 import { InputText } from "primereact/inputtext";
 import { Skeleton } from "primereact/skeleton";
-import { SkeletonTemplate } from "@/components/common/skeleton";
+import { SkeletonTemplate } from "~/components/common/skeleton";
 import { useSelector } from "react-redux";
+import type { RootState } from "~/store";
+import { toast } from "react-toastify";
+import type { Route } from "./+types/PermissionList";
+export function meta({}: Route.MetaArgs) {
+  return [
+    { title: "Permisison" },
+    { name: "description", content: "Hotel Admin Permisison" },
+  ];
+}
 
 interface Resource {
   id: number; // mapRsActionId
@@ -42,7 +50,6 @@ export default function PermissionList() {
 
   const [mounted, setMounted] = useState(false);
 
-  const toast = useRef<Toast>(null);
 
   const {
     data,
@@ -54,7 +61,7 @@ export default function PermissionList() {
     updatePageData,
     handleSort,
     handleSearch,
-    resetFilters,
+    refresh,
     deleteItem,
     page,
     pageSize,
@@ -63,11 +70,9 @@ export default function PermissionList() {
     sortField,
     sortOrder,
     openFormDetail,
-  } = useCrud("/permission");
+    permissionPage
+  } = useCrud("/permission", undefined, undefined, 'Permissions');
 
-  const permissions = useSelector(
-    (state: any) => state.permissions.permissions
-  );
 
   useEffect(() => {
     setMounted(true);
@@ -104,38 +109,29 @@ export default function PermissionList() {
   const handleSortChange = (e: any) =>
     handleSort(e.sortField || "", e.sortOrder || 0);
 
-  const handleDelete = (id: string) => {
-    Swal.fire({
-      title: "Delete role?",
-      showDenyButton: true,
-      showCancelButton: true,
-      confirmButtonText: "Delete",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        deleteItem(id)
-          .then(() => Swal.fire("Deleted!", "", "success"))
-          .catch(() =>
-            toast.current?.show({
-              severity: "error",
-              summary: "Error",
-              detail: "Failed to delete role",
-              life: 3000,
-            })
-          );
-      }
-    });
-  };
+  async function handleDelete(id: string): Promise<boolean> {
+    try {
+      const result = await Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        showCancelButton: true,
+        confirmButtonText: "Yes",
+      });
 
-  const hasPermission = (actionName: string) => {
-    const resource = permissions.find(
-      (p: any) => p.resourceName === "Permissions"
-    );
-    return resource ? resource.actionNames.includes(actionName) : false;
-  };
+      if (result.isConfirmed) {
+        await deleteItem(id);
+        return true;
+      }
+      return false; // User canceled or denied
+    } catch (error) {
+      console.error("Error during delete operation:", error);
+      return false; // Delete failed due to error
+    }
+  }
+
 
   return (
     <div className="main-container">
-      {mounted && <Toast ref={toast} />}
       <div className="mb-5">
         {mounted ? (
           <BreadCrumbComponent name="PermissionList" />
@@ -193,7 +189,7 @@ export default function PermissionList() {
                 severity="secondary"
                 icon="pi pi-refresh"
                 text
-                onClick={resetFilters}
+                onClick={refresh}
               />
             }
           >
@@ -272,7 +268,7 @@ export default function PermissionList() {
               className="w-60"
               body={(rowData) => (
                 <div className="flex gap-2 justify-center">
-                  {hasPermission("view") && (
+                  {permissionPage.view && (
                     <Button
                       icon="pi pi-eye"
                       rounded
@@ -288,20 +284,17 @@ export default function PermissionList() {
                           setPermissionData(response);
                           setOpenFormDetail(true);
                         } catch (error) {
-                          toast.current?.show({
-                            severity: "error",
-                            summary: "Error",
-                            detail: "Failed to load permission details",
-                            life: 3000,
+                          toast.error("Failed to load permission details", {
+                            autoClose: 3000,
                           });
                         }
-                      }}
+                        }}
                       tooltip="View"
                       tooltipOptions={{ position: "top" }}
                     />
                   )}
 
-                  {hasPermission("update") && (
+                  {permissionPage.update && (
                     <Button
                       icon="pi pi-pencil"
                       className="icon_edit"
@@ -317,11 +310,9 @@ export default function PermissionList() {
                           setPermissionData(response);
                           setOpenForm(true);
                         } catch (error) {
-                          toast.current?.show({
-                            severity: "error",
-                            summary: "Error",
-                            detail: "Failed to load permission details",
-                            life: 3000,
+                          console.error("Failed to load permission details", error);
+                          toast.error("Failed to load permission details", {
+                            autoClose: 3000,
                           });
                         }
                       }}
@@ -330,7 +321,7 @@ export default function PermissionList() {
                     />
                   )}
 
-                  {hasPermission("delete") && (
+                  {permissionPage.delete && (
                     <Button
                       icon="pi pi-trash"
                       className="icon_trash"
@@ -349,7 +340,7 @@ export default function PermissionList() {
         )}
       </Card>
 
-      {(hasPermission("create") || hasPermission("update")) && (
+      {(permissionPage.create || permissionPage.update) && (
         <PermissionForm
           id={selectedId}
           open={openForm}
@@ -365,7 +356,7 @@ export default function PermissionList() {
         />
       )}
 
-      {hasPermission("view") && (
+      {permissionPage.view && (
         <PermissionDetail
           id={selectedId}
           open={openFormDetail}

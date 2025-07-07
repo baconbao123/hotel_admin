@@ -71,7 +71,6 @@ public abstract class BaseServiceImpl<E, ID, DTO, R extends BaseRepository<E, ID
       List<Predicate> predicates = new ArrayList<>();
       predicates.add(cb.isNull(root.get("deletedAt")));
 
-      // Loại trừ email sa@gmail.com nếu field email tồn tại
       boolean hasEmailField = true;
       try {
         root.get("email");

@@ -31,7 +31,8 @@ public class SecurityConfig {
   };
 
   public static final String[] AUTHENTICATED_PUBLIC_URLS = {
-        "/api/permission/resources", "/api/common-data", "/api/user/profile", "/api/user/profile/**"
+        "/api/permission/resources", "/api/common-data", "/api/user/profile", "/api/user/profile/**",
+        "/owner/api/**"
   };
 
   private final JwtAuthenticationFilter jwtAuthenticationFilter;

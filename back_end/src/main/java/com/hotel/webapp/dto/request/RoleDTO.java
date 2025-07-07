@@ -15,8 +15,7 @@ public class RoleDTO {
   @FieldNotEmpty(field = "Name")
   @Trim
   String name;
-  @Nullable
   String description;
-  @FieldNotEmpty(field = "Is Active Role")
+  @FieldNotEmpty(field = "Status")
   Boolean status;
 }

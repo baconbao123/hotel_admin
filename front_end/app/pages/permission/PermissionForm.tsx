@@ -1,12 +1,13 @@
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import $axios from "@/axios";
+import $axios from "~/axios";
 import { Checkbox } from "antd";
-import { useCommonData } from "@/hooks/useCommonData";
+import { useCommonData } from "~/hook/useCommonData";
+import { toast } from "react-toastify";
 
 interface Resource {
   id: number;
@@ -31,37 +32,38 @@ export default function PermissionForm({
   onClose,
   loadDataTable,
 }: Props) {
-  const [resourceData, setResourceData] = useState<Resource[]>([]);
   const [actionData, setActionData] = useState<Resource[]>([]);
   const [selectedActions, setSelectedActions] = useState<{
     [key: number]: number[];
   }>({});
   const [submitting, setSubmitting] = useState(false);
-  const toast = useRef<Toast>(null);
 
   const getHeader = (): string => {
     return "EDIT PERMISSION";
   };
-  const { commonData } = useCommonData(["permissions"]);
 
+  const { commonData } = useCommonData(["permissions"]);
   const resourceActions = commonData.resourceActions;
+
+  const uniqueResources = useMemo(() => {
+    if (!resourceActions) return [];
+
+    return [
+      ...new Map(
+        resourceActions.map((item: Resource) => [
+          item.resourceId,
+          {
+            resourceId: item.resourceId,
+            resourceName: item.resourceName,
+          },
+        ])
+      ).values(),
+    ];
+  }, [resourceActions]);
 
   useEffect(() => {
     if (resourceActions) {
       setActionData(resourceActions);
-
-      const uniqueResources: any = [
-        ...new Map(
-          resourceActions.map((item: Resource) => [
-            item.resourceId,
-            {
-              resourceId: item.resourceId,
-              resourceName: item.resourceName,
-            },
-          ])
-        ).values(),
-      ];
-      setResourceData(uniqueResources);
     }
   }, [resourceActions]);
 
@@ -84,11 +86,8 @@ export default function PermissionForm({
     });
 
     if (mapResourceActionIds.length === 0) {
-      toast.current?.show({
-        severity: "warn",
-        summary: "Warning",
-        detail: "Please select at least one action",
-        life: 3000,
+      toast.warn("Please select at least one action", {
+        autoClose: 3000,
       });
       setSubmitting(false);
       return;
@@ -102,22 +101,16 @@ export default function PermissionForm({
     try {
       if (id) {
         await $axios.put("/permission", mappingDTO);
-        toast.current?.show({
-          severity: "success",
-          summary: "Success",
-          detail: "Permission updated successfully",
-          life: 3000,
+        toast.success("Permission updated successfully", {
+          autoClose: 3000,
         });
         await loadDataTable();
       }
       onClose();
     } catch (error: any) {
       console.error("Error submitting form:", error);
-      toast.current?.show({
-        severity: "error",
-        summary: "Error",
-        detail: error.response?.data?.message || "Failed to save permission",
-        life: 3000,
+      toast.error(error.response?.data?.message || "Failed to save permission", {
+        autoClose: 3000,
       });
     } finally {
       setSubmitting(false);
@@ -151,26 +144,18 @@ export default function PermissionForm({
                     matchingAction.actionId
                   );
                 }
-              } else {
               }
             });
-          } else {
           }
         });
         setSelectedActions(newSelectedActions);
       } else {
-        toast.current?.show({
-          severity: "error",
-          summary: "Error",
-          detail: "Invalid permission data structure",
-          life: 3000,
-        });
-        setSelectedActions({});
-      }
-    } else {
+        toast.error("Invalid permission data structure", {
+          autoClose: 3000,
+        })
       setSelectedActions({});
     }
-  }, [id, open, permissionData, actionData]);
+  }}, [id, open, permissionData, actionData]);
 
   const onActionChange = (
     resourceId: number,
@@ -180,7 +165,10 @@ export default function PermissionForm({
     setSelectedActions((prev) => {
       const currentActions = prev[resourceId] || [];
       if (checked) {
-        return { ...prev, [resourceId]: [...currentActions, actionId] };
+        if (!currentActions.includes(actionId)) {
+          return { ...prev, [resourceId]: [...currentActions, actionId] };
+        }
+        return prev;
       } else {
         return {
           ...prev,
@@ -205,7 +193,6 @@ export default function PermissionForm({
 
   return (
     <div>
-      <Toast ref={toast} />
       <Dialog
         visible={open}
         onHide={onClose}
@@ -224,7 +211,6 @@ export default function PermissionForm({
               <Button
                 label="Save"
                 onClick={submit}
-                severity="success"
                 className="btn_submit"
                 disabled={submitting}
                 loading={submitting}
@@ -238,7 +224,7 @@ export default function PermissionForm({
         className="p-fluid"
         breakpoints={{ "960px": "75vw", "641px": "90vw" }}
       >
-        <DataTable value={resourceData} className="mt-4 p-4">
+        <DataTable value={uniqueResources} className="mt-4 p-4" key={JSON.stringify(selectedActions)}>
           <Column
             field="resourceName"
             header="Resource"
@@ -260,7 +246,7 @@ export default function PermissionForm({
                       }}
                     >
                       <Checkbox
-                        id={`action-${rowData.id}-${action.id}`}
+                        id={`action-${rowData.resourceId}-${action.id}`}
                         checked={(
                           selectedActions[rowData.resourceId] || []
                         ).includes(action.actionId)}
@@ -273,7 +259,7 @@ export default function PermissionForm({
                         }
                       />
                       <label
-                        htmlFor={`action-${rowData.id}-${action.id}`}
+                        htmlFor={`action-${rowData.resourceId}-${action.id}`}
                         className="p-checkbox-label"
                       >
                         {action.actionName}

@@ -45,7 +45,7 @@ export default function PermissionDetail({
   }>({});
   const toast = useRef<Toast>(null);
 
-  const getHeader = (): string => "DETAILS";
+  const getHeader = (): string => "PERMISSION DETAIL";
 
   useEffect(() => {
     if (id && open && permissionData?.roleRes) {
@@ -107,16 +107,15 @@ export default function PermissionDetail({
           uniqueResources.map((perm) => (
             <div
               key={perm.resourceId}
-              className="grid grid-cols-1 gap-3 mb-4 pl-4 pr-4"
+              className="grid grid-cols-1 md:grid-cols-2  gap-4  mb-4 pl-4 pr-4"
             >
-              <div className="resouce_actions">
-                <div className="w-127">
+                <div className=" grid grid-cols-3 gap-2 items-center mb-2">
                   <label className="font-bold w-24">Resource:</label>
                   <div>{perm.resourceName}</div>
                 </div>
-                <div>
-                  <label className="font-bold w-24">Actions:</label>
-                  <div className="flex flex-wrap gap-2">
+                <div className="grid grid-cols-3 gap-2 items-center mb-2">
+                  <label className="font-bold w-24 ">Actions:</label>
+                  <div className="flex flex-wrap gap-2 col-span-2">
                     {permissionData?.roleRes
                       .flatMap((role) => role.permissions)
                       .filter((p) => p.resourceId === perm.resourceId)
@@ -142,25 +141,22 @@ export default function PermissionDetail({
                       ))}
                   </div>
                 </div>
-              </div>
             </div>
           ))
-        ) : (
-          <p>-</p>
+        ) : (''
         )}
 
         {/* Info data create/update */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pl-4 pr-4">
+        <div className="grid grid-cols-1 md:grid-cols-2  gap-4  mb-4 pl-4 pr-4">
           {/* Left */}
-          <div className="flex flex-col gap-4">
-            <div>
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="createdName" className="font-bold block mb-1">
                 Created By:
               </label>
               <span id="createdName">{permissionData?.createdBy || "-"}</span>
             </div>
 
-            <div>
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="createdAt" className="font-bold block mb-1">
                 Created At:
               </label>
@@ -173,17 +169,16 @@ export default function PermissionDetail({
                   : "-"}
               </span>
             </div>
-          </div>
+
           {/* Right */}
-          <div className="flex flex-col gap-4">
-            <div>
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="updatedName" className="font-bold block mb-1">
                 Updated By:
               </label>
               <span id="updatedName">{permissionData?.updatedBy || "-"}</span>
             </div>
 
-            <div>
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="createdAt" className="font-bold block mb-1">
                 Update At:
               </label>
@@ -196,7 +191,6 @@ export default function PermissionDetail({
                   : "-"}
               </span>
             </div>
-          </div>
         </div>
       </Dialog>
     </div>

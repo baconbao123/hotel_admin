@@ -38,9 +38,9 @@ public class UserController {
 
   @Permission(name = "update")
   @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ApiResponse<User> update(@PathVariable int id, @Valid @ModelAttribute UserDTO userDTO) throws IOException {
+  public ApiResponse<User> update(@PathVariable Integer id, @Valid @ModelAttribute UserDTO.UserUpdateDTO userDTO) throws IOException {
     return ApiResponse.<User>builder()
-                      .result(userService.update(id, userDTO))
+                      .result(userService.updateUser(id, userDTO))
                       .build();
   }
 
@@ -74,10 +74,10 @@ public class UserController {
                       .build();
   }
 
-  @GetMapping("/profile/{id}")
-  public ApiResponse<UserRes> findProfileById(@PathVariable Integer id) {
-    return ApiResponse.<UserRes>builder()
-                      .result(userService.findUserById(id))
+  @GetMapping("/profile")
+  public ApiResponse<UserRes.UserProfileRes> findProfileLogin() {
+    return ApiResponse.<UserRes.UserProfileRes>builder()
+                      .result(userService.findProfile())
                       .build();
   }
 

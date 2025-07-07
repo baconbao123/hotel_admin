@@ -7,6 +7,7 @@ import com.hotel.webapp.dto.response.LocalResponse;
 import com.hotel.webapp.entity.Streets;
 import com.hotel.webapp.service.admin.LocalService;
 import com.hotel.webapp.validation.Permission;
+import com.hotel.webapp.validation.Resource;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
@@ -21,17 +22,11 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/local")
 @RequiredArgsConstructor
+@Resource(name = "Street")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class LocalController {
   LocalService localService;
 
-//  @GetMapping("/get-province")
-//  public ApiResponse<List<LocalResponse>> getProvince() {
-//    return ApiResponse.<List<LocalResponse>>builder()
-//                      .result(localService.getProvinces())
-//                      .build();
-//  }
-//
   @GetMapping("/get-district")
   public ApiResponse<List<LocalResponse>> getDistrict(
         @RequestParam @NotBlank(message = "PROVINCE_CODE_REQUIRED") String provinceCode) {
@@ -66,6 +61,7 @@ public class LocalController {
 
   // street
   @PostMapping
+  @Permission(name = "create")
   public ApiResponse<Streets> createStreet(@RequestBody @Valid StreetsDTO dto) {
     return ApiResponse.<Streets>builder()
                       .result(localService.create(dto))
@@ -73,6 +69,7 @@ public class LocalController {
   }
 
   @PutMapping("/{id}")
+  @Permission(name = "update")
   public ApiResponse<Streets> updateStreet(@PathVariable Integer id, @RequestBody @Valid StreetsDTO dto) {
     return ApiResponse.<Streets>builder()
                       .result(localService.update(id, dto))
@@ -80,6 +77,7 @@ public class LocalController {
   }
 
   @GetMapping("/{id}")
+  @Permission(name = "view")
   public ApiResponse<CommonRes<Streets>> findStreetById(@PathVariable Integer id) {
     return ApiResponse.<CommonRes<Streets>>builder()
                       .result(localService.getEById(id))
@@ -87,6 +85,7 @@ public class LocalController {
   }
 
   @DeleteMapping("/{id}")
+  @Permission(name = "view")
   public ApiResponse<Object> updateStreet(@PathVariable Integer id) {
     localService.delete(id);
     return ApiResponse.builder()

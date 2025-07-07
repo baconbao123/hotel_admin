@@ -3,8 +3,7 @@ import { Upload, Image } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
 import type { GetProp, UploadFile, UploadProps } from "antd";
 import { Toast as PrimeToast } from "primereact/toast";
-import "antd/dist/reset.css";
-import { v4 as uuidv4 } from "uuid";
+// import "antd/dist/reset.css";
 
 type FileType = Parameters<GetProp<UploadProps, "beforeUpload">>[0];
 type RcFile = import("antd/es/upload").RcFile;
@@ -77,6 +76,9 @@ const GalleryUploader: React.FC<GalleryUploaderProps> = ({
     setPreviewOpen(true);
   };
 
+  const generateId = () => {
+    return Math.random().toString(36).substr(2, 9) + Date.now();
+  }
   const handleFileChange: UploadProps["onChange"] = ({
     fileList: newFileList,
     file,
@@ -89,7 +91,7 @@ const GalleryUploader: React.FC<GalleryUploaderProps> = ({
         if (!f.uid || f.uid.startsWith("upload-")) {
           return {
             ...f,
-            uid: `upload-${uuidv4()}`,
+            uid: `upload-${generateId()}`,
             status: f.status || "uploading", 
           };
         }

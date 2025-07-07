@@ -29,6 +29,7 @@ export default function UserDetail({
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [status, setStatus] = useState<string>("");
   const [roleData, setRoleData] = useState<any[]>([]);
+  const [userType, setUserType] = useState<any>("");
   const [createdData, setCreatedData] = useState("");
   const [createdAt, setCreatedAt] = useState("");
   const [updatedData, setUpdatedData] = useState("");
@@ -49,6 +50,7 @@ export default function UserDetail({
           setAvatarUrl(data.avatarUrl || null);
           setRoleData(data.roles);
           setCreatedAt(data.createdAt || "");
+          setUserType(data.userTypeName || "");
           setUpdateAt(data.updatedAt || "");
           setCreatedData(data.createdName || "");
           setUpdatedData(data.updatedName || "");
@@ -74,9 +76,10 @@ export default function UserDetail({
         footer={
           <div className="flex justify-center gap-2">
             <Button
+              severity="secondary"
+              outlined
               label="Close"
               onClick={onClose}
-              severity="secondary"
               style={{ padding: "8px 40px" }}
             />
           </div>
@@ -108,21 +111,21 @@ export default function UserDetail({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-4 pr-4">
           {/* Left */}
           <div className="flex flex-col gap-4">
-            <div>
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="name" className="font-bold block mb-1">
                 Fullname:
               </label>
               <span id="name">{fullName || "-"}</span>
             </div>
 
-            <div>
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="email" className="font-bold block mb-1">
                 Email:
               </label>
               <span id="email">{email || "-"}</span>
             </div>
 
-            <div>
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="phone" className="font-bold block mb-1">
                 Phone number:
               </label>
@@ -132,7 +135,13 @@ export default function UserDetail({
 
           {/* Cột phải */}
           <div className="flex flex-col gap-4">
-            <div>
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
+              <label htmlFor="role" className="font-bold block mb-1">
+                User Type:
+              </label>
+              <span id="role">{userType ?? "-"}</span>
+            </div>
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="role" className="font-bold block mb-1">
                 Roles:
               </label>
@@ -147,7 +156,7 @@ export default function UserDetail({
               </span>
             </div>
 
-            <div>
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="status" className="font-bold block mb-1">
                 Status:
               </label>
@@ -165,14 +174,14 @@ export default function UserDetail({
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pl-4 pr-4">
           {/* Left */}
           <div className="flex flex-col gap-4">
-            <div>
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="createdName" className="font-bold block mb-1">
                 Created By:
               </label>
               <span id="createdName">{createdData || "-"}</span>
             </div>
 
-            <div>
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="createdAt" className="font-bold block mb-1">
                 Created At:
               </label>
@@ -185,14 +194,14 @@ export default function UserDetail({
           </div>
           {/* Right */}
           <div className="flex flex-col gap-4">
-            <div>
+            <div className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="updatedName" className="font-bold block mb-1">
                 Updated By:
               </label>
               <span id="updatedName">{updatedData || "-"}</span>
             </div>
 
-            <div>
+            <div  className="grid grid-cols-3 gap-2 items-center mb-2">
               <label htmlFor="createdAt" className="font-bold block mb-1">
                 Update At:
               </label>

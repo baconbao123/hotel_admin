@@ -19,13 +19,20 @@ public class UserDTO {
   @Trim
   @FieldNotEmpty(field = "Full name")
   String fullName;
-  @FieldAndCheckRegexp(field = "Email", force = ForceType.MANDATORY, regex = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
+  @FieldAndCheckRegexp(field = "Email", notice = "Enter a valid email (example: a@gmail.com)",
+        force = ForceType.MANDATORY, regex = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
   @Trim
   String email;
-  @FieldAndCheckRegexp(field = "Phone Number", force = ForceType.MANDATORY, regex = "^(\\(\\d{3}\\)|\\d{3})-?\\d{3}-?\\d{4}$")
+  @FieldAndCheckRegexp(field = "Phone Number", notice = "Phone number must be exactly 10 digits",
+        force = ForceType.MANDATORY, regex = "^(\\(\\d{3}\\)|\\d{3})-?\\d{3}-?\\d{4}$")
   @Trim
   String phoneNumber;
+  @FieldAndCheckRegexp(field = "Password", notice = "At least 8 characters, with upper & lower case, number, and symbol.",
+        force = ForceType.MANDATORY, regex = "^(?=.*[A-Z])(?=.*[@$!%*?&]).{8,}$")
   String password;
+
+  @FieldNotEmpty(field = "User Type")
+  Integer userTypeId;
 
   MultipartFile avatarUrl;
   String keepAvatar;
@@ -34,7 +41,39 @@ public class UserDTO {
   Boolean status;
 
   // roles
+  @FieldNotEmpty(field = "Role")
   List<Integer> rolesIds;
+
+  @Getter
+  @Setter
+  @FieldDefaults(level = AccessLevel.PRIVATE)
+  public static class UserUpdateDTO {
+    @Trim
+    @FieldNotEmpty(field = "Full name")
+    String fullName;
+    @FieldAndCheckRegexp(field = "Email", notice = "Email example a@gmail.com",
+          force = ForceType.MANDATORY, regex = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
+    @Trim
+    String email;
+    @FieldAndCheckRegexp(field = "Phone Number", notice = "Phone number must be exactly 10 digits",
+          force = ForceType.MANDATORY, regex = "^(\\(\\d{3}\\)|\\d{3})-?\\d{3}-?\\d{4}$")
+    @Trim
+    String phoneNumber;
+
+    @FieldNotEmpty(field = "User Type")
+    Integer userTypeId;
+
+    MultipartFile avatarUrl;
+    String keepAvatar;
+
+    @FieldNotEmpty(field = "Status")
+    Boolean status;
+
+    // roles
+    @FieldNotEmpty(field = "Role")
+    List<Integer> rolesIds;
+  }
+
 
   @Getter
   @Setter
@@ -43,15 +82,19 @@ public class UserDTO {
     @Trim
     @FieldNotEmpty(field = "Full name")
     String fullName;
-    @FieldAndCheckRegexp(field = "Email", force = ForceType.MANDATORY, regex = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
+    @FieldAndCheckRegexp(field = "Email", notice = "Email example a@gmail.com",
+          force = ForceType.MANDATORY, regex = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
     @Trim
     String email;
-    @FieldAndCheckRegexp(field = "Phone Number", force = ForceType.MANDATORY, regex = "^(\\(\\d{3}\\)|\\d{3})-?\\d{3}-?\\d{4}$")
+    @FieldAndCheckRegexp(field = "Phone Number", notice = "Phone number must be exactly 10 digits",
+          force = ForceType.MANDATORY, regex = "^(\\(\\d{3}\\)|\\d{3})-?\\d{3}-?\\d{4}$")
     @Trim
     String phoneNumber;
     MultipartFile avatarUrl;
     String keepAvatar;
   }
+
+
 }
 
 

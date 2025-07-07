@@ -22,12 +22,10 @@ public class Payment implements AuditEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   Integer id;
-  Integer bookingId;
   Integer methodId;
   BigDecimal amount;
   String note;
   Boolean status;
-  Integer type;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;
   Integer createdBy;

@@ -37,7 +37,7 @@ export const navigation: MenuItem[] = [
   },
   {
     name: "Street Management",
-    href: "/streets",
+    href: "/street",
     icon: MapIcon,
     resourceName: "Street",
   },

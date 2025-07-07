@@ -34,6 +34,7 @@ public class ApplicationInitConfig {
                                                      .fullName("sa")
                                                      .email("sa@gmail.com")
                                                      .password(passwordEncoder.encode("123"))
+                                                     .phoneNumber("")
                                                      .createdAt(LocalDateTime.now())
                                                      .build();
                                   return userRepository.save(newUser);

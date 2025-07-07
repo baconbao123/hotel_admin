@@ -3,7 +3,7 @@ import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { format } from "date-fns";
-import $axios from "@/axios";
+import $axios from "~/axios";
 
 interface Props {
   id?: string;
@@ -28,44 +28,18 @@ export default function FacilityDetail({
   const [updatedData, setUpdatedData] = useState("");
   const [updateAt, setUpdateAt] = useState("");
 
-  const [typeData, setTypeData] = useState<any[]>([]);
   const toast = useRef<Toast>(null);
-
   const header = "FACILITY DETAILS";
-
-  // Load danh sách types để mapping hiển thị type name
-  useEffect(() => {
-    const fetchTypes = async () => {
-      try {
-        const res = await $axios.get("/hotel-facilities/facilities-type");
-        setTypeData(res.data.result || []);
-      } catch (err: any) {
-        toast.current?.show({
-          severity: "error",
-          summary: "Error",
-          detail: err.response?.data?.message || "Failed to load types",
-          life: 3000,
-        });
-      }
-    };
-    fetchTypes();
-  }, []);
 
   useEffect(() => {
     if (id && open) {
       loadDataById(id)
         .then((data) => {
-          setName(data.entity.name || "");
-          setIcon(data.entity.icon || "");
-          const typeId =
-            typeof data.entity.type === "object"
-              ? data.entity.type.id
-              : data.entity.type;
-          const matchedType = typeData.find((t) => t.id === typeId);
-          setTypeName(matchedType?.name || "-");
-
-          setCreatedAt(data.entity.createdAt || "");
-          setUpdateAt(data.entity.updatedAt || "");
+          setName(data.name || "");
+          setIcon(data.icon || "");
+          setTypeName(data.typeName || "-");
+          setCreatedAt(data.createdAt || "");
+          setUpdateAt(data.updatedAt || "");
           setCreatedData(data.createdName || "");
           setUpdatedData(data.updatedName || "");
         })
@@ -78,7 +52,7 @@ export default function FacilityDetail({
           })
         );
     }
-  }, [id, open, loadDataById, typeData]);
+  }, [id, open, loadDataById]);
 
   return (
     <div>
@@ -90,10 +64,10 @@ export default function FacilityDetail({
         footer={
           <div className="flex justify-center gap-2">
             <Button
-              outlined
               label="Close"
               onClick={onClose}
               severity="secondary"
+              outlined
               style={{ padding: "8px 40px" }}
             />
           </div>
@@ -112,8 +86,9 @@ export default function FacilityDetail({
 
           {/* Icon */}
           <div className="grid grid-cols-3 gap-2 items-center mb-2">
+            <label className="font-bold col-span-1">Icon:</label>
             <span className="col-span-2 flex items-center gap-2">
-              <label className="font-bold col-span-1">Icon:</label>
+              {icon || "-"}
               {icon && <i className={`${icon} text-xl`} />}
             </span>
           </div>

@@ -1,9 +1,9 @@
 package com.hotel.webapp.controller;
 
 import com.hotel.webapp.dto.request.AuthReq;
-import com.hotel.webapp.dto.request.TokenRefreshReq;
 import com.hotel.webapp.dto.response.ApiResponse;
 import com.hotel.webapp.dto.response.AuthResponse;
+import com.hotel.webapp.service.admin.PermissionService;
 import com.hotel.webapp.service.admin.UserService;
 import com.hotel.webapp.service.admin.interfaces.AuthService;
 import com.hotel.webapp.service.system.EmailService;
@@ -26,6 +26,7 @@ public class AuthController {
   EmailService emailService;
   OtpService otpService;
   UserService userService;
+  PermissionService permissionService;
 
   @PostMapping("/login")
   public ApiResponse<AuthResponse> authentication(@Valid @RequestBody AuthReq authReq) {
@@ -35,7 +36,7 @@ public class AuthController {
   }
 
   @PostMapping("/refresh-token")
-  public ApiResponse<AuthResponse> refreshToken(@RequestBody TokenRefreshReq tokenRefreshReq) {
+  public ApiResponse<AuthResponse> refreshToken(@RequestBody AuthReq.TokenRefreshReq tokenRefreshReq) {
     return ApiResponse.<AuthResponse>builder()
                       .result(authService.refreshToken(tokenRefreshReq))
                       .build();
@@ -76,7 +77,7 @@ public class AuthController {
     String token = authService.generatePasswordResetToken(email);
 
     String subject = "Reset Password";
-    String text = "http://localhost:5173/reset-password?token=" + token;
+    String text = "http://localhost:5173/reset-password-profile?token=" + token;
     emailService.sendEmail(email, subject, text);
 
     return ApiResponse.builder()
@@ -129,5 +130,11 @@ public class AuthController {
                       .code(200)
                       .message("Change password successful")
                       .build();
+  }
+
+  @GetMapping("/me/permission-hotel")
+  public Boolean checkPermissionHotel(
+        @RequestHeader("Authorization") String token) throws ParseException, JOSEException {
+    return permissionService.checkPermissionHotel(token);
   }
 }
