@@ -17,7 +17,7 @@ spring:
     resources:
       static-locations: file:${app.storage.root}/
   datasource:
-    url: jdbc:mysql://localhost:3306/hotel_manager
+    url: jdbc:mysql://103.161.172.90:3308/hotel_manager
     username: root
     password: 123456
     driver-class-name: com.mysql.cj.jdbc.Driver
