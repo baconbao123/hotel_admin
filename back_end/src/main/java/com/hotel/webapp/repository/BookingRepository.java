@@ -9,7 +9,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface BookingRepository extends BaseRepository<Booking, Integer> {
@@ -41,4 +45,13 @@ public interface BookingRepository extends BaseRepository<Booking, Integer> {
   @Query("select new com.hotel.webapp.dto.response.owner.PricesDTO(r.priceHour, r.priceNight) from Rooms r " +
         "where r.id = :roomId and r.deletedAt is null")
   PricesDTO getPriceDataByRoomId(Integer roomId);
+
+
+  // booking
+  @Query("SELECT b FROM Booking b WHERE b.roomId = :roomId AND b.checkInTime < :end AND b.checkOutTime > :start AND b.deletedAt IS NULL")
+  List<Booking> findBookingsByRoomIdAndDateRange(
+        @Param("roomId") Integer roomId,
+        @Param("start") LocalDateTime start,
+        @Param("end") LocalDateTime end
+  );
 }

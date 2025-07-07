@@ -12,18 +12,23 @@ import com.hotel.webapp.repository.*;
 import com.hotel.webapp.service.admin.AddressService;
 import com.hotel.webapp.service.admin.interfaces.AuthService;
 import com.hotel.webapp.service.system.StorageFileService;
+import com.nimbusds.jose.JOSEException;
+import com.nimbusds.jwt.SignedJWT;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 @Service
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class HotelOwnerService extends BaseServiceImpl<Hotels, Integer, HotelOwnerDTO, HotelRepository> {
@@ -169,6 +174,7 @@ public class HotelOwnerService extends BaseServiceImpl<Hotels, Integer, HotelOwn
 
   // find all
   public Page<HotelsRes> findHotels(Map<String, String> filters, Map<String, String> sort, int size, int page) {
+
     Map<String, Object> filterMap = removedFiltersKey(filters);
     Map<String, Object> sortMap = removedSortedKey(sort);
 
@@ -182,8 +188,12 @@ public class HotelOwnerService extends BaseServiceImpl<Hotels, Integer, HotelOwn
     Page<Hotels> hotelsPage;
     if ("sa@gmail.com".equals(user.getEmail())) {
       hotelsPage = repository.findAll(spec, defaultPage);
+//      log.error("chec sa admin id {}" + ownerLogin);
+
+//      log.error();
     } else {
-      hotelsPage = repository.findAllByOwnerId(ownerLogin, spec, defaultPage);
+//      log.error("chec owner id {}" + ownerLogin);
+      hotelsPage = repository.findAllByOwnerId(ownerLogin, defaultPage);
     }
 
     return hotelsPage.map(hotels -> {
@@ -397,6 +407,39 @@ public class HotelOwnerService extends BaseServiceImpl<Hotels, Integer, HotelOwn
     return repository.save(hotelCrr);
   }
 
+  public Page<HotelsRes> findHotelsForAdmin(Map<String, String> filters, Map<String, String> sort, int size, int page,
+        String token) throws ParseException, JOSEException {
+
+    if (!checkPermissionHotelForAdmin(token)) {
+      throw new AppException(ErrorCode.ACCESS_DENIED);
+    }
+
+    Map<String, Object> filterMap = removedFiltersKey(filters);
+    Map<String, Object> sortMap = removedSortedKey(sort);
+
+    Specification<Hotels> spec = buildSpecification(filterMap);
+    Pageable defaultPage = buildPageable(sortMap, page, size);
+
+
+    Page<Hotels> hotelsPage = repository.findAll(spec, defaultPage);
+
+    return hotelsPage.map(hotels -> {
+      HotelsRes dto = new HotelsRes();
+      dto.setId(hotels.getId());
+      dto.setAvatarUrl(hotels.getAvatar());
+      dto.setName(hotels.getName());
+      dto.setDescription(hotels.getDescription());
+      dto.setStatus(hotels.getStatus());
+
+      if (hotels.getOwnerId() != null) {
+        userRepository.findById(hotels.getOwnerId()).ifPresent(user1 -> {
+          dto.setOwnerName(user1.getFullName());
+        });
+      }
+
+      return dto;
+    });
+  }
 
 
   @Override
@@ -404,16 +447,16 @@ public class HotelOwnerService extends BaseServiceImpl<Hotels, Integer, HotelOwn
     return new AppException(ErrorCode.NOT_FOUND, "Hotel");
   }
 
-//  private boolean checkPermissionHotelForAdmin(String token) throws ParseException, JOSEException {
-//    SignedJWT signedJWT = authService.verifyToken(token.replace("Bearer ", ""));
-//    Integer userId = signedJWT.getJWTClaimsSet().getIntegerClaim("userId");
-//
-//    User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
-//
-//    if (user.getEmail().equals("sa@gmail.com")) {
-//      return true;
-//    }
-//
-//    return userRepository.hasPermissionHotel(userId);
-//  }
+  private boolean checkPermissionHotelForAdmin(String token) throws ParseException, JOSEException {
+    SignedJWT signedJWT = authService.verifyToken(token.replace("Bearer ", ""));
+    Integer userId = signedJWT.getJWTClaimsSet().getIntegerClaim("userId");
+
+    User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
+
+    if (user.getEmail().equals("sa@gmail.com")) {
+      return true;
+    }
+
+    return userRepository.hasPermissionHotel(userId);
+  }
 }

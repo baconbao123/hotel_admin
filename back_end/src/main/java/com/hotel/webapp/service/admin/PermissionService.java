@@ -265,6 +265,8 @@ public class PermissionService extends BaseServiceImpl<Permissions, Integer, Map
       return true;
     }
 
+    log.error("check permission hotel in module admin: " + !permissionsRepository.hasPermissionHotel(userId));
+
     if (!permissionsRepository.hasPermissionHotel(userId)) {
       throw new AppException(ErrorCode.ACCESS_DENIED);
     }

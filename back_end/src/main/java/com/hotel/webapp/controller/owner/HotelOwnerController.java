@@ -5,7 +5,6 @@ import com.hotel.webapp.dto.response.ApiResponse;
 import com.hotel.webapp.dto.response.HotelsRes;
 import com.hotel.webapp.entity.Hotels;
 import com.hotel.webapp.service.owner.HotelOwnerService;
-import com.hotel.webapp.validation.Permission;
 import com.nimbusds.jose.JOSEException;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
@@ -58,6 +57,19 @@ public class HotelOwnerController {
   ) throws ParseException, JOSEException {
     return ApiResponse.<Page<HotelsRes>>builder()
                       .result(hotelService.findHotels(filters, sort, size, page))
+                      .build();
+  }
+
+  @GetMapping("/admin")
+  public ApiResponse<Page<HotelsRes>> getAllByAdmin(
+        @RequestParam(required = false) Map<String, String> filters,
+        @RequestParam(required = false) Map<String, String> sort,
+        @RequestParam int size,
+        @RequestParam int page,
+        String token
+  ) throws ParseException, JOSEException {
+    return ApiResponse.<Page<HotelsRes>>builder()
+                      .result(hotelService.findHotelsForAdmin(filters, sort, size, page, token))
                       .build();
   }
 }

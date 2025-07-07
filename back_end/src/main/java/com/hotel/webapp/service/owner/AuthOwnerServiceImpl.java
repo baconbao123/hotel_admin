@@ -1,4 +1,4 @@
-package com.hotel.webapp.service.admin;
+package com.hotel.webapp.service.owner;
 
 import com.hotel.webapp.dto.request.AuthReq;
 import com.hotel.webapp.dto.response.AuthResponse;
@@ -9,7 +9,7 @@ import com.hotel.webapp.exception.ErrorCode;
 import com.hotel.webapp.repository.MapUserRoleRepository;
 import com.hotel.webapp.repository.RoleRepository;
 import com.hotel.webapp.repository.UserRepository;
-import com.hotel.webapp.service.admin.interfaces.AuthService;
+import com.hotel.webapp.service.owner.intefaces.AuthOwnerService;
 import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
@@ -38,7 +38,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
-public class AuthServiceImpl implements AuthService {
+public class AuthOwnerServiceImpl implements AuthOwnerService {
   UserRepository userRepository;
   MapUserRoleRepository userRoleRepository;
   RoleRepository roleRepository;

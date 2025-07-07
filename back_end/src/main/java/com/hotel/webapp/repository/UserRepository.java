@@ -22,6 +22,14 @@ public interface UserRepository extends BaseRepository<User, Integer> {
   // ----------------------
   Optional<User> findByRefreshToken(String refreshToken);
 
+  @Query("select count(p) > 0 from Permissions p " +
+        "join Role r on p.roleId = r.id " +
+        "join MapUserRoles mur on r.id = mur.roleId and mur.deletedAt is null " +
+        "join User u on mur.userId = u.id " +
+        "where u.id = :userId and lower(r.name) = 'owner' and p.deletedAt is null " +
+        "and r.deletedAt is null")
+  boolean checkUserHaveRoleOwner(Integer userId);
+
   @Query("select u.id, u.fullName, u.email, u.phoneNumber, u.avatarUrl, u.status, " +
         "u1.fullName, u2.fullName, u.createdAt, u.updatedAt, ut.id, ut.name " +
         "from User u " +
