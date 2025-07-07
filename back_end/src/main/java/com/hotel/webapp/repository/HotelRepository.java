@@ -6,7 +6,6 @@ import com.hotel.webapp.entity.Hotels;
 import com.hotel.webapp.entity.TypeHotel;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -90,7 +89,7 @@ public interface HotelRepository extends BaseRepository<Hotels, Integer> {
 
   @Query("select h from Hotels h " +
         "where h.ownerId = :ownerId and h.deletedAt is null")
-  Page<Hotels> findAllByOwnerId(Integer ownerId, Specification<Hotels> specification, Pageable pageRequest);
+  Page<Hotels> findAllByOwnerId(@Param("ownerId") Integer ownerId, Pageable pageRequest);
 
   // find by id for admin
   @Query("SELECT h.id, h.name, h.addressId, h.avatar, h.description, hp.id, hp.name, hp.description, " +

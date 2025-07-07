@@ -14,6 +14,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -32,7 +34,6 @@ public class BookingController {
   }
 
   @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//  @PutMapping(value = "/{id}")
   public ApiResponse<Booking> update(@PathVariable int id, @Valid @ModelAttribute BookingDTO dto) {
     return ApiResponse.<Booking>builder()
                       .result(bookingService.update(id, dto))
@@ -71,6 +72,18 @@ public class BookingController {
   public ApiResponse<PricesDTO> getPricesData(@PathVariable Integer roomId) {
     return ApiResponse.<PricesDTO>builder()
                       .result(bookingService.getPriceData(roomId))
+                      .build();
+  }
+
+  @GetMapping("/{roomId}/booked-hours")
+  public ApiResponse<List<Map<String, LocalDateTime>>> getBookedHours(
+        @PathVariable Integer roomId,
+        @RequestParam String date
+  ) {
+    LocalDateTime startOfDay = LocalDateTime.parse(date + "T00:00:00");
+    LocalDateTime endOfDay = startOfDay.plusDays(1);
+    return ApiResponse.<List<Map<String, LocalDateTime>>>builder()
+                      .result(bookingService.getBookedHours(roomId, startOfDay, endOfDay))
                       .build();
   }
 }

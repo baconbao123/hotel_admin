@@ -5,7 +5,7 @@ import com.hotel.webapp.dto.response.ApiResponse;
 import com.hotel.webapp.dto.response.AuthResponse;
 import com.hotel.webapp.service.admin.PermissionService;
 import com.hotel.webapp.service.admin.UserService;
-import com.hotel.webapp.service.admin.interfaces.AuthService;
+import com.hotel.webapp.service.owner.intefaces.AuthOwnerService;
 import com.hotel.webapp.service.system.EmailService;
 import com.hotel.webapp.service.system.OtpService;
 import com.nimbusds.jose.JOSEException;
@@ -24,7 +24,7 @@ import java.text.ParseException;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthOwnerController {
-  AuthService authService;
+  AuthOwnerService authService;
   EmailService emailService;
   OtpService otpService;
   UserService userService;

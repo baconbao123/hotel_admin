@@ -27,7 +27,6 @@ const getBase64 = (file: FileType): Promise<string> =>
 const ImageUploader: React.FC<ImageUploaderProp> = ({
   initialImageUrl,
   onFileChange,
-  maxFileSize = 2,
   disabled = false,
 }) => {
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -103,9 +102,9 @@ const ImageUploader: React.FC<ImageUploaderProp> = ({
       });
       return false;
     }
-    const isLtMaxSize = file.size / 1024 / 1024 < maxFileSize;
+    const isLtMaxSize = file.size / 1024 / 1024 < 100;
     if (!isLtMaxSize) {
-      toast.error(`Image must be smaller than ${maxFileSize}MB!`, {
+      toast.error(`Image must be smaller than ${100}MB!`, {
         autoClose: 3000,
       });
       return false;

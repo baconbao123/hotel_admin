@@ -22,7 +22,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -41,8 +43,7 @@ public class BookingService extends BaseServiceImpl<Booking, Integer, BookingDTO
   }
 
   public Page<BookingRes> findBookingsByRoomId(Integer roomId, Map<String, String> filters, Map<String, String> sort,
-        int size,
-        int page) {
+        int size, int page) {
     Map<String, Object> filterMap = removedFiltersKey(filters);
     Map<String, Object> sortMap = removedSortedKey(sort);
 
@@ -54,13 +55,18 @@ public class BookingService extends BaseServiceImpl<Booking, Integer, BookingDTO
 
   @Override
   public Booking create(BookingDTO create) {
-    // booking
+    // Check for time conflict
+    if (hasTimeConflict(create.getRoomId(), create.getCheckInTime(), create.getCheckOutTime(), null)) {
+      throw new AppException(ErrorCode.COMMON_400, "Selected time slot is already booked");
+    }
+
+    // Booking
     var newBooking = mapper.toCreate(create);
     newBooking.setCreatedAt(LocalDateTime.now());
     newBooking.setCreatedBy(getAuthId());
     newBooking = repository.save(newBooking);
 
-    // payment
+    // Payment
     Payment payment = Payment.builder()
                              .methodId(create.getMethodId())
                              .amount(create.getAmount())
@@ -68,7 +74,6 @@ public class BookingService extends BaseServiceImpl<Booking, Integer, BookingDTO
                              .status(create.getStatus())
                              .createdAt(LocalDateTime.now())
                              .build();
-
     payment = paymentRepository.save(payment);
 
     newBooking.setPaymentId(payment.getId());
@@ -79,16 +84,20 @@ public class BookingService extends BaseServiceImpl<Booking, Integer, BookingDTO
 
   @Override
   public Booking update(Integer id, BookingDTO update) {
-    // booking
+    // Booking
     Booking booking = repository.findById(id)
                                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Booking"));
+
+    // Check for time conflict (exclude current booking)
+    if (hasTimeConflict(update.getRoomId(), update.getCheckInTime(), update.getCheckOutTime(), id)) {
+      throw new AppException(ErrorCode.COMMON_400, "Selected time slot is already booked");
+    }
 
     // Update booking fields
     booking.setUserId(update.getUserId());
     booking.setRoomId(update.getRoomId());
     booking.setCheckInTime(update.getCheckInTime());
     booking.setCheckOutTime(update.getCheckOutTime());
-    booking.setPaymentId(booking.getPaymentId());
     booking.setUpdatedAt(LocalDateTime.now());
     booking.setUpdatedBy(getAuthId());
     booking = repository.save(booking);
@@ -96,7 +105,6 @@ public class BookingService extends BaseServiceImpl<Booking, Integer, BookingDTO
     // Find and update payment
     Payment payment = paymentRepository.findPaymentByBookingId(booking.getId())
                                        .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Payment"));
-
     payment.setMethodId(update.getMethodId());
     payment.setAmount(update.getAmount());
     payment.setNote(update.getNotePayment());
@@ -104,22 +112,37 @@ public class BookingService extends BaseServiceImpl<Booking, Integer, BookingDTO
     payment.setUpdatedAt(LocalDateTime.now());
     paymentRepository.save(payment);
 
-
     return booking;
   }
 
   public BookingRes findBookingById(Integer id) {
     var res = repository.findBookingById(id);
-
     if (res == null) {
       throw new AppException(ErrorCode.NOT_FOUND, "Booking or Payment");
     }
-
     return res;
   }
 
   public PricesDTO getPriceData(Integer roomId) {
     return repository.getPriceDataByRoomId(roomId);
+  }
+
+  public List<Map<String, LocalDateTime>> getBookedHours(Integer roomId, LocalDateTime start, LocalDateTime end) {
+    List<Booking> bookings = repository.findBookingsByRoomIdAndDateRange(roomId, start, end);
+    return bookings.stream()
+                   .map(booking -> Map.of(
+                         "checkInTime", booking.getCheckInTime(),
+                         "checkOutTime", booking.getCheckOutTime()
+                   ))
+                   .collect(Collectors.toList());
+  }
+
+  private boolean hasTimeConflict(Integer roomId, LocalDateTime checkIn, LocalDateTime checkOut,
+        Integer excludeBookingId) {
+    List<Booking> bookings = repository.findBookingsByRoomIdAndDateRange(roomId, checkIn, checkOut);
+    return bookings.stream()
+                   .filter(b -> excludeBookingId == null || !b.getId().equals(excludeBookingId))
+                   .anyMatch(b -> !(b.getCheckOutTime().isBefore(checkIn) || b.getCheckInTime().isAfter(checkOut)));
   }
 
   @Override
