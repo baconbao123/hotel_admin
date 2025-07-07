@@ -129,7 +129,7 @@ public class AuthUserService {
   }
 
   public Boolean register(UserAuth.UserRegister register) {
-    if(userRepository.existsByEmail(register.getEmail())) {
+    if (userRepository.existsByEmail(register.getEmail())) {
       throw new AppException(ErrorCode.FIELD_EXISTED, "Email");
     }
 
@@ -139,13 +139,13 @@ public class AuthUserService {
     }
 
 
-
     var user = User.builder()
                    .fullName(register.getFullName())
                    .email(register.getEmail())
                    .password(passwordEncoder.encode(register.getPassword()))
                    .userType(3)
                    .avatarUrl(avatarStr)
+                   .status(true)
                    .phoneNumber(register.getPhoneNumber())
                    .build();
 

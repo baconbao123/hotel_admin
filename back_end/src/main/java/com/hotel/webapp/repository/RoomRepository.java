@@ -25,8 +25,7 @@ public interface RoomRepository extends BaseRepository<Rooms, Integer> {
   Page<Rooms> findHotelOwnerByHotelId(Integer userId, Specification<Rooms> spec, Pageable pageable);
 
   // user
-  @Query("select min(r.priceNight) from Rooms r " +
-        "where r.hotelId = :hotelId and r.deletedAt is null")
+  @Query("SELECT COALESCE(MIN(r.priceNight), null) FROM Rooms r WHERE r.hotelId = :hotelId AND r.deletedAt IS NULL")
   BigDecimal findPriceNightByHotelId(int hotelId);
 
   @Query("select min(r.priceNight), max(r.priceNight) " +

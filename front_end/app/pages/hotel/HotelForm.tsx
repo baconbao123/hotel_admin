@@ -99,7 +99,7 @@ export default function HotelForm({
 
   const provinces = commonData.provinces;
   const hotelTypes = commonData.hotelTypes;
-  const hotelFacilities = commonData.hotelTypes;
+  const hotelFacilities = commonData.hotelFacilities;
   const hotelDocuments = commonData.documentTypes;
 
   const dispatch: AppDispatch = useDispatch();
@@ -187,7 +187,7 @@ export default function HotelForm({
     formData.append("provinceCode", selectedProvince?.code || "");
     formData.append("note", note || "");
     formData.append("noteHotel", hotelNote || "");
-    formData.append("ownerId", ownerId?.id || null);
+    formData.append("ownerId", ownerId?.id || "");
 
     // Avatar
     formData.append("avatar.keepAvatar", keepAvatar);
