@@ -8,6 +8,7 @@ import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -30,4 +31,15 @@ public class RoomRes {
   String updatedName;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;
+
+  List<RoomFacilities> roomFacilities;
+
+  @Getter
+  @Setter
+  @AllArgsConstructor
+  @FieldDefaults(level = AccessLevel.PRIVATE)
+  public static class RoomFacilities {
+    Integer id;
+    String name;
+  }
 }

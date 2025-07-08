@@ -45,6 +45,7 @@ public class HotelDTO {
 
   // document
   @Valid
+  @FieldNotEmpty(field = "Document")
   List<DocumentReq> documents;
 
   // images ---
@@ -53,6 +54,7 @@ public class HotelDTO {
 
   // avatar ---
   @Valid
+  @FieldNotEmpty(field = "Avatar")
   AvatarReq avatar;
 
   // policy ---
@@ -92,9 +94,10 @@ public class HotelDTO {
     String documentName;
     @FieldNotEmpty(field = "Document Type")
     Integer typeId;
-    @MultipartFileCheckEmptyAndSize(field = "Document file", value = 1)
+    @MultipartFileCheckEmptyAndSize(field = "Document file", value = 1, force = false)
     MultipartFile documentUrl;
     String existingDocumentUrl;
+    Boolean keepDocument = true;
   }
 
   @Getter
