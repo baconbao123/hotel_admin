@@ -44,6 +44,5 @@ public class UserAuth {
     @Trim
     String phoneNumber;
     MultipartFile avatar;
-
   }
 }
