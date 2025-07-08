@@ -3,6 +3,7 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
+import { AutoComplete } from "primereact/autocomplete";
 import { useCommonData } from "~/hook/useCommonData";
 import { useAppDispatch } from "~/store"; // Import useAppDispatch from your store
 import { fetchCommonData } from "~/store/slice/commonDataSlice"; // Adjust path if needed
@@ -17,7 +18,29 @@ interface Props {
   updateItem: (id: string, data: object | FormData) => Promise<any>;
   error: Object | null;
 }
-
+//Danh sách 20 icon phù hợp, không trùng lặp, chắc chắn hiển thị tốt với PrimeIcons
+const hotelIcons = [
+  { label: "WiFi", value: "pi pi-wifi" },
+  { label: "Parking", value: "pi pi-car" },
+  { label: "Swimming Pool", value: "pi pi-home" },
+  { label: "Restaurant", value: "pi pi-shopping-cart" },
+  { label: "Gym", value: "pi pi-heart" },
+  { label: "Spa", value: "pi pi-star" },
+  { label: "Bar", value: "pi pi-glass" },
+  { label: "Room Service", value: "pi pi-bell" },
+  { label: "Laundry", value: "pi pi-refresh" },
+  { label: "Air Conditioning", value: "pi pi-snowflake" },
+  { label: "TV", value: "pi pi-desktop" },
+  { label: "Safe", value: "pi pi-lock" },
+  { label: "Mini Bar", value: "pi pi-bolt" },
+  { label: "Balcony", value: "pi pi-window-maximize" },
+  { label: "Ocean View", value: "pi pi-eye" },
+  { label: "Business Center", value: "pi pi-briefcase" },
+  { label: "Conference Room", value: "pi pi-users" },
+  { label: "Shuttle Service", value: "pi pi-send" },
+  { label: "Security", value: "pi pi-shield" },
+  { label: "Pet Friendly", value: "pi pi-paw" },
+];
 export default function FacilityForm({
   id,
   open,
@@ -32,6 +55,7 @@ export default function FacilityForm({
   const [icon, setIcon] = useState("");
   const [type, setType] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [filteredIcons, setFilteredIcons] = useState(hotelIcons);
 
   const { commonData } = useCommonData(["facilitiestype"]);
 
@@ -43,6 +67,7 @@ export default function FacilityForm({
     setName("");
     setIcon("");
     setType(null);
+    setFilteredIcons(hotelIcons);
   };
 
   useEffect(() => {
@@ -111,6 +136,14 @@ export default function FacilityForm({
 
   const getError = (field: string) =>
     (error && typeof error === "object" && (error as any)[field]) || null;
+
+  const searchIcon = (event: any) => {
+    const query = event.query.toLowerCase();
+    const filtered = hotelIcons.filter((icon) =>
+      icon.label.toLowerCase().includes(query) || icon.value.toLowerCase().includes(query)
+    );
+    setFilteredIcons(filtered);
+  };
 
   const header = mode === "edit" ? "EDIT" : "ADD";
 
@@ -209,21 +242,54 @@ export default function FacilityForm({
               >
                 Icon <span className="text-red-500">*</span>
               </label>
-              <div className="relative">
-                <InputText
-                  id="icon"
-                  value={icon}
-                  onChange={(e) => setIcon(e.target.value)}
-                  disabled={submitting}
-                  placeholder="e.g. pi pi-check"
-                  className="w-full"
-                />
-                {icon && (
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
-                    <i className={`${icon} text-xl`} />
-                  </span>
-                )}
+              <InputText
+                id="icon"
+                value={icon}
+                onChange={e => setIcon(e.target.value)}
+                placeholder="Type to search or enter custom icon class"
+                className={`w-full border rounded-lg focus:ring-2 focus:ring-blue-500 ${getError("icon") ? "p-invalid" : ""}`}
+                disabled={submitting}
+                style={{ marginBottom: '8px' }}
+              />
+              {/* Grid icon */}
+              <div className="grid grid-cols-5 gap-2 mb-2">
+                {hotelIcons
+                  .filter(i =>
+                    !icon ||
+                    i.label.toLowerCase().includes(icon.toLowerCase()) ||
+                    i.value.toLowerCase().includes(icon.toLowerCase())
+                  )
+                  .map(i => (
+                    <button
+                      type="button"
+                      key={i.value}
+                      className={`flex flex-col items-center justify-center p-2 border rounded hover:bg-blue-100 transition-all ${icon === i.value ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
+                      onClick={() => {
+                        setIcon(i.value);
+                        if (!name) setName(i.label);
+                      }}
+                      tabIndex={-1}
+                      style={{ outline: 'none' }}
+                    >
+                      <i className={`${i.value} text-xl mb-1`} />
+                      <span className="text-xs text-center whitespace-nowrap">{i.label}</span>
+                    </button>
+                  ))}
               </div>
+              {icon && (
+                <div className="mt-2 flex items-center gap-2 text-sm text-gray-600">
+                  <span>Preview:</span>
+                  <i className={`${icon} text-lg`} />
+                  <span className="font-mono text-xs bg-gray-100 px-2 py-1 rounded">
+                    {icon}
+                  </span>
+                </div>
+              )}
+              {getError("icon") && (
+                <small className="text-red-600 text-xs mt-1 block">
+                  {getError("icon")}
+                </small>
+              )}
             </div>
           </div>
         </div>

@@ -52,6 +52,7 @@ public class HomeRes {
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class HotelRes {
       Integer id;
+      String name;
       String avatarUrl;
       String address;
       List<FacilitiesRes> facilities;
