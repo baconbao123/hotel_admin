@@ -69,7 +69,6 @@ export default function HotelForm({
   const [selectedWard, setSelectedWard] = useState<LocalResponse | null>(null);
   const [selectedStreet, setSelectedStreet] = useState<any>(null);
   const [hotelNote, setHotelNote] = useState("");
-
   const [streetNumber, setStreetNumber] = useState("");
   const [documents, setDocuments] = useState<any>([
     {
@@ -84,7 +83,6 @@ export default function HotelForm({
   const [policyId, setPolicyId] = useState("0");
   const [policyName, setPolicyName] = useState("");
   const [policyDescription, setPolicyDescription] = useState("");
-  // Owner
   const [ownerId, setOwnerId] = useState<any>(null);
   const [keyword, setKeyword] = useState("");
   const [owners, setOwners] = useState<any>([]);
@@ -105,13 +103,12 @@ export default function HotelForm({
 
   const dispatch: AppDispatch = useDispatch();
 
-  // owner
   const loadOwners = async (keyword = "", page = 0) => {
     const result = await dispatch(
       fetchCommonData({
         types: ["owners"],
         force: true,
-        params: { keyword, pageOwner: pageOwner },
+        params: { keyword, pageOwner: page },
       })
     );
 
@@ -137,7 +134,6 @@ export default function HotelForm({
     setExistingImages((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // Document
   const addDocument = () => {
     setDocuments([
       ...documents,
@@ -147,6 +143,7 @@ export default function HotelForm({
         typeId: null,
         documentUrl: null,
         existingDocumentUrl: null,
+        keepDocument: mode === "edit", // Default to false for create mode
       },
     ]);
   };
@@ -169,7 +166,6 @@ export default function HotelForm({
     typeof error === "object" &&
     (error as Record<string, string>)[field];
 
-  // submit
   const submit = async () => {
     setSubmitting(true);
 
@@ -193,7 +189,6 @@ export default function HotelForm({
     formData.append("noteHotel", hotelNote || "");
     formData.append("ownerId", ownerId?.id || "");
 
-    // Avatar
     // Avatar
     formData.append("avatar.keepAvatar", keepAvatar);
     if (keepAvatar === "false" && selectedFile) {
@@ -220,7 +215,6 @@ export default function HotelForm({
     });
 
     // Facilities
-    console.log("Submitting Facilities:", selectedFacilies);
     selectedFacilies.forEach((facilityId) => {
       if (typeof facilityId === "number" && !isNaN(facilityId)) {
         formData.append("facilities", facilityId.toString());
@@ -230,7 +224,6 @@ export default function HotelForm({
     });
 
     // Types
-    console.log("Submitting Types:", selectedTypes);
     selectedTypes.forEach((typeId) => {
       if (typeof typeId === "number" && !isNaN(typeId)) {
         formData.append("typeIds", typeId.toString());
@@ -242,20 +235,22 @@ export default function HotelForm({
     // Documents
     documents.forEach((doc: any, index: any) => {
       if (doc.documentName && doc.typeId !== null && doc.typeId !== undefined) {
-        if (doc.documentId) {
+        // Common fields for both create and edit
+        formData.append(`documents[${index}].documentName`, doc.documentName);
+        formData.append(`documents[${index}].typeId`, doc.typeId.toString());
+
+        // Fields specific to edit mode
+        if (id && doc.documentId != null) {
           formData.append(
             `documents[${index}].documentId`,
             doc.documentId.toString()
           );
         }
-        formData.append(`documents[${index}].documentName`, doc.documentName);
-        formData.append(`documents[${index}].typeId`, doc.typeId.toString());
-        formData.append(
-          `documents[${index}].keepDocument`,
-          doc.keepDocument.toString()
-        );
-
-        if (doc.keepDocument && doc.existingDocumentUrl) {
+        if (id && doc.keepDocument && doc.existingDocumentUrl) {
+          formData.append(
+            `documents[${index}].keepDocument`,
+            doc.keepDocument.toString()
+          );
           formData.append(
             `documents[${index}].existingDocumentUrl`,
             doc.existingDocumentUrl
@@ -529,7 +524,6 @@ export default function HotelForm({
       setSelectedFile(null);
       setAvatarUrl(null);
       setKeepAvatar("false");
-
       setExistingImages([]);
       setSelectedProvince(null);
       setSelectedDistrict(null);
@@ -544,6 +538,7 @@ export default function HotelForm({
           typeId: null,
           documentUrl: null,
           existingDocumentUrl: null,
+          keepDocument: false, // Default to false for create mode
         },
       ]);
       setPolicyId("0");
@@ -840,7 +835,6 @@ export default function HotelForm({
                     )}
                   </div>
 
-                  {/* Facilities */}
                   <div>
                     <label
                       htmlFor="facilities"
@@ -872,10 +866,8 @@ export default function HotelForm({
                 </div>
               </div>
 
-              {/* Owner + Hotel note */}
               <div className="mt-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Hotel type */}
                   <div>
                     <label
                       htmlFor="type"
@@ -911,7 +903,6 @@ export default function HotelForm({
                       }}
                       filterBy="fullName"
                     />
-
                     {getError("ownerId") && (
                       <small className="text-red-500 text-xs mt-1">
                         {getError("ownerId")}
@@ -919,7 +910,6 @@ export default function HotelForm({
                     )}
                   </div>
 
-                  {/* Hotel Note */}
                   <div>
                     <label
                       htmlFor="facilities"
@@ -946,7 +936,6 @@ export default function HotelForm({
               </div>
             </div>
 
-            {/* Documents */}
             <div className="col-span-12 mt-4">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
                 Document & Policy Information
@@ -1040,23 +1029,25 @@ export default function HotelForm({
                         disabled={submitting}
                       />
                     </div>
-                    <div>
-                      <label
-                        htmlFor={`keepDocument-${index}`}
-                        className="block text-sm font-medium text-gray-700 mb-1"
-                      >
-                        Keep Existing Document
-                      </label>
-                      <InputSwitch
-                        id={`keepDocument-${index}`}
-                        checked={doc.keepDocument}
-                        onChange={(e) =>
-                          updateDocument(index, "keepDocument", e.value)
-                        }
-                        disabled={submitting || !doc.existingDocumentUrl}
-                      />
-                    </div>
-                    {!doc.keepDocument && (
+                    {id && doc.existingDocumentUrl && (
+                      <div>
+                        <label
+                          htmlFor={`keepDocument-${index}`}
+                          className="block text-sm font-medium text-gray-700 mb-1"
+                        >
+                          Keep Existing Document
+                        </label>
+                        <InputSwitch
+                          id={`keepDocument-${index}`}
+                          checked={doc.keepDocument}
+                          onChange={(e) =>
+                            updateDocument(index, "keepDocument", e.value)
+                          }
+                          disabled={submitting || !doc.existingDocumentUrl}
+                        />
+                      </div>
+                    )}
+                    {(!id || !doc.keepDocument) && (
                       <div>
                         <label
                           htmlFor={`documentUpload-${index}`}
@@ -1111,7 +1102,7 @@ export default function HotelForm({
                         </div>
                       </div>
                     )}
-                    {doc.keepDocument && doc.existingDocumentUrl && (
+                    {id && doc.keepDocument && doc.existingDocumentUrl && (
                       <div className="flex items-center gap-2 text-sm text-blue-500">
                         <i
                           className="pi pi-file-pdf"
@@ -1154,7 +1145,6 @@ export default function HotelForm({
               </button>
             </div>
 
-            {/* Policy */}
             <div className="col-span-12">
               <h4 className="text-md font-semibold text-gray-800 mb-2">
                 Policy
@@ -1209,7 +1199,6 @@ export default function HotelForm({
               </div>
             </div>
 
-            {/* Address */}
             <div className="col-span-12 mt-4">
               <h3 className="text-lg font-semibold text-gray-800 mb-2">
                 Address Information
@@ -1362,7 +1351,6 @@ export default function HotelForm({
               </div>
             </div>
 
-            {/* Status */}
             <div className="col-span-12 flex items-center gap-4 mt-4">
               <label
                 htmlFor="status"

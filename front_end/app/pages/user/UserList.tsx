@@ -13,12 +13,13 @@ import UserDetail from "./UserDetail";
 import { Skeleton } from "primereact/skeleton";
 import { SkeletonTemplate } from "~/components/common/skeleton";
 import noImg from "@/asset/images/no-img.png";
-import UserForm from "./UserForm";
+// import UserForm from "./UserForm";
 import { useSelector } from "react-redux";
 import { useAppDispatch, type RootState } from "~/store";
 import { fetchCommonData } from "~/store/slice/commonDataSlice";
 import { toast } from "react-toastify";
 import type { Route } from "./+types/UserList";
+import UserForm from "./UserForm";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -63,7 +64,9 @@ export default function UserList() {
     sortField,
     sortOrder,
     permissionPage
-  } = useCrud("/user", undefined, undefined, 'User');
+  // } = useCrud("/user", undefined, undefined, 'User');
+  } = useCrud("/user");
+
 
   useEffect(() => {
     setMounted(true);

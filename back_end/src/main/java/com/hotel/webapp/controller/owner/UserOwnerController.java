@@ -25,7 +25,7 @@ public class UserOwnerController {
 
   // find-all customer
   @GetMapping("/profile")
-  public ApiResponse<UserRes.UserProfileRes> findProfileLogin() {
+  public ApiResponse<UserRes.UserProfileRes> findOwnerProfileLogin() {
     return ApiResponse.<UserRes.UserProfileRes>builder()
                       .result(userService.findProfile())
                       .build();

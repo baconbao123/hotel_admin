@@ -43,7 +43,7 @@ public class HotelOwnerDTO {
   List<DocumentReq> documents;
 
   // images ---
-  @MultipartFileCheckEmptyAndSize(field = "Images", value = 3, force = false)
+  @MultipartFileCheckEmptyAndSize(field = "Images", value = 100, force = false)
   List<ImagesReq> images;
 
   // avatar ---
@@ -96,7 +96,8 @@ public class HotelOwnerDTO {
     List<DocumentReqUpdate> documents;
 
     // images ---
-    @MultipartFileCheckEmptyAndSize(field = "Images", value = 3, force = false)
+    @MultipartFileCheckEmptyAndSize(field = "Images", value = 100, force =
+          false)
     List<ImagesReq> images;
 
     // avatar ---
@@ -121,7 +122,8 @@ public class HotelOwnerDTO {
       String documentName;
       @FieldNotEmpty(field = "Document Type")
       Integer typeId;
-      @MultipartFileCheckEmptyAndSize(field = "Document file", value = 1, force = false)
+      @MultipartFileCheckEmptyAndSize(field = "Document file", value = 100,
+            force = false)
       MultipartFile documentUrl;
       Boolean keepDocumentUrl = true;
     }
@@ -131,7 +133,8 @@ public class HotelOwnerDTO {
     @FieldDefaults(level = AccessLevel.PRIVATE)
     public static class AvatarUpdateReq {
       String keepAvatar = "false";
-      @MultipartFileCheckEmptyAndSize(field = "avatar", value = 1, force = false)
+      @MultipartFileCheckEmptyAndSize(field = "avatar", value = 100, force =
+            false)
       MultipartFile avatarUrl;
       String existingAvatarUrl;
     }
@@ -143,7 +146,8 @@ public class HotelOwnerDTO {
   @FieldDefaults(level = AccessLevel.PRIVATE)
   public static class AvatarReq {
     String keepAvatar = "false";
-    @MultipartFileCheckEmptyAndSize(field = "avatar", value = 1, force = false)
+    @MultipartFileCheckEmptyAndSize(field = "avatar", value = 100, force =
+          false)
     MultipartFile avatarUrl;
     String existingAvatarUrl;
   }
@@ -166,7 +170,7 @@ public class HotelOwnerDTO {
     String documentName;
     @FieldNotEmpty(field = "Document Type")
     Integer typeId;
-    @MultipartFileCheckEmptyAndSize(field = "Document file", value = 1)
+    @MultipartFileCheckEmptyAndSize(field = "Document file", value = 100)
     MultipartFile documentUrl;
     Boolean keepDocumentUrl = true;
   }

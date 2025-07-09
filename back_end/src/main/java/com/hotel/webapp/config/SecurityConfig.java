@@ -28,7 +28,7 @@ public class SecurityConfig {
 
   public static final String[] PUBLIC_URLS = {
         "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**", "/api/auth/**", "/public/**", "/upload/**", "/user/**",
-        "/owner/api/auth/**"
+        "/owner/api/auth/**", "/payment/**"
   };
 
   public static final String[] AUTHENTICATED_PUBLIC_URLS = {
@@ -80,7 +80,7 @@ public class SecurityConfig {
   CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(List.of("http://localhost:9898", "http://localhost:5173", "http://localhost:5174"
-          , "http://localhost:8080"));
+          , "http://localhost:5175"));
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     configuration.setAllowedHeaders(List.of("*"));
     configuration.setAllowCredentials(true);
