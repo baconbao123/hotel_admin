@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 public class BookingDTO {
   @FieldNotEmpty(field = "Customer")
   Integer userId;
-  @FieldNotEmpty(field = "Room")
   Integer roomId;
   @FieldNotEmpty(field = "Check In Time")
   LocalDateTime checkInTime;
@@ -37,27 +36,4 @@ public class BookingDTO {
   String notePayment;
   @FieldNotEmpty(field = "Status")
   Boolean statusPayment;
-
-  @Getter
-  @Setter
-  @FieldDefaults(level = AccessLevel.PRIVATE)
-  public static class UserBookingDTO {
-    @FieldNotEmpty(field = "Customer")
-    Integer userId;
-    @FieldNotEmpty(field = "Room")
-    Integer roomId;
-    @FieldNotEmpty(field = "Check In Time")
-    LocalDateTime checkInTime;
-    @FieldNotEmpty(field = "Check Out Time")
-    LocalDateTime checkOutTime;
-    String note;
-
-    //  payment
-    @FieldNotEmpty(field = "Method")
-    Integer methodId;
-    @FieldNotEmpty(field = "Amount")
-    BigDecimal amount;
-    String notePayment;
-  }
-
 }

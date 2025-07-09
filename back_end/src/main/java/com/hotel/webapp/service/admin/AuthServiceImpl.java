@@ -63,10 +63,6 @@ public class AuthServiceImpl implements AuthService {
                              .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
     boolean authenticated = passwordEncoder.matches(authReq.getPassword(), user.getPassword());
 
-    if (userRepository.checkUserHaveRoleOwner(user.getId())) {
-      throw new AppException(ErrorCode.ACCESS_DENIED);
-    }
-
     if (!authenticated) {
       throw new AppException(ErrorCode.AUTHENTICATION_FAILED);
     }

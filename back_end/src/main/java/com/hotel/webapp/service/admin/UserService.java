@@ -288,23 +288,6 @@ public class UserService extends BaseServiceImpl<User, Integer, UserDTO, UserRep
     );
   }
 
-  public UserRes.UserFEProfileRes findUserProfile() {
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    var username = auth.getName();
-
-    User user = repository.findByEmail(username)
-                          .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Not Found Profile"));
-
-
-    return new UserRes.UserFEProfileRes(
-          user.getId(),
-          user.getFullName(),
-          user.getEmail(),
-          user.getPhoneNumber(),
-          user.getAvatarUrl()
-    );
-  }
-
   // check email already existed
   @Transactional
   public boolean existsByEmail(String email) {

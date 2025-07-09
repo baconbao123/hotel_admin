@@ -20,7 +20,6 @@ public class RoomDTO {
 
   String keepAvatar;
   MultipartFile roomAvatar;
-  String existingroomAvatar;
 
   @FieldNotEmpty(field = "Hotel")
   Integer hotelId;

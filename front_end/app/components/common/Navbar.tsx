@@ -195,6 +195,7 @@ export default function Navbar() {
                     : undefined
                 }
                 onFileChange={(file) => setSelectedFile(file)}
+                maxFileSize={100}
               />
             </div>
 

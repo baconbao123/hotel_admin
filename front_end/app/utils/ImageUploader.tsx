@@ -12,6 +12,7 @@ type RcFile = import("antd/es/upload").RcFile;
 interface ImageUploaderProp {
   initialImageUrl?: string;
   onFileChange: (file: RcFile | null) => void;
+  maxFileSize?: number;
   disabled?: boolean;
 }
 
@@ -31,8 +32,9 @@ const ImageUploader: React.FC<ImageUploaderProp> = ({
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState("");
   const [fileList, setFileList] = useState<UploadFile[]>([]);
-  const hasUploadedFile = useRef(false);
+  const hasUploadedFile = useRef(false); // Track if a file has been uploaded
 
+  // Sync fileList with initialImageUrl only when no file has been uploaded
   useEffect(() => {
     console.log("ImageUploader: initialImageUrl =", initialImageUrl);
     if (initialImageUrl && !hasUploadedFile.current) {

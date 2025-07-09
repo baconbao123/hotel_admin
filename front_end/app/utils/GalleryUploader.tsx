@@ -12,6 +12,7 @@ interface GalleryUploaderProps {
   initialImageUrls?: string[];
   onFilesChange: (files: RcFile[]) => void;
   onRemoveExistingImage?: (index: number) => void;
+  maxFileSize?: number;
   disabled?: boolean;
   maxCount?: number;
 }

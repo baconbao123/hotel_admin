@@ -259,18 +259,16 @@ public class PermissionService extends BaseServiceImpl<Permissions, Integer, Map
     SignedJWT signedJWT = authService.verifyToken(token.replace("Bearer ", ""));
     Integer userId = signedJWT.getJWTClaimsSet().getIntegerClaim("userId");
 
-    User user = userRepository.findById(userId)
-                              .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
+    User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
 
     if (user.getEmail().equals("sa@gmail.com")) {
       return true;
     }
 
-    boolean isHavePermissionHotel = permissionsRepository.hasPermissionHotel(userId);
-    boolean isHaveRoleOwner = userRepository.checkUserHaveRoleOwner(userId);
+    log.error("check permission hotel in module admin: " + !permissionsRepository.hasPermissionHotel(userId));
 
-    if (!isHavePermissionHotel && !isHaveRoleOwner) {
-      throw new AppException(ErrorCode.ACCESS_DENIED, "You do not have permission to access hotels");
+    if (!permissionsRepository.hasPermissionHotel(userId)) {
+      throw new AppException(ErrorCode.ACCESS_DENIED);
     }
 
     return true;

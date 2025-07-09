@@ -14,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -79,10 +78,12 @@ public class BookingController {
   @GetMapping("/{roomId}/booked-hours")
   public ApiResponse<List<Map<String, LocalDateTime>>> getBookedHours(
         @PathVariable Integer roomId,
-        @RequestParam(required = false) LocalDate startOfDay) {
-    LocalDate date = startOfDay != null ? startOfDay : LocalDate.now();
+        @RequestParam String date
+  ) {
+    LocalDateTime startOfDay = LocalDateTime.parse(date + "T00:00:00");
+    LocalDateTime endOfDay = startOfDay.plusDays(1);
     return ApiResponse.<List<Map<String, LocalDateTime>>>builder()
-                      .result(bookingService.getBookedHours(roomId, date))
+                      .result(bookingService.getBookedHours(roomId, startOfDay, endOfDay))
                       .build();
   }
 }

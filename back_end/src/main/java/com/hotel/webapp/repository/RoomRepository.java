@@ -36,7 +36,7 @@ public interface RoomRepository extends BaseRepository<Rooms, Integer> {
 
   @Query("select new com.hotel.webapp.dto.response.owner.RoomRes(r.id, r.name, r.roomAvatar, h.name, r.roomArea, " +
         "r.roomNumber, rt.name, r.priceHour, r.priceNight, r.limitPerson, r.description, r.status, u1.fullName, " +
-        "u2.fullName, r.createdAt, r.updatedAt, null )" +
+        "u2.fullName, r.createdAt, r.updatedAt)" +
         "from Rooms r " +
         "join Hotels h on h.id = r.hotelId " +
         "join RoomType rt on rt.id = r.roomType " +
@@ -44,12 +44,6 @@ public interface RoomRepository extends BaseRepository<Rooms, Integer> {
         "left join User u2 on r.updatedBy = u2.id " +
         "where r.id = :id and r.deletedAt is null ")
   RoomRes findRoomById(Integer id);
-
-  @Query("select f.id, f.name  from MapRoomFacility mrf " +
-        "join Rooms r on mrf.roomId = r.id " +
-        "join Facilities f on f.id = mrf.facilityId " +
-        "where r.id = :roomId and mrf.deletedAt is null and r.deletedAt is null and f.deletedAt is null ")
-  List<Object[]> findFacilitiesByRoomId(Integer roomId);
 
   // user
   @Query("select r.id, r.name, h.addressId, r.description, r.roomArea, r.priceHour, r.priceNight, rt.name, " +
