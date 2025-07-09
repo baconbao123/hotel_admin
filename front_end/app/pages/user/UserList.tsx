@@ -40,7 +40,6 @@ export default function UserList() {
 
   const dispatch = useAppDispatch();
 
-
   const {
     data,
     tableLoading,
@@ -63,10 +62,8 @@ export default function UserList() {
     filters,
     sortField,
     sortOrder,
-    permissionPage
-  // } = useCrud("/user", undefined, undefined, 'User');
-  } = useCrud("/user");
-
+    permissionPage,
+  } = useCrud("/user", undefined, undefined, "User");
 
   useEffect(() => {
     setMounted(true);
@@ -92,13 +89,12 @@ export default function UserList() {
       return false; // User canceled or denied
     } catch (error) {
       console.error("Error during delete operation:", error);
-      toast.error('Delete failed', {
-        autoClose: 3000
+      toast.error("Delete failed", {
+        autoClose: 3000,
       });
       return false; // Delete failed due to error
     }
   }
-
 
   const statusBody = (row: any) => (
     <div className="flex justify-center">
@@ -290,7 +286,7 @@ export default function UserList() {
                             );
                             if (fetchCommonData.rejected.match(result)) {
                               toast.error("Failed to refresh room data", {
-                                autoClose: 3000
+                                autoClose: 3000,
                               });
                             }
                             await updatePageData(page, pageSize);
