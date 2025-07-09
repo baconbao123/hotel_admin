@@ -45,4 +45,23 @@ public class UserAuth {
     String phoneNumber;
     MultipartFile avatar;
   }
+
+  @Getter
+  @Setter
+  @AllArgsConstructor
+  @NoArgsConstructor
+  @FieldDefaults(level = AccessLevel.PRIVATE)
+  public static class UserUpdateProfile {
+    @FieldAndCheckRegexp(field = "Email", notice = "Enter a valid email (example: a@gmail.com)",
+          force = ForceType.MANDATORY, regex = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$")
+    @Trim
+    String email;
+    @FieldNotEmpty(field = "fullname")
+    String fullName;
+    @FieldAndCheckRegexp(field = "Phone Number", notice = "Phone number must be exactly 10 digits",
+          force = ForceType.MANDATORY, regex = "^(\\(\\d{3}\\)|\\d{3})-?\\d{3}-?\\d{4}$")
+    @Trim
+    String phoneNumber;
+    MultipartFile avatar;
+  }
 }

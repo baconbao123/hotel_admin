@@ -75,7 +75,7 @@ public class UserController {
   }
 
   @GetMapping("/profile")
-  public ApiResponse<UserRes.UserProfileRes> findProfileLogin() {
+  public ApiResponse<UserRes.UserProfileRes> findProfileAdminLogin() {
     return ApiResponse.<UserRes.UserProfileRes>builder()
                       .result(userService.findProfile())
                       .build();
