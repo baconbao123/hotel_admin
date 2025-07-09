@@ -32,14 +32,14 @@ public enum ErrorCode {
 
   // Exceeds
   IMG_EXCEEDS(400, "Maximum of {maxSize} images", HttpStatus.BAD_REQUEST),
-  IMG_SIZE_EXCEEDS(400, "Maximum upload size 1MB exceeded", HttpStatus.BAD_REQUEST),
+  IMG_SIZE_EXCEEDS(400, "Maximum upload size 100MB exceeded", HttpStatus.BAD_REQUEST),
 
   // Not Active
   NOT_ACTIVE(400, "%s is not active", HttpStatus.BAD_REQUEST),
 
   //  NOT EMPTY
   FIELD_NOT_EMPTY(422, "{field} is required", HttpStatus.UNPROCESSABLE_ENTITY),
-  IMAGES_SIZE_EXCEEDED(422, "{field} in invalid. Minium is 1 and maximum allowed is {0}",
+  IMAGES_SIZE_EXCEEDED(422, "{field} in invalid. Minium is 100 and maximum allowed is {0}",
         HttpStatus.UNPROCESSABLE_ENTITY),
 
   // TOKEN

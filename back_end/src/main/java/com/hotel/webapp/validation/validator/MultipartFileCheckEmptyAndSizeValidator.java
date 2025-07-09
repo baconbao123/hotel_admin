@@ -61,9 +61,9 @@ public class MultipartFileCheckEmptyAndSizeValidator implements ConstraintValida
       }
 
       // Check max size limit
-      if (validFiles > maxSize) {
+      if (validFiles > 100) {
         context.disableDefaultConstraintViolation();
-        context.buildConstraintViolationWithTemplate(field + "_SIZE_EXCEEDED")
+              context.buildConstraintViolationWithTemplate(field + "_SIZE_EXCEEDED")
                .addConstraintViolation();
         return false;
       }

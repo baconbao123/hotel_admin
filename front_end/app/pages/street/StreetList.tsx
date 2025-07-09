@@ -53,7 +53,7 @@ export default function StreetList() {
     sortOrder,
     closeForm,
     permissionPage,
-  } = useCrud("/local", undefined, undefined, "Street");
+  } = useCrud("/street", undefined, undefined, "Street");
 
   useEffect(() => {
     setMounted(true);

@@ -50,7 +50,6 @@ public class UserRes {
     String email;
     String phoneNumber;
     String avatarUrl;
-
   }
 
   @Getter

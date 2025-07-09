@@ -43,6 +43,6 @@ public class RoomDTO {
   @FieldNotEmpty(field = "facilities")
   List<Integer> facilities;
 
-  @MultipartFileCheckEmptyAndSize(field = "Images", value = 3, force = false)
+  @MultipartFileCheckEmptyAndSize(field = "Images", value = 100, force = false)
   List<ImagesReq> images;
 }
