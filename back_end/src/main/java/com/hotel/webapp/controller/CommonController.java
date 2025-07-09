@@ -3,6 +3,9 @@ package com.hotel.webapp.controller;
 import com.hotel.webapp.dto.response.ApiResponse;
 import com.hotel.webapp.dto.response.AttributeDataResponse;
 import com.hotel.webapp.service.admin.*;
+import com.hotel.webapp.service.owner.PaymentService;
+import com.hotel.webapp.service.owner.RoomService;
+import com.hotel.webapp.service.owner.UserOwnerService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -24,6 +27,9 @@ public class CommonController {
   PermissionService permissionService;
   HotelService hotelService;
   UserService userService;
+  PaymentService paymentService;
+  RoomService roomService;
+  UserOwnerService userOwnerService;
 
   @GetMapping("/common-data")
   public ApiResponse<AttributeDataResponse> getCommonData(
@@ -61,6 +67,18 @@ public class CommonController {
           break;
         case "usertypes":
           builder.userTypes(userService.findUserTypes());
+          break;
+        case "paymentmethods":
+          builder.paymentMethods(paymentService.findAllPayment());
+          break;
+        case "roomtypes":
+          builder.roomTypes(roomService.findRoomTypes());
+          break;
+        case "customers":
+          builder.customers(userOwnerService.findCustomer(keyword, pageOwner != null ? pageOwner : 0));
+          break;
+        case "pricesRoom":
+          builder.customers(userOwnerService.findCustomer(keyword, pageOwner != null ? pageOwner : 0));
           break;
         default:
           break;

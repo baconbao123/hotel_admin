@@ -16,6 +16,8 @@ import HotelForm from "./HotelForm";
 import HotelDetail from "./HotelDetail";
 import { Link } from "react-router";
 import type { Route } from "./+types/HotelList";
+import Cookies from "js-cookie";
+import $axios from "~/axios";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -54,13 +56,12 @@ export default function HotelList() {
     sortField,
     sortOrder,
     closeForm,
-    permissionPage
-  } = useCrud("/hotel", undefined, undefined, 'Hotel');
+    permissionPage,
+  } = useCrud("/hotel", undefined, undefined, "Hotel");
 
   useEffect(() => {
     setMounted(true);
   }, []);
-
 
   const handlePageChange = (e: any) => updatePageData(e.page, e.rows);
   const handleSortChange = (e: any) =>
@@ -74,8 +75,7 @@ export default function HotelList() {
       confirmButtonText: "Delete",
     }).then((result) => {
       if (result.isConfirmed) {
-        deleteItem(id)
-          .then(() => Swal.fire("Deleted!", "", "success"))
+        deleteItem(id).then(() => Swal.fire("Deleted!", "", "success"));
       }
     });
   };
@@ -96,18 +96,41 @@ export default function HotelList() {
     </div>
   );
 
-  const statusRoom = (row: any) => (
-    <div className="flex justify-center">
-      <Link to={`/room/${row.id}`}>
+  const statusRoom = (row: any) => {
+    const handleViewRooms = async () => {
+      try {
+        const token = Cookies.get("token");
+
+        const res = await $axios.get("/auth/me/permission-hotel", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (res.data === true) {
+          window.location.href = `http://localhost:5174/rooms/${row.id}`;
+        }
+      } catch (err: any) {
+        if (err.response?.status === 403) {
+          alert("You do not have access to this hotel.");
+        } else {
+          alert("An error occurred. Please try again.");
+        }
+      }
+    };
+
+    return (
+      <div className="flex justify-center">
         <Button
           label="View Rooms"
           severity="info"
           text
           style={{ color: "#0ea5e9" }}
+          onClick={handleViewRooms}
         />
-      </Link>
-    </div>
-  );
+      </div>
+    );
+  };
 
   return (
     <div className="main-container">
@@ -143,17 +166,16 @@ export default function HotelList() {
             <div className="col-span-4 2xl:col-span-1">
               <div className="flex flex-wrap gap-2 justify-end">
                 {permissionPage.create && (
-                     <Button
-                  label="Add new"
-                  className="btn_add_new"
-                  onClick={() => {
-                    setSelectedId(undefined);
-                    setFormMode("create");
-                    setOpenForm(true);
-                  }}
-                />
+                  <Button
+                    label="Add new"
+                    className="btn_add_new"
+                    onClick={() => {
+                      setSelectedId(undefined);
+                      setFormMode("create");
+                      setOpenForm(true);
+                    }}
+                  />
                 )}
-             
               </div>
             </div>
           </div>

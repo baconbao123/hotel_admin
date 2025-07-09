@@ -13,10 +13,12 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
@@ -30,6 +32,7 @@ public class AuthController {
 
   @PostMapping("/login")
   public ApiResponse<AuthResponse> authentication(@Valid @RequestBody AuthReq authReq) {
+    log.info("Auth admin check");
     return ApiResponse.<AuthResponse>builder()
                       .result(authService.authenticate(authReq))
                       .build();

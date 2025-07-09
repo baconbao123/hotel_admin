@@ -47,3 +47,8 @@ jwt:
   signerKey: "1miFxX59tPM31zfyscZTV1ovDPI+2RI6f7nxOPe0/9Cnblzms/A3CY9Jid7QyEa0"
   valid-duration: 86400 # seconds -> 1 day
   refreshable-duration: 604800 # seconds -> 7 days
+
+vnpay:
+  vnp_TmnCode: AIBIAS9A
+  vnpHashSecret: OZDJTCTJZ0MVOBYF6X05MM3VJV64W377
+  vnp_ApiUrl: https://sandbox.vnpayment.vn/tryitnow/apis/vnpay/

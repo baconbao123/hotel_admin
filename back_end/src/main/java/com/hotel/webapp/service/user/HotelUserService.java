@@ -27,7 +27,6 @@ public class HotelUserService {
   HotelImagesRepository hotelImagesRepository;
 
   public HotelUserRes getData(int hotelId) {
-    // Gọi truy vấn với hotelId
     List<Object[]> hotelObjs = hotelRepository.findHotelDetail(hotelId);
     if (hotelObjs.isEmpty()) {
       return null;
@@ -69,7 +68,7 @@ public class HotelUserService {
     // Group rooms by RoomType
     Map<String, List<HotelUserRes.TypeRes.RoomsRes>> typeMap = new HashMap<>();
     for (Object[] row : hotelObjs) {
-      if (row[8] != null) { // Check if room data exists (r.id is not null)
+      if (row[8] != null) {
         // Facilities - room
         List<Object[]> facilitiesByRoom = facilitiesRepository.findFacilitiesByRoomId((Integer) row[8]);
         Map<Integer, List<HomeRes.FacilitiesRes>> facilityRoomMap = new HashMap<>();

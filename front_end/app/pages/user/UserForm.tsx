@@ -55,7 +55,6 @@ export default function UserForm({
   const rolesData = commonData.roles ?? [];
   const userTypes = commonData.userTypes ?? [];
 
-
   const header = mode === "edit" ? "EDIT USER" : "ADD USER";
 
   const permissions = useSelector(
@@ -82,8 +81,10 @@ export default function UserForm({
           setSelectedRoles(selectedRoleIds);
         })
         .catch((error: any) => {
-          toast.error(error.response?.data?.message || "Failed to load user data", {autoClose: 3000})
-
+          toast.error(
+            error.response?.data?.message || "Failed to load user data",
+            { autoClose: 3000 }
+          );
         });
     } else {
       setFullName("");
@@ -139,7 +140,7 @@ export default function UserForm({
       formData.append("keepAvatar", "true");
     }
 
-    formData.append("userTypeId", selectedType?.id);
+    formData.append("userTypeId", selectedType?.id || "");
 
     selectedRoles.forEach((roleId) => {
       formData.append("rolesIds", roleId.toString());
@@ -148,16 +149,14 @@ export default function UserForm({
     try {
       if (id) {
         await updateItem(id, formData);
-        toast.success("User updated successfully", {autoClose: 3000})
-
+        toast.success("User updated successfully", { autoClose: 3000 });
       } else {
         await createItem(formData);
-        toast.success( "User created successfully", {autoClose: 3000})
-
+        toast.success("User created successfully", { autoClose: 3000 });
       }
       onClose();
     } catch (err: any) {
-      toast.error(err.message || "Failed to save user", {autoClose: 3000})
+      toast.error(err.message || "Failed to save user", { autoClose: 3000 });
     } finally {
       setSubmitting(false);
     }
@@ -176,7 +175,7 @@ export default function UserForm({
 
   const handleChangePassword = async () => {
     if (!passwordsMatch) {
-      toast.error( "Password don't match", {autoClose: 3000})
+      toast.error("Password don't match", { autoClose: 3000 });
 
       return;
     }
@@ -190,11 +189,12 @@ export default function UserForm({
         setNewPassword("");
         setConfirmPassword("");
         setViewChangePassword(false);
-        toast.success( "Password updated successfully", {autoClose: 3000})
+        toast.success("Password updated successfully", { autoClose: 3000 });
       }
     } catch (err: any) {
-
-      toast.error( err.message || "Failed to change password", {autoClose: 3000})
+      toast.error(err.message || "Failed to change password", {
+        autoClose: 3000,
+      });
     } finally {
       setSubmitting(false);
     }
@@ -208,7 +208,7 @@ export default function UserForm({
         header={header}
         footer={
           <div className="flex justify-center gap-2">
-            {hasPermission('change_password') && mode === "edit" && (
+            {hasPermission("change_password") && mode === "edit" && (
               <Button
                 severity="secondary"
                 raised
@@ -216,7 +216,6 @@ export default function UserForm({
                 onClick={() => setViewChangePassword(!viewChangePassword)}
                 style={{ color: "white" }}
               />
-
             )}
             <Button
               label="Close"
@@ -234,7 +233,6 @@ export default function UserForm({
               className="btn_submit"
               style={{ padding: "8px 40px" }}
             />
-   
           </div>
         }
         style={{ width: "50%", maxWidth: "95vw" }}
@@ -267,7 +265,6 @@ export default function UserForm({
                     : undefined
                 }
                 onFileChange={(file) => setSelectedFile(file)}
-                maxFileSize={100}
                 disabled={submitting}
               />
               {getError("avatar") && (
@@ -445,7 +442,6 @@ export default function UserForm({
 
                 {id && hasPermission("change_password") && (
                   <div className="mt-3">
-          
                     {viewChangePassword && (
                       <Dialog
                         header="Change Password"

@@ -58,6 +58,7 @@ public class HomeService {
       BigDecimal priceNight = roomRepository.findPriceNightByHotelId(h.getId());
       return new HomeRes.HotelsRes.HotelRes(
             h.getId(),
+            h.getName(),
             h.getAvatar(),
             addressString,
             facilityMap.getOrDefault(h.getId(), Collections.emptyList()),

@@ -13,12 +13,13 @@ import UserDetail from "./UserDetail";
 import { Skeleton } from "primereact/skeleton";
 import { SkeletonTemplate } from "~/components/common/skeleton";
 import noImg from "@/asset/images/no-img.png";
-import UserForm from "./UserForm";
+// import UserForm from "./UserForm";
 import { useSelector } from "react-redux";
 import { useAppDispatch, type RootState } from "~/store";
 import { fetchCommonData } from "~/store/slice/commonDataSlice";
 import { toast } from "react-toastify";
 import type { Route } from "./+types/UserList";
+import UserForm from "./UserForm";
 
 export function meta({}: Route.MetaArgs) {
   return [
@@ -38,7 +39,6 @@ export default function UserList() {
   );
 
   const dispatch = useAppDispatch();
-
 
   const {
     data,
@@ -62,8 +62,8 @@ export default function UserList() {
     filters,
     sortField,
     sortOrder,
-    permissionPage
-  } = useCrud("/user", undefined, undefined, 'User');
+    permissionPage,
+  } = useCrud("/user", undefined, undefined, "User");
 
   useEffect(() => {
     setMounted(true);
@@ -89,13 +89,12 @@ export default function UserList() {
       return false; // User canceled or denied
     } catch (error) {
       console.error("Error during delete operation:", error);
-      toast.error('Delete failed', {
-        autoClose: 3000
+      toast.error("Delete failed", {
+        autoClose: 3000,
       });
       return false; // Delete failed due to error
     }
   }
-
 
   const statusBody = (row: any) => (
     <div className="flex justify-center">
@@ -287,7 +286,7 @@ export default function UserList() {
                             );
                             if (fetchCommonData.rejected.match(result)) {
                               toast.error("Failed to refresh room data", {
-                                autoClose: 3000
+                                autoClose: 3000,
                               });
                             }
                             await updatePageData(page, pageSize);

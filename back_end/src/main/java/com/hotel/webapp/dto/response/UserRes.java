@@ -44,6 +44,18 @@ public class UserRes {
   @Setter
   @AllArgsConstructor
   @FieldDefaults(level = AccessLevel.PRIVATE)
+  public static class UserFEProfileRes {
+    Integer id;
+    String fullName;
+    String email;
+    String phoneNumber;
+    String avatarUrl;
+  }
+
+  @Getter
+  @Setter
+  @AllArgsConstructor
+  @FieldDefaults(level = AccessLevel.PRIVATE)
   public static class UserProfileRes {
     Integer id;
     String fullName;

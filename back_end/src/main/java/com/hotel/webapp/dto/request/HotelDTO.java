@@ -45,14 +45,16 @@ public class HotelDTO {
 
   // document
   @Valid
+  @FieldNotEmpty(field = "Document")
   List<DocumentReq> documents;
 
   // images ---
-  @MultipartFileCheckEmptyAndSize(field = "Images", value = 3, force = false)
+  @MultipartFileCheckEmptyAndSize(field = "Images", value = 200, force = false)
   List<ImagesReq> images;
 
   // avatar ---
   @Valid
+  @FieldNotEmpty(field = "Avatar")
   AvatarReq avatar;
 
   // policy ---
@@ -69,7 +71,7 @@ public class HotelDTO {
   @FieldDefaults(level = AccessLevel.PRIVATE)
   public static class AvatarReq {
     String keepAvatar = "false";
-    @MultipartFileCheckEmptyAndSize(field = "avatar", value = 1, force = false)
+    @MultipartFileCheckEmptyAndSize(field = "avatar", value = 100, force = false)
     MultipartFile avatarUrl;
     String existingAvatarUrl;
   }
@@ -92,9 +94,11 @@ public class HotelDTO {
     String documentName;
     @FieldNotEmpty(field = "Document Type")
     Integer typeId;
-    @MultipartFileCheckEmptyAndSize(field = "Document file", value = 1)
+    @MultipartFileCheckEmptyAndSize(field = "Document file", value = 100,
+          force = false)
     MultipartFile documentUrl;
     String existingDocumentUrl;
+    Boolean keepDocument = true;
   }
 
   @Getter

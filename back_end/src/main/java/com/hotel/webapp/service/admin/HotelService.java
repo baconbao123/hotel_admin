@@ -383,12 +383,18 @@ public class HotelService extends BaseServiceImpl<Hotels, Integer, HotelDTO, Hot
         documentsHotel.setName(req.getDocumentName());
         documentsHotel.setTypeId(req.getTypeId());
 
-        if (req.getDocumentUrl() != null && !req.getDocumentUrl().isEmpty()) {
-          documentsHotel.setDocumentUrl(storageFileService.uploadDocument(req.getDocumentUrl()));
-        } else if (req.getExistingDocumentUrl() != null && !req.getExistingDocumentUrl().isEmpty()) {
+        // Handle document URL based on keepDocument flag
+        if (req.getKeepDocument() && req.getExistingDocumentUrl() != null && !req.getExistingDocumentUrl().isEmpty()) {
+          // Keep existing document URL
           documentsHotel.setDocumentUrl(req.getExistingDocumentUrl());
-        } else if (req.getDocumentId() == null) {
-          throw new AppException(ErrorCode.FIELD_NOT_EMPTY, "Document URL");
+        } else if (!req.getKeepDocument() && req.getDocumentUrl() != null && !req.getDocumentUrl().isEmpty()) {
+          documentsHotel.setDocumentUrl(storageFileService.uploadDocument(req.getDocumentUrl()));
+        } else if (req.getDocumentId() == null && !req.getKeepDocument()) {
+          throw new AppException(ErrorCode.FIELD_NOT_EMPTY, "Document URL is required for new document");
+        } else if (req.getKeepDocument() && documentsHotel.getDocumentUrl() != null) {
+          documentsHotel.setDocumentUrl(documentsHotel.getDocumentUrl());
+        } else {
+          throw new AppException(ErrorCode.FIELD_NOT_EMPTY, "Document URL or existing URL is required");
         }
 
         documentsHotel.setUpdatedAt(LocalDateTime.now());
