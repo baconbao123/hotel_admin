@@ -60,16 +60,16 @@ public class HotelOwnerController {
                       .build();
   }
 
-  @GetMapping("/admin")
-  public ApiResponse<Page<HotelsRes>> getAllByAdmin(
-        @RequestParam(required = false) Map<String, String> filters,
-        @RequestParam(required = false) Map<String, String> sort,
-        @RequestParam int size,
-        @RequestParam int page,
-        String token
-  ) throws ParseException, JOSEException {
-    return ApiResponse.<Page<HotelsRes>>builder()
-                      .result(hotelService.findHotelsForAdmin(filters, sort, size, page, token))
-                      .build();
-  }
+//  @GetMapping("/admin")
+//  public ApiResponse<Page<HotelsRes>> getAllByAdmin(
+//        @RequestParam(required = false) Map<String, String> filters,
+//        @RequestParam(required = false) Map<String, String> sort,
+//        @RequestParam int size,
+//        @RequestParam int page,
+//        String token
+//  ) throws ParseException, JOSEException {
+//    return ApiResponse.<Page<HotelsRes>>builder()
+//                      .result(hotelService.findHotelsForAdmin(filters, sort, size, page, token))
+//                      .build();
+//  }
 }

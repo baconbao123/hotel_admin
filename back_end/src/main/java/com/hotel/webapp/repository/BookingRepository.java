@@ -48,10 +48,15 @@ public interface BookingRepository extends BaseRepository<Booking, Integer> {
 
 
   // booking
-  @Query("SELECT b FROM Booking b WHERE b.roomId = :roomId AND b.checkInTime < :end AND b.checkOutTime > :start AND b.deletedAt IS NULL")
+  @Query("SELECT b FROM Booking b WHERE b.roomId = :roomId " +
+        "AND b.checkInTime >= :start AND b.checkInTime <= :end " +
+        "AND b.deletedAt IS NULL")
   List<Booking> findBookingsByRoomIdAndDateRange(
         @Param("roomId") Integer roomId,
         @Param("start") LocalDateTime start,
         @Param("end") LocalDateTime end
   );
+
+  // user
+  List<Booking> findAllByUserIdAndDeletedAtIsNull(Integer userId);
 }

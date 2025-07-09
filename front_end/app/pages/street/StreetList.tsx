@@ -52,8 +52,8 @@ export default function StreetList() {
     sortField,
     sortOrder,
     closeForm,
-    permissionPage
-  } = useCrud("/local", undefined, undefined, 'Street');
+    permissionPage,
+  } = useCrud("/local", undefined, undefined, "Street");
 
   useEffect(() => {
     setMounted(true);
@@ -79,13 +79,12 @@ export default function StreetList() {
       return false; // User canceled or denied
     } catch (error) {
       console.error("Error during delete operation:", error);
-      toast.error('Delete failed', {
-        autoClose: 3000
+      toast.error("Delete failed", {
+        autoClose: 3000,
       });
       return false; // Delete failed due to error
     }
   }
-
 
   return (
     <div className="main-container">
@@ -101,7 +100,18 @@ export default function StreetList() {
         <div className="mb-5">
           <div className="grid grid-cols-4 gap-10 card">
             <div className="col-span-4 2xl:col-span-3">
-              <div className="grid gap-2 2xl:grid-cols-6 grid-cols-2"></div>
+              <div className="grid gap-2 2xl:grid-cols-6 grid-cols-2">
+                {mounted ? (
+                  <InputText
+                    placeholder="Name"
+                    className="w-full"
+                    value={filters.name || ""}
+                    onChange={(e) => handleSearch("name", e.target.value)}
+                  />
+                ) : (
+                  <Skeleton height="100%" />
+                )}
+              </div>
             </div>
             <div className="col-span-4 2xl:col-span-1">
               <div className="flex flex-wrap gap-2 justify-end">

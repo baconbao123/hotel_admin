@@ -92,7 +92,10 @@ public class RoomService extends BaseServiceImpl<Rooms, Integer, RoomDTO, RoomRe
   // update
   @Override
   protected void beforeUpdate(Rooms rooms, RoomDTO update) {
-    if (update.getKeepAvatar().equals("false") && update.getRoomAvatar() != null && !update.getRoomAvatar().isEmpty()) {
+    if (update.getKeepAvatar().equals("true") && update.getExistingroomAvatar() != null && !update
+          .getExistingroomAvatar().isEmpty()) {
+      rooms.setRoomAvatar(update.getExistingroomAvatar());
+    } else if (update.getRoomAvatar() != null && !update.getRoomAvatar().isEmpty()) {
       String name = storageFileService.uploadHotelImg(update.getRoomAvatar());
       rooms.setRoomAvatar(name);
     }
@@ -166,9 +169,7 @@ public class RoomService extends BaseServiceImpl<Rooms, Integer, RoomDTO, RoomRe
   public Page<Rooms> findRoomsByHotelId(Integer hotelId, Map<String, String> filters, Map<String, String> sort,
         int size, int page, String token) throws ParseException, JOSEException {
 
-
     boolean isPermissionAdmin = checkPermissionAdmin(token, hotelId);
-
 
     boolean isPermissionOwner = checkPermissionOwner(token, hotelId);
 
@@ -214,7 +215,34 @@ public class RoomService extends BaseServiceImpl<Rooms, Integer, RoomDTO, RoomRe
     if (rooms == null) {
       throw new AppException(ErrorCode.NOT_FOUND, "Room");
     }
-    return rooms;
+
+    List<Object[]> facilitiesData = repository.findFacilitiesByRoomId(id);
+    List<RoomRes.RoomFacilities> roomFacilities = facilitiesData.stream()
+                                                                .map(data -> new RoomRes.RoomFacilities(
+                                                                      (Integer) data[0],
+                                                                      (String) data[1]
+                                                                ))
+                                                                .toList();
+
+    return new RoomRes(
+          rooms.getId(),
+          rooms.getName(),
+          rooms.getRoomAvatar(),
+          rooms.getHotelName(),
+          rooms.getRoomArea(),
+          rooms.getRoomNumber(),
+          rooms.getRoomType(),
+          rooms.getPriceHours(),
+          rooms.getPriceNight(),
+          rooms.getLimitPerson(),
+          rooms.getDescription(),
+          rooms.getStatus(),
+          rooms.getCreatedName(),
+          rooms.getUpdatedName(),
+          rooms.getCreatedAt(),
+          rooms.getUpdatedAt(),
+          roomFacilities
+    );
   }
 
   private boolean checkPermissionAdmin(String token, Integer hotelId) throws ParseException, JOSEException {
