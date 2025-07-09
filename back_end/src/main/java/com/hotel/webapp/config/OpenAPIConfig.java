@@ -18,7 +18,7 @@ public class OpenAPIConfig {
     @Bean
     OpenAPI openAPI() {
     Server server = new Server();
-    server.setUrl("http://localhost:9898/hotel");
+    server.setUrl("http://103.161.172.90:9898/hotel");
     server.description("Phoebe Dev");
 
     Contact contact = new Contact();

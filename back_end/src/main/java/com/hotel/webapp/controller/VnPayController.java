@@ -37,6 +37,10 @@ public class VnPayController {
   @Value("${vnpay.vnp_ApiUrl}")
   private String vnp_ApiUrl;
 
+  @Value("${vnpay.vnp_return}")
+  private String vnp_ReturnFE;
+
+
   @GetMapping("/pay")
   public ResponseEntity<?> createPayment(
         HttpServletRequest request,
@@ -61,7 +65,7 @@ public class VnPayController {
       String vnp_IpAddr = request.getHeader("X-Forwarded-For") != null
             ? request.getHeader("X-Forwarded-For")
             : request.getRemoteAddr();
-      String vnp_ReturnUrl = "http://localhost:5175/payment-result"; // FE port 8080
+      String vnp_ReturnUrl = vnp_ReturnFE;
       String vnp_CreateDate = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
       String vnpPayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
 
@@ -84,29 +88,35 @@ public class VnPayController {
       StringBuilder hashData = new StringBuilder();
       StringBuilder query = new StringBuilder();
 
-      for (int i = 0; i < fieldNames.size(); i++) {
-        String fieldName = fieldNames.get(i);
+      for (String fieldName : fieldNames) {
         String value = vnpParams.get(fieldName);
         if (value != null && !value.isEmpty()) {
-          hashData.append(fieldName).append('=').append(URLEncoder.encode(value, "UTF-8"));
-          query.append(fieldName).append('=').append(URLEncoder.encode(value, "UTF-8"));
-          if (i != fieldNames.size() - 1) {
-            hashData.append('&');
-            query.append('&');
-          }
+          String encodedValue = URLEncoder.encode(value, "UTF-8");
+          hashData.append(fieldName).append('=').append(encodedValue);
+          query.append(fieldName).append('=').append(encodedValue);
+          hashData.append('&');
+          query.append('&');
         }
       }
+      // Xóa ký tự & cuối
+      if (hashData.length() > 0) hashData.setLength(hashData.length() - 1);
+      if (query.length() > 0) query.setLength(query.length() - 1);
+
       String secureHash = hmacSHA512(vnpHashSecret, hashData.toString());
       query.append("&vnp_SecureHash=").append(secureHash);
 
       String paymentUrl = vnpPayUrl + "?" + query.toString();
-      logger.info("Payment URL for amount {}: {}", amount / 100, paymentUrl);
-      logger.debug("Hash data: {}", hashData.toString());
+      logger.info("Payment URL: {}", paymentUrl);
+      logger.info("HashData: {}", hashData.toString());
+      logger.info("SecureHash: {}", secureHash);
 
       return ResponseEntity.ok(Collections.singletonMap("paymentUrl", paymentUrl));
     } catch (UnsupportedEncodingException e) {
-      logger.error("Lỗi tạo URL thanh toán", e);
-      return ResponseEntity.badRequest().body("Lỗi hệ thống, thử lại sau!");
+      logger.error("Lỗi tạo URL thanh toán: {}", e.getMessage());
+      return ResponseEntity.badRequest().body("Lỗi hệ thống: " + e.getMessage());
+    } catch (Exception e) {
+      logger.error("Lỗi không xác định: {}", e.getMessage());
+      return ResponseEntity.badRequest().body("Lỗi không xác định: " + e.getMessage());
     }
   }
 
@@ -142,8 +152,7 @@ public class VnPayController {
       params.put("vnp_ResponseCode", "97"); // Invalid checksum
     }
 
-    String redirectUrl =
-          "http://localhost:5175/payment-result?" + buildQueryString(params);
+    String redirectUrl = vnp_ReturnFE + buildQueryString(params);
     return ResponseEntity.status(302).header("Location", redirectUrl).build();
   }
 

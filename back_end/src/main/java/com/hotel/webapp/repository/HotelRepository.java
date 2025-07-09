@@ -98,12 +98,13 @@ public interface HotelRepository extends BaseRepository<Hotels, Integer> {
         "JOIN HotelPolicy hp ON hp.hotelId = h.id " +
         "LEFT JOIN Rooms r ON r.hotelId = h.id " +
         "LEFT JOIN RoomType rt ON rt.id = r.roomType " +
-        "LEFT JOIN Booking b ON b.roomId = r.id AND b.status = true " +
+//        "LEFT JOIN Booking b ON b.roomId = r.id AND b.status = true " +
         "WHERE h.id = :hotelId " +
         "AND r.deletedAt IS NULL " +
-        "AND rt.deletedAt IS NULL " +
-        "AND (b.id IS NULL OR (b.checkOutTime <= CURRENT_TIMESTAMP " +
-        "AND b.id = (SELECT MAX(b2.id) FROM Booking b2 WHERE b2.roomId = r.id AND b2.deletedAt IS NULL AND b2.status = true)))")
+        "AND rt.deletedAt IS NULL "
+//        "AND (b.id IS NULL OR (b.checkOutTime <= CURRENT_TIMESTAMP " +
+//        "AND b.id = (SELECT MAX(b2.id) FROM Booking b2 WHERE b2.roomId = r.id AND b2.deletedAt IS NULL AND b2.status = true)))")
+  )
   List<Object[]> findHotelDetail(@Param("hotelId") Integer hotelId);
 //  @Query("select r from Rooms r " +
 //        "join Hotels h on h.id = r.hotelId " +
