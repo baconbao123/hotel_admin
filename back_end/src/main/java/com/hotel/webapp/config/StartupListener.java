@@ -13,7 +13,7 @@ public class StartupListener implements ApplicationListener<ApplicationReadyEven
   @Override
   public void onApplicationEvent(ApplicationReadyEvent event) {
     logger.info("Swagger UI is available at " +
-          "http://103.161.172.90:9898/hotel/swagger-ui/index.html");
+          "http://localhost:9898/hotel/swagger-ui/index.html");
     logger.info("email: sa@gmail.com || Raw password: 123");
   }
 }

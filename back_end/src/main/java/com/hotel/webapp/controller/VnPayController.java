@@ -37,15 +37,12 @@ public class VnPayController {
   @Value("${vnpay.vnp_ApiUrl}")
   private String vnp_ApiUrl;
 
-  @Value("${vnpay.vnp_return}")
-  private String vnp_ReturnFE;
-
-
   @GetMapping("/pay")
   public ResponseEntity<?> createPayment(
         HttpServletRequest request,
         @RequestParam(defaultValue = "10000") long amount,
-        @RequestParam String txnRef
+        @RequestParam String txnRef,
+        @RequestParam Integer hotelId
   ) {
     try {
       if (amount <= 0) {
@@ -56,6 +53,10 @@ public class VnPayController {
         logger.error("Mã đơn thanh toán không hợp lệ: {}", txnRef);
         return ResponseEntity.badRequest().body("Mã đơn thanh toán không được để trống!");
       }
+      if (hotelId == null || hotelId <= 0) {
+        logger.error("Hotel ID không hợp lệ: {}", hotelId);
+        return ResponseEntity.badRequest().body("Hotel ID không hợp lệ!");
+      }
 
       String vnp_Version = "2.1.0";
       String vnp_Command = "pay";
@@ -65,7 +66,7 @@ public class VnPayController {
       String vnp_IpAddr = request.getHeader("X-Forwarded-For") != null
             ? request.getHeader("X-Forwarded-For")
             : request.getRemoteAddr();
-      String vnp_ReturnUrl = vnp_ReturnFE;
+      String vnp_ReturnUrl = "http://localhost:5175"; // Backend return URL
       String vnp_CreateDate = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
       String vnpPayUrl = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
 
@@ -82,6 +83,7 @@ public class VnPayController {
       vnpParams.put("vnp_ReturnUrl", vnp_ReturnUrl);
       vnpParams.put("vnp_IpAddr", vnp_IpAddr);
       vnpParams.put("vnp_CreateDate", vnp_CreateDate);
+//      vnpParams.put("vnp_HotelId", String.valueOf(hotelId)); // Lưu hotelId
 
       List<String> fieldNames = new ArrayList<>(vnpParams.keySet());
       Collections.sort(fieldNames);
@@ -98,7 +100,6 @@ public class VnPayController {
           query.append('&');
         }
       }
-      // Xóa ký tự & cuối
       if (hashData.length() > 0) hashData.setLength(hashData.length() - 1);
       if (query.length() > 0) query.setLength(query.length() - 1);
 
@@ -123,6 +124,7 @@ public class VnPayController {
   @GetMapping("/return")
   public ResponseEntity<?> vnpReturn(@RequestParam Map<String, String> params) {
     String vnp_SecureHash = params.get("vnp_SecureHash");
+    String hotelId = params.get("vnp_HotelId"); // Lấy hotelId từ params
     params.remove("vnp_SecureHash");
     params.remove("vnp_SecureHashType");
 
@@ -150,9 +152,15 @@ public class VnPayController {
 
     if (!calculatedHash.equals(vnp_SecureHash)) {
       params.put("vnp_ResponseCode", "97"); // Invalid checksum
+      logger.warn("Invalid checksum for transaction: {}", txnRef);
     }
 
-    String redirectUrl = vnp_ReturnFE + buildQueryString(params);
+    // Redirect tới trang khách sạn với hotelId
+    String redirectUrl = hotelId != null && !hotelId.isEmpty()
+          ? "http://localhost:5175/hotel/" + hotelId
+          : "http://localhost:5175/hotel"; // Fallback nếu không có hotelId
+
+    logger.info("Redirecting to: {}", redirectUrl);
     return ResponseEntity.status(302).header("Location", redirectUrl).build();
   }
 
