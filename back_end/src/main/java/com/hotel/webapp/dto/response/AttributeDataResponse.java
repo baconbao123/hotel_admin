@@ -1,5 +1,6 @@
 package com.hotel.webapp.dto.response;
 
+import com.hotel.webapp.dto.response.owner.PricesDTO;
 import com.hotel.webapp.entity.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -25,4 +26,5 @@ public class AttributeDataResponse {
   List<UserRes.OwnerRes> owners;
   List<UserType> userTypes;
   List<UserRes.CustomerRes> customers;
+  List<PricesDTO> pricesRoom;
 }

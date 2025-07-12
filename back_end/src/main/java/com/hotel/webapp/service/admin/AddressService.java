@@ -83,7 +83,8 @@ public class AddressService {
                                       .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Street"));
 
     if (!Objects.equals(streets.getWardCode(), addressDTO.getWardCode()))
-      throw new AppException(ErrorCode.COMMON_400, "Street not include in district");
+      throw new AppException(ErrorCode.COMMON_400, "Street not include in " +
+            "ward");
   }
 
 

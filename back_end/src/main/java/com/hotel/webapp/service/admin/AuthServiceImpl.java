@@ -43,6 +43,7 @@ public class AuthServiceImpl implements AuthService {
   MapUserRoleRepository userRoleRepository;
   RoleRepository roleRepository;
   PasswordEncoder passwordEncoder;
+//  PermissionService permissionService
 
   @NonFinal
   @Value("${jwt.signerKey}")
@@ -61,6 +62,10 @@ public class AuthServiceImpl implements AuthService {
     var user = userRepository.findByEmail(authReq.getEmail())
                              .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
     boolean authenticated = passwordEncoder.matches(authReq.getPassword(), user.getPassword());
+
+    if (userRepository.checkUserHaveRoleOwner(user.getId())) {
+      throw new AppException(ErrorCode.ACCESS_DENIED);
+    }
 
     if (!authenticated) {
       throw new AppException(ErrorCode.AUTHENTICATION_FAILED);

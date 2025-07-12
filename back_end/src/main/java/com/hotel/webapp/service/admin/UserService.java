@@ -3,6 +3,7 @@ package com.hotel.webapp.service.admin;
 import com.hotel.webapp.base.BaseServiceImpl;
 import com.hotel.webapp.dto.request.UserDTO;
 import com.hotel.webapp.dto.response.UserRes;
+import com.hotel.webapp.dto.user_response.UserAuth;
 import com.hotel.webapp.entity.MapUserRoles;
 import com.hotel.webapp.entity.Role;
 import com.hotel.webapp.entity.User;
@@ -165,6 +166,51 @@ public class UserService extends BaseServiceImpl<User, Integer, UserDTO, UserRep
     return user;
   }
 
+  // find profile - user
+  public UserRes.UserFEProfileRes findUserProfile() {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    var username = auth.getName();
+
+    User user = repository.findByEmail(username)
+                          .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Not Found Profile"));
+
+
+    return new UserRes.UserFEProfileRes(
+          user.getId(),
+          user.getFullName(),
+          user.getEmail(),
+          user.getPhoneNumber(),
+          user.getAvatarUrl()
+    );
+  }
+
+  // update profile - user
+  public UserRes.UserFEProfileRes updateUserProfile(UserAuth.UserUpdateProfile update) {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    var username = auth.getName();
+
+    User user = repository.findByEmail(username)
+                          .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Not Found Profile"));
+
+    user.setFullName(update.getFullName());
+    user.setEmail(update.getEmail());
+    user.setPhoneNumber(update.getPhoneNumber());
+
+    if (update.getAvatar() != null && !update.getAvatar().isEmpty()) {
+      user.setAvatarUrl(storageFileService.uploadUserImg(update.getAvatar()));
+    }
+
+    user = repository.save(user);
+
+    return new UserRes.UserFEProfileRes(
+          user.getId(),
+          user.getFullName(),
+          user.getEmail(),
+          user.getPhoneNumber(),
+          user.getAvatarUrl()
+    );
+  }
+
   @Override
   protected void validateDelete(Integer id) {
     User user = findById(id);
@@ -229,7 +275,7 @@ public class UserService extends BaseServiceImpl<User, Integer, UserDTO, UserRep
     );
   }
 
-  // Update Profile
+  // Update Profile - admin
   public User updateProfile(Integer id, UserDTO.ProfileDTO update) {
     var user = findById(id);
 
@@ -260,7 +306,7 @@ public class UserService extends BaseServiceImpl<User, Integer, UserDTO, UserRep
     return repository.save(user);
   }
 
-  // find profile
+  // find profile - admin
   public UserRes.UserProfileRes findProfile() {
     Authentication auth = SecurityContextHolder.getContext().getAuthentication();
     var username = auth.getName();
@@ -287,6 +333,7 @@ public class UserService extends BaseServiceImpl<User, Integer, UserDTO, UserRep
           roles
     );
   }
+
 
   // check email already existed
   @Transactional

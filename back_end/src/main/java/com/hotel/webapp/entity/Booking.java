@@ -22,6 +22,7 @@ public class Booking implements AuditEntity {
   Integer userId;
   @Column(nullable = false)
   Integer roomId;
+  Integer paymentId;
   @Column(nullable = false)
   LocalDateTime checkInTime;
   @Column(nullable = false)
@@ -30,7 +31,6 @@ public class Booking implements AuditEntity {
   LocalDateTime actualCheckOutTime;
   @Lob
   String note;
-  @Column(nullable = false)
   Boolean status;
   LocalDateTime createdAt;
   LocalDateTime updatedAt;
