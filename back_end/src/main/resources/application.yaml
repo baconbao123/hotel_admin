@@ -52,3 +52,4 @@ vnpay:
   vnp_TmnCode: AIBIAS9A
   vnpHashSecret: OZDJTCTJZ0MVOBYF6X05MM3VJV64W377
   vnp_ApiUrl: https://sandbox.vnpayment.vn/tryitnow/apis/vnpay/
+#  vnp_return: http://localhost:5175/hotel?
